@@ -31,7 +31,7 @@ async function accessFsBlob(handle) {
 
 export async function getHighlights(rowOffset, rowLimit) {
   let query = "SELECT id, snippet FROM highlights;";
-  const result = await safeQuery(query);
+  const result = await singleQuery(query);
   if (!result) {
     highlights.value = [];
     return;
@@ -40,7 +40,7 @@ export async function getHighlights(rowOffset, rowLimit) {
   let hls = values.map(([id, snippet]) => {
     return { id, snippet };
   });
-  var { columns, values } = await safeQuery(taggingsQuery());
+  var { columns, values } = await singleQuery(taggingsQuery());
   hls = values.reduce((acc, [hid, tid]) => {
     // go through hls and add the tag tags array within the hl obj ()
     let index = acc.findIndex((hl) => hl.id === hid);
@@ -51,7 +51,7 @@ export async function getHighlights(rowOffset, rowLimit) {
     acc[index] = hl;
     return acc;
   }, hls);
-  var { columns, values } = await safeQuery(tagLookupQuery());
+  var { columns, values } = await singleQuery(tagLookupQuery());
   tags.value = values.reduce((acc, [tid, tag]) => {
     acc[tid] = tag;
     return acc;
@@ -60,7 +60,25 @@ export async function getHighlights(rowOffset, rowLimit) {
   highlights.value = hls;
 }
 
-async function safeQuery(query) {
+export async function multiWriteQuery(query) {
+  if (!(dbHandle.value instanceof FileSystemFileHandle)) {
+    return null;
+  }
+  let worker = new Worker("worker.sql-wasm.js");
+  const dbBlob = await accessFsBlob(dbHandle.value);
+  const res = await ousourceSql(worker, dbBlob, query);
+  worker.terminate();
+  const { buffer, results, s: queryTime } = res;
+  // trash the buffer for now
+  // console.log(results);
+  // save the buffer to the filesystem
+  await writeDbToFile(dbHandle.value, buffer);
+
+  await getHighlights();
+  return results;
+}
+
+async function singleQuery(query) {
   if (!(dbHandle.value instanceof FileSystemFileHandle)) {
     return null;
   }

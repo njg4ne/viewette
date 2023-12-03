@@ -44,7 +44,7 @@ export function TagChooser(props) {
             options={options}
             onChange={onChange}
             getOptionLabel={(option) => option[1]}
-
+            isOptionEqualToValue={(option, value) => option[0] === value[0]}
             filterSelectedOptions
             renderInput={(params) => (
                 <TextField

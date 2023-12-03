@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import { highlights, tags } from "../signals/Filesystems";
 import { TagChooser } from "./TagsFilter";
+import { multiWriteQuery } from "../utils/sql";
 
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -68,28 +69,29 @@ export default function EditHighlight() {
     tids = tids.map(tid => [`${tid}`, tags.value[tid]]);
     const hlTags = tids.map(tid => tags[tid]);
 
-    console.log("tids", tids);
+    // console.log("tids", tids);
     const [toRemove, setToRemove] = React.useState(new Set());
     const [toAdd, setToAdd] = React.useState(new Set());
 
     const onChange = (event, value) => {
-        console.log("onChange", value);
+        // console.log("onChange", value);
         // setToAdd((s) => {
         //     value.map(v => Number(v[0])).forEach((v) => s.add(v));
         //     return new Set(s);
         // });
+        setToAdd(new Set(value.map(v => Number(v[0]))));
     };
     const onCheck = (checked, id) => {
-        console.log("onCheck", checked, id)
-        // setToRemove((s) => {
-        //     if (checked) {
-        //         s.delete(id);
-        //     }
-        //     else {
-        //         s.add(id);
-        //     }
-        //     return new Set(s);
-        // });
+        // console.log("onCheck", checked, id)
+        setToRemove((s) => {
+            if (checked) {
+                s.delete(id);
+            }
+            else {
+                s.add(id);
+            }
+            return new Set(s);
+        });
     };
 
     // use effect to both sets and console log them
@@ -99,6 +101,25 @@ export default function EditHighlight() {
     // }, [toRemove, toAdd]);
 
 
+    const buttonDisabled = toRemove.size === 0 && toAdd.size === 0;
+    function save() {
+        const highlight_id = Number(id);
+        const tags_to_remove = [...toRemove];
+        const tags_to_add = [...toAdd];
+        let q = "";
+        if (tags_to_remove.length > 0) {
+            q += `DELETE FROM highlight_tags WHERE highlight_id=${highlight_id} AND tag_id IN (${tags_to_remove.join(", ")});`;
+        }
+        if (tags_to_add.length > 0) {
+            q += `INSERT INTO highlight_tags (highlight_id, tag_id) VALUES ${tags_to_add.map(tid => `(${highlight_id}, ${tid})`).join(", ")};`;
+        }
+        // console.log(q);
+        multiWriteQuery(q).then(() => {
+            // TODO update the page controls
+        });
+
+    }
+
     return <Stack alignItems="center" spacing={2} sx={{ pt: 5 }}>
         <Typography variant="h4"> Edit Highlight {id}</Typography>
         <Typography dangerouslySetInnerHTML={{ __html: snippet }} />
@@ -106,6 +127,6 @@ export default function EditHighlight() {
         <ChangeExistingTags options={tids} onCheck={onCheck} />
         <Typography variant="h5"> New Tags</Typography>
         <TagChooser options={tagEntries} sx={{ width: "75%" }} defaultValue={[]} onChange={onChange} />
-        <Button disabled variant="contained">Save</Button>
+        <Button onClick={save} disabled={buttonDisabled} variant="contained">Save</Button>
     </Stack >;
 }
