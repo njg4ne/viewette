@@ -22,7 +22,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import { MailRounded } from "@mui/icons-material";
+import { BrowserNotSupported, MailRounded } from "@mui/icons-material";
 import {
   ColorThemeProvider,
   ColorModeToggler,
@@ -37,8 +37,20 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import EditHighlight from "./components/EditHighlight";
 
+import SQL from "./components/SQL";
+
+
 function Home() {
   const [dbHandle, setDbHandle] = useState(null);
+  useEffect(() => {
+    // console.log("Home mounted");
+    // const worker = new Worker(workerUrl);
+    // return () => {
+    //   // console.log("Home unmounted");
+    //   worker.terminate();
+    // }
+
+  }, []);
   // const worker = useWorker();
   // listenToWorker((msg) => {
   //   console.log("Worker told Home something: ", msg.data);
@@ -49,6 +61,7 @@ function Home() {
       <Typography variant="h4" sx={{ textAlign: "center" }}>
         Viewette
       </Typography>
+      {/* <Button variant="contained" onClick={opfs}>Export</Button> */}
 
       {/* <Typography variant="body1" sx={{}}>
         Content with link to <Link to="/test-router">/test-router</Link>.
@@ -92,6 +105,7 @@ function Home() {
 }
 
 const AppContainer = ({ Contents }) => {
+
   // get max width based on screen size
   const maxWidth = /* options are: xs, sm, md, lg, xl */ "md";
   return (
@@ -128,6 +142,10 @@ const router = createHashRouter([
   {
     path: "/",
     element: AppContainer({ Contents: Home }),
+  },
+  {
+    path: "/sql",
+    element: AppContainer({ Contents: SQL }),
   },
   {
     path: "/highlights/:id",

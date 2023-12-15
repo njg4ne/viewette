@@ -12,7 +12,7 @@ import {
   GridToolbarFilterButton,
   GridToolbarExport,
   GridToolbarDensitySelector,
-} from '@mui/x-data-grid';
+} from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 
 function CustomToolbar() {
@@ -34,7 +34,7 @@ const columns = [
     headerName: "Highlight",
     flex: 1,
     sortable: false,
-    filterable: false,
+    filterable: true,
     // hideable: false,
     renderCell(params) {
       return (
@@ -54,22 +54,33 @@ const columns = [
     },
     renderCell: (params) => {
       //getter should convert to array of strings
-      return params.value?.map((tag, i) => (
-        <Chip
-          key={i}
+      return (
+        <Stack
+          direction="row"
           sx={{
-            mr: 0.35,
-            mt: 0.35,
-            bgcolor: "primary.main",
-            color: "primary.contrastText",
+            bgcolor: "",
+            flexWrap: "wrap",
+            // justifyContent: "center",
+            py: 1,
           }}
-          label={tag}
-        />
-      ));
-    }
+        >
+          {params.value?.map((tag, i) => (
+            <Chip
+              key={i}
+              sx={{
+                mr: 0.35,
+                mt: 0.35,
+                bgcolor: "primary.main",
+                color: "primary.contrastText",
+              }}
+              label={tag}
+            />
+          ))}
+        </Stack>
+      );
+    },
   },
 ];
-
 
 export default function DataViewer() {
   const navigate = useNavigate();
@@ -95,32 +106,30 @@ export default function DataViewer() {
           items: [
             { columnField: "tags", operator: "contains", value: "test" },
             // { columnField: "snippet", operator: "contains", value: "test" }
-          ]
-        }
+          ],
+        },
       }}
-      pageSizeOptions={[5]}
+      pageSizeOptions={[10]}
       // checkboxSelection
       // disableRowSelectionOnClick
       // disableColumnSelector
       getRowHeight={() => "auto"}
-    // filterModel={{
-    //   // items: [{ field: 'snippet', operator: 'contains', value: 'accel' }, { field: 'tags', operator: 'contains', value: 'accel' }],
-    // }}
-    // slots={{
-    //   toolbar: GridToolbar
-    // }}
-    // slotProps={{
-    //   toolbar: {
-    //     showQuickFilter: true,
-    //     sx: {
-    //       pt: 2,
-    //       pb: 1
-    //     },
+      // filterModel={{
+      //   // items: [{ field: 'snippet', operator: 'contains', value: 'accel' }, { field: 'tags', operator: 'contains', value: 'accel' }],
+      // }}
+      // slots={{
+      //   toolbar: GridToolbar
+      // }}
+      // slotProps={{
+      //   toolbar: {
+      //     showQuickFilter: true,
+      //     sx: {
+      //       pt: 2,
+      //       pb: 1
+      //     },
 
-
-    //   },
-    // }}
-
+      //   },
+      // }}
     />
     //{" "}
     // </Box>

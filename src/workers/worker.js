@@ -1,6 +1,40 @@
 
-console.log("Hello from worker.js");
+// console.log("Starting worker.js");
 
+// async function opfs() {
+//   const opfsRoot = await navigator.storage.getDirectory();
+//   const fileHandle = await opfsRoot.getFileHandle("abc.txt", {
+//     create: true,
+//   });
+//   // print all files in opfsRoot
+//   for await (const entry of opfsRoot.values()) {
+//     console.log("OPFS Root Contains: ", entry.name);
+//   }
+
+// }
+// opfs();
+
+
+if (crossOriginIsolated) {
+  console.log("Using SharedArrayBuffer because Cross-Origin-Isolated is enabled");
+  const buffer = new SharedArrayBuffer(16);
+  // myWorker.postMessage(buffer);
+} else {
+  console.log("Using ArrayBuffer because Cross-Origin-Isolated is not enabled");
+  const buffer = new ArrayBuffer(16);
+  // myWorker.postMessage(buffer);
+}
+
+
+// self.onmessage = async function (msg) {
+//   console.log(`Worker got the message: ${msg.data}`);
+//   self.postMessage("Response from worker");
+//   // const { query, blob } = msg.data;
+//   // if (query && blob) {
+//   //   const data = DB.exec(blob, query)
+//   //   self.postMessage(data, [data.blob]);
+//   // }
+// };
 // import initSqlJs from "sql.js";
 // const SQL = await initSqlJs({
 //   // Required to load the wasm binary asynchronously. Of course, you can host it wherever you want
@@ -10,36 +44,26 @@ console.log("Hello from worker.js");
 //   locateFile: (file) => `./${file}`,
 // });
 
-self.onmessage = async function (msg) {
-  console.log(`Worker got the message: ${msg.data}`);
-  self.postMessage("Response from worker");
-  // const { query, blob } = msg.data;
-  // if (query && blob) {
-  //   const data = DB.exec(blob, query)
-  //   self.postMessage(data, [data.blob]);
-  // }
-};
-
-class DB {
-  // static async init(...args) {
-  //   const db = new SQL.Database();
-  //   const asset = db.export().buffer;
-  //   return { asset };
-  // }
-  // static async import(...args) {
-  //   const buff = new Uint8Array(args[0]);
-  //   const db = new SQL.Database(buff);
-  //   const asset = db.export().buffer;
-  //   return { asset };
-  // }
-  static exec(blob, query) {
-    const buff = new Uint8Array(blob);
-    const db = new SQL.Database(buff);
-    const result = db.exec(query);
-    blob = db.export().buffer;
-    return { blob, result };
-  }
-}
+// class DB {
+//   // static async init(...args) {
+//   //   const db = new SQL.Database();
+//   //   const asset = db.export().buffer;
+//   //   return { asset };
+//   // }
+//   // static async import(...args) {
+//   //   const buff = new Uint8Array(args[0]);
+//   //   const db = new SQL.Database(buff);
+//   //   const asset = db.export().buffer;
+//   //   return { asset };
+//   // }
+//   static exec(blob, query) {
+//     const buff = new Uint8Array(blob);
+//     const db = new SQL.Database(buff);
+//     const result = db.exec(query);
+//     blob = db.export().buffer;
+//     return { blob, result };
+//   }
+// }
 
 
 

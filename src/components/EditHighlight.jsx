@@ -21,6 +21,8 @@ import { signal } from "@preact/signals-react";
 import LexicalEditor from "./LexicalEditor";
 import { Box } from "@mui/material";
 
+import { convert } from "html-to-text";
+
 function ChangeExistingTags({ options, onCheck, disabled }) {
   const [checked, setChecked] = React.useState([0]);
 
@@ -67,6 +69,7 @@ const newTags = signal([]);
 export default function EditHighlight() {
   const { id } = useParams();
   const highlight = highlights.value?.find((h) => h.id === Number(id));
+  //   console.log("highlight", highlight);
   const snippet = highlight?.snippet;
   let tids = highlight?.tags;
   const tagEntries = Object.entries(tags.value).filter(
@@ -76,7 +79,7 @@ export default function EditHighlight() {
   tids = tids.map((tid) => [`${tid}`, tags.value[tid]]);
   const hlTags = tids.map((tid) => tags[tid]);
   const [loading, setLoading] = React.useState(false);
-  const [richText, setRichText] = React.useState(null);
+  //   const [richText, setRichText] = React.useState(null);
 
   //   const [newTags, setNewTags] = React.useState([]);
 
@@ -142,16 +145,34 @@ export default function EditHighlight() {
     });
   }
   //   Button__root___1gz0c define background: yellow for this class
-
+  function saveText(newText) {
+    const q = `UPDATE highlights SET snippet='${newText}' WHERE id=${id};`;
+    setLoading(true);
+    multiWriteQuery(q).then(() => {
+      setLoading(false);
+    });
+  }
   return (
     <Stack alignItems="center" spacing={2} sx={{ pt: 5 }}>
       <Typography variant="h4"> Edit Highlight {id}</Typography>
       <Typography dangerouslySetInnerHTML={{ __html: snippet }} />
-      {/* <Box sx={{ height: "50vh", width: "75%" }}>
-        <LexicalEditor />
-      </Box> */}
-      <Typography variant="h5"> Existing Tags</Typography>
-      <ChangeExistingTags options={tids} onCheck={onCheck} disabled={loading} />
+      <Box sx={{ height: "50vh", width: "100%" }}>
+        <LexicalEditor
+          defaultValue={snippet}
+          onSave={saveText}
+          loading={loading}
+        />
+      </Box>
+      {tids.length > 0 ? (
+        <>
+          <Typography variant="h5"> Existing Tags</Typography>
+          <ChangeExistingTags
+            options={tids}
+            onCheck={onCheck}
+            disabled={loading}
+          />
+        </>
+      ) : null}
       <Typography variant="h5"> New Tags</Typography>
       {/* <TagChooser
         options={tagEntries}

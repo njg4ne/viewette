@@ -1,69 +1,60 @@
-import { $getRoot, $getSelection } from "lexical";
-import { useEffect, useState } from "react";
+import React, { useRef } from "react";
+import { Editor } from "@tinymce/tinymce-react";
+import { convert } from "html-to-text";
 
-import { LexicalComposer } from "@lexical/react/LexicalComposer";
-import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
-import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
-import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
-
-const theme = {
-  // Theme styling goes here
-};
-
-// Lexical React plugins are React components, which makes them
-// highly composable. Furthermore, you can lazy load plugins if
-// desired, so you don't pay the cost for plugins until you
-// actually use them.
-function MyCustomAutoFocusPlugin() {
-  const [editor] = useLexicalComposerContext();
-
-  useEffect(() => {
-    // Focus the editor when the effect fires!
-    editor.focus();
-  }, [editor]);
-
-  return null;
-}
-
-// Catch any errors that occur during Lexical updates and log them
-// or throw them as needed. If you don't throw them, Lexical will
-// try to recover gracefully without losing user data.
-function onError(error) {
-  console.error(error);
-}
-
-// function OnChangePlugin({ onChange }) {
-//   const [editor] = useLexicalComposerContext();
-//   useEffect(() => {
-//     return editor.registerUpdateListener(({ editorState }) => {
-//       onChange(editorState);
-//     });
-//   }, [editor, onChange]);
-// }
-
-export default function Editor() {
-  const [editorState, setEditorState] = useState();
-  function onChange(editorState) {
-    setEditorState(editorState);
-  }
-  const initialConfig = {
-    namespace: "MyEditor",
-    theme,
-    onError,
+export default function LexicalEditor({ defaultValue, onSave, loading }) {
+  //   const [loading, setLoading] = React.useState(false);
+  const editorRef = useRef(null);
+  const log = () => {
+    if (editorRef.current) {
+      console.log(editorRef.current.getContent());
+    }
   };
+  console.log("defaultValue", defaultValue);
   return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <PlainTextPlugin
-        contentEditable={<ContentEditable />}
-        placeholder={<div>Enter some text...</div>}
-        ErrorBoundary={LexicalErrorBoundary}
-      />
-      <HistoryPlugin />
-      <MyCustomAutoFocusPlugin />
-      <OnChangePlugin onChange={onChange} />
-    </LexicalComposer>
+    // <>
+    <Editor
+      //   disabled={true}
+      tinymceScriptSrc={"tinymce/tinymce.min.js"}
+      onInit={(evt, editor) => (editorRef.current = editor)}
+      initialValue={defaultValue}
+      style={{ flexGrow: 1 }}
+      onSaveContent={(e) => {
+        // setLoading(true);
+        onSave(e.content);
+        // console.log("onSaveContent", e.content);
+        // const clean = convert(e.content);
+        // console.log("clean", clean);
+      }}
+      init={{
+        height: "100%",
+        width: "100%",
+        menubar: false,
+        plugins: [
+          "lists",
+          "save",
+          //   "advlist autolink lists link image charmap print preview anchor",
+          //   "searchreplace visualblocks code fullscreen",
+          //   "insertdatetime media table paste code help wordcount",
+        ],
+        toolbar: [
+          "undo redo | styles removeformat | indent outdent | bold italic underline | h1 blockquote | bullist numlist | save ",
+          //   "undo redo | styleselect | bold italic | link image",
+          //   "alignleft aligncenter alignright",
+        ],
+        //   "undo redo | formatselect | " +
+        //   "bold italic  | " +
+        //   "bullist numlist outdent indent | " +
+        //   "removeformat | formatselect",
+        content_style:
+          "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+        save_enablewhendirty: false,
+        save_onsavecallback: (e) => {
+          //   console.log("save_onsavecallback", e);
+        },
+      }}
+    />
+    //       <button onClick={log}>Log editor content</button>
+    //     </>
   );
 }

@@ -49,9 +49,9 @@ export const filteredHighlights = computed(() => {
 // effect(() => {
 //   console.log("Filtered highlights", filteredHighlights.value);
 // });
-effect(() => {
-  console.log("ForceInclude", tagIncludeFilter.value);
-});
+// effect(() => {
+//   console.log("ForceInclude", tagIncludeFilter.value);
+// });
 
 // get a computed db that is just the first one in the list
 export const dbHandle = computed(() => {
@@ -64,7 +64,7 @@ effect(() => {
   changeDbs();
 });
 effect(() => {
-  console.log("Getting highlights");
+  // console.log("Getting highlights");
   getHighlights(0, 7);
 });
 

@@ -38,7 +38,7 @@ export async function getHighlights(rowOffset, rowLimit) {
   }
   var { columns, values } = result;
   let hls = values.map(([id, snippet]) => {
-    return { id, snippet };
+    return { id, snippet, tags: [] };
   });
   var { columns, values } = await singleQuery(taggingsQuery());
   hls = values.reduce((acc, [hid, tid]) => {
