@@ -14,6 +14,8 @@ import {
   GridToolbarDensitySelector,
 } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+
 
 function CustomToolbar() {
   return (
@@ -49,9 +51,9 @@ const columns = [
     headerName: "Tags",
     flex: 1,
     filterable: false,
-    valueGetter: (params) => {
-      return params.value?.map((tid) => tags.value[tid]);
-    },
+    // valueGetter: (params) => {
+    //   return params.value?.map((tid) => tags.value[tid]);
+    // },
     renderCell: (params) => {
       //getter should convert to array of strings
       return (
@@ -84,9 +86,12 @@ const columns = [
 
 export default function DataViewer() {
   const navigate = useNavigate();
+  const [searchParams, _] = useSearchParams();
   function onRowClick(params, e, d) {
     const hlId = params.row.id;
-    navigate(`/highlights/${hlId}`);
+    const tags = searchParams.get("tags");
+    const queryStr = tags ? `?tags=${tags}` : "";
+    navigate(`/highlights/${hlId}${queryStr}`);
   }
 
   return (
@@ -114,22 +119,22 @@ export default function DataViewer() {
       // disableRowSelectionOnClick
       // disableColumnSelector
       getRowHeight={() => "auto"}
-      // filterModel={{
-      //   // items: [{ field: 'snippet', operator: 'contains', value: 'accel' }, { field: 'tags', operator: 'contains', value: 'accel' }],
-      // }}
-      // slots={{
-      //   toolbar: GridToolbar
-      // }}
-      // slotProps={{
-      //   toolbar: {
-      //     showQuickFilter: true,
-      //     sx: {
-      //       pt: 2,
-      //       pb: 1
-      //     },
+    // filterModel={{
+    //   // items: [{ field: 'snippet', operator: 'contains', value: 'accel' }, { field: 'tags', operator: 'contains', value: 'accel' }],
+    // }}
+    // slots={{
+    //   toolbar: GridToolbar
+    // }}
+    // slotProps={{
+    //   toolbar: {
+    //     showQuickFilter: true,
+    //     sx: {
+    //       pt: 2,
+    //       pb: 1
+    //     },
 
-      //   },
-      // }}
+    //   },
+    // }}
     />
     //{" "}
     // </Box>

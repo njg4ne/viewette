@@ -56,7 +56,7 @@ export function ManagedTagChooser(props) {
       value={value}
       onChange={onChange}
       getOptionLabel={(option) => option[1]}
-      isOptionEqualToValue={(option, value) => option[0] === value[0]}
+      isOptionEqualToValue={(option, value) => options.length === 0 || option[0] === value[0]}
       filterSelectedOptions
       renderInput={(params) => <TextField {...params} label={label} />}
       disabled={disabled}

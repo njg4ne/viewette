@@ -3,32 +3,71 @@
 // import sqlWorkerUrl from "./mimic/sqlite3/worker1.js?url";
 // import "./mimic/sqlite3/promiser.js";
 import { useEffect } from "react";
-import { signal, effect } from "@preact/signals-react";
+// import { signal, effect } from "@preact/signals-react";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import HeaderTestWorkerUrl from "../workers/worker.js?url";
+import UploadDatabase from "./UploadDatabase";
 
+declare global {
+    interface FileSystemDirectoryHandle {
+        entries(): Iterator<FileSystemHandle>;
+    }
+}
 
-import OpfsDb from "../sqlite3"
-
-async function test() {
-    // const name = "viewette"
-    const db = new OpfsDb();
-    let sql = `DROP TABLE IF EXISTS users;`
-    sql += `CREATE TABLE IF NOT EXISTS users 
-    (id INTEGER PRIMARY KEY AUTOINCREMENT,
-    first_name TEXT,
-    last_name TEXT);`;
-    sql += `INSERT INTO users (first_name, last_name) VALUES ('John', 'Doe'), ('Jane', 'Doe');`;
-    sql += `SELECT * FROM users;`;
-    // open, drop, close for both
-    console.log(await db.open("db"));
-    console.log(await db.exec(sql));
-    console.log(await db.close());
+import OpfsDb, { TaguetteDb } from "../sqlite3"
+async function opfs() {
+    const opfsRoot: FileSystemDirectoryHandle = await navigator.storage.getDirectory();
+    // navigator.storage.remo
+    const fileHandle = await opfsRoot.getFileHandle("abc.txt", {
+        create: true,
+    });
+    // print all files in opfsRoot
+    // @ts-expect-error
+    for await (const entry of opfsRoot.values()) {
+        console.log("OPFS Root Contains: ", entry.name);
+        // print the size of each file
+        const file = await entry.getFile();
+        console.log("File Size: ", file.size);
+    }
 
 }
-// db.exec(`DROP TABLE IF EXISTS users;`)
+async function test() {
+    // const name = "viewette"
+    const db = new TaguetteDb();
+    // let est: StorageEstimate = (await navigator.storage.estimate())
+    // console.log(est)
+    // console.log(Number(quota) / 1000000000, Number(usage) / 1000000000)
+    let bind = [1, 2, 4];
+    let sql = `DROP TABLE IF EXISTS test;
+    CREATE TABLE IF NOT EXISTS test (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        age INTEGER
+    ); 
+    INSERT INTO test (age) VALUES (?), (?);
+    INSERT INTO test (age) VALUES (?);
+    SELECT * FROM test;
+    DROP TABLE IF EXISTS test;`;
+    // sql += `CREATE TABLE IF NOT EXISTS users 
+    // (id INTEGER PRIMARY KEY AUTOINCREMENT,
+    // first_name TEXT,
+    // last_name TEXT);`;
+
+    // sql += `INSERT INTO users (first_name, last_name) VALUES ('John', 'Doe'), ('Jane', 'Doe');`;
+    // sql += `SELECT * FROM users; COMMIT;`;
+    // sql = `SELECT * from highlights;`
+    // sql = `SELECT highlights.id as hid, highlight_tags.tag_id as tid FROM highlights JOIN highlight_tags ON highlights.id = highlight_tags.highlight_id`;
+    // open, drop, close for both
+    console.log(await db.open("database"));
+    const res = await db.exec(sql, "array", bind);
+    // console.log(res.workerRespondTime - res.workerReceivedTime)
+    console.log(res.result)
+    console.log(await db.close());
+    // await opfs();
+
+}
+// db.exec(`DROP TABLE IF EXISTS users; `)
 
 // import sqlite3 from "../sqlite3-bundler-friendly/sqlite3-bundler-friendly.mjs";
 // import sqlite3Worker1Url from "../sqlite3-bundler-friendly/sqlite3-worker1-bundler-friendly.mjs?url";
@@ -49,7 +88,7 @@ async function test() {
 //         console.log(`No more rows returned`);
 //         return
 //     }
-//     console.log(`Row [${rowNumber}] callback: `, Object.fromEntries(columnNames.map((name, i) => [name, row[i]])));
+//     console.log(`Row[${ rowNumber }]callback: `, Object.fromEntries(columnNames.map((name, i) => [name, row[i]])));
 // }
 
 
@@ -72,12 +111,12 @@ async function test() {
 
 // async function test() {
 //     const db = "viewette.sqlite3"
-//     let res = await sqler("open", { filename: `file:${db}?vfs=opfs` });
+//     let res = await sqler("open", { filename: `file:${ db }?vfs = opfs` });
 //     const { result: { dbId } } = res;
 //     console.log("opened database: ", dbId, res.result);
 
-//     let sql = `DROP TABLE IF EXISTS users;`
-//     sql += `CREATE TABLE IF NOT EXISTS users 
+//     let sql = `DROP TABLE IF EXISTS users; `
+//     sql += `CREATE TABLE IF NOT EXISTS users
 //   (id INTEGER PRIMARY KEY AUTOINCREMENT,
 //   first_name TEXT,
 //   last_name TEXT);`;
@@ -146,6 +185,7 @@ export default function SQL({ }) {
         <Typography variant="h4" sx={{ textAlign: "center" }}>
             Viewette
         </Typography>
+        <UploadDatabase />
         <Typography sx={{}}>
             Viewette
         </Typography>

@@ -1,101 +1,14 @@
-import { signal, effect, computed } from "@preact/signals";
-import OpfsDb, { TaguetteDb } from "../sqlite3";
-
-
-export const opfsDb = signal(null);
-export async function updateTagsForHighlight(highlight_id, toRemove, toAdd) {
-  const db = opfsDb.value;
-  if (opfsDb.value !== null) {
-    await opfsDb.value.updateTagsForHighlight(highlight_id, [...toRemove], [...toAdd]);
-  }
-  await invalidateRam();
-}
-export async function updateTagPaths(updateEntries) {
-  const db = opfsDb.value;
-  if (opfsDb.value !== null) {
-    await opfsDb.value.updateTagPaths(updateEntries);
-  }
-  await invalidateRam();
-}
-
-async function opfs() {
-  const name = "database.sqlite3";
-  async function files() {
-    const files = [];
-    const opfsRoot = await navigator.storage.getDirectory();
-    for await (const entry of opfsRoot.values()) {
-      files.push(entry.name);
-    }
-    return files;
-  }
-  const filesList = await files();
-  if (!filesList.includes(name)) {
-    return null;
-  }
-  const db = new TaguetteDb(name);
-  try {
-    await db.open("database");
-  }
-  catch (e) {
-    console.error(e);
-    return null;
-  }
-  return db;
-}
-// opfs().then((db) => {
-//   opfsDb.value = db;
-// });
-export async function loadOpfsDb() {
-  const db = await opfs();
-  opfsDb.value = db;
-}
-loadOpfsDb();
-export async function clearOpfsDb() {
-  const db = opfsDb.value;
-  if (db === null) return;
-  await db.close();
-  opfsDb.value = null;
-  await invalidateRam();
-}
-
-// effect(() => {
-//   console.log("opfsDbReady", opfsDb.value !== null);
-// });
-
-
+import { signal, effect, computed } from "@preact/signals-react";
 import { getHighlights } from "../utils/sql.js";
 
 export const fsAccessRoot = signal(null);
 export const databases = signal([]);
 export const highlights = signal([]);
-export async function reloadHighlights() {
-  const db = opfsDb.value;
-  if (db === null) {
-    highlights.value = [];
-    return;
-  }
-  highlights.value = await db.getHighlights();
-}
-effect(reloadHighlights); // do this when db changes
-
 export const tags = signal({});
-export async function reloadTags() {
-  const db = opfsDb.value;
-  if (db === null) {
-    tags.value = {};
-    return;
-  }
-  tags.value = await db.getTags();
-}
-effect(reloadTags); // do this when db changes
-export async function invalidateRam() {
-  await Promise.all([reloadTags(), reloadHighlights()]);
-}
 
 export const tagIncludeFilter = signal([]);
 export const tagExcludeFilter = signal([]);
 export const tagRequirementFilter = signal([]);
-
 
 
 function getSubTags(tids) {
@@ -111,19 +24,19 @@ function getSubTags(tids) {
 
 export const filteredHighlights = computed(() => {
   const keepByInclude = (hl) => {
-    let { tagIds: hlTags } = hl;
+    let { tags: hlTags } = hl;
     hlTags = hlTags || [];
     if (tagIncludeFilter.value.length === 0) return true;
     return getSubTags(tagIncludeFilter.value).flat().some((tag) => hlTags.includes(tag));
   };
   const keepByExclude = (hl) => {
-    let { tagIds: hlTags } = hl;
+    let { tags: hlTags } = hl;
     hlTags = hlTags || [];
     if (tagExcludeFilter.value.length === 0) return true;
     return !getSubTags(tagExcludeFilter.value).flat().some((tag) => hlTags.includes(tag));
   };
   const keepByRequirement = (hl) => {
-    let { tagIds: hlTags } = hl;
+    let { tags: hlTags } = hl;
     hlTags = hlTags || [];
     if (tagRequirementFilter.value.length === 0) return true;
     return getSubTags(tagRequirementFilter.value).every((subTagSet) => subTagSet.some((subTag) => hlTags.includes(subTag)));
@@ -152,7 +65,7 @@ effect(() => {
 });
 effect(() => {
   // console.log("Getting highlights");
-  // getHighlights(0, 7);
+  getHighlights(0, 7);
 });
 
 // effect(() => {

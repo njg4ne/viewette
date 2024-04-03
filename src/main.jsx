@@ -37,7 +37,12 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import EditHighlight from "./components/EditHighlight";
 
+import UploadDatabase from "./components/UploadDatabase";
+
 import SQL from "./components/SQL";
+import Tags from "./components/Tags";
+import { tags } from "./signals/Filesystems";
+import { TagAutocomplete, TagFilters } from "./components/Filters";
 
 
 function Home() {
@@ -59,8 +64,47 @@ function Home() {
   return (
     <Stack sx={{ alignItems: "stretch", py: 2 }} spacing={2}>
       <Typography variant="h4" sx={{ textAlign: "center" }}>
-        Viewette
+        Viewette (Taguette 2.0 Prototype)
       </Typography>
+      <Accordion elevation={3}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel-instructions-content"
+          id="panel-instructions-header"
+        >
+          <Typography variant="h5" >
+            Instructions
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Stack spacing={2}>
+            <Typography variant="body1" sx={{}}>
+              Upload a .sqlite3 database file exported from <Link to="https://www.taguette.org/">Taguette</Link> to view your data. A copy will be saved to your browser to edit. Click on a table row to edit the tags on a highlight. Navigate to <Link to="/tags">/tags</Link> to edit the tag hierarchy using drag and drop!
+            </Typography>
+            <Typography variant="body1" sx={{}}>
+              Unsupported features include managing documents or projects, editing tags by path, merging tags, exporting data, or editing highlights. Please use <Link to="https://www.taguette.org/">Taguette</Link> for these features at this time.
+            </Typography>
+
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+      <Accordion elevation={3}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel-database-file-control-content"
+          id="panel-database-file-control-header"
+        >
+          <Typography variant="h5" >
+            Manage Database File
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Stack spacing={2}>
+            <UploadDatabase />
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+
       {/* <Button variant="contained" onClick={opfs}>Export</Button> */}
 
       {/* <Typography variant="body1" sx={{}}>
@@ -69,7 +113,7 @@ function Home() {
       {/*
        */}
       {/* <ListedHighights /> */}
-      <Accordion elevation={3}>
+      {/* <Accordion elevation={3}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel-filesystem-content"
@@ -80,7 +124,7 @@ function Home() {
         <AccordionDetails>
           <FileSystemControls />
         </AccordionDetails>
-      </Accordion>
+      </Accordion> */}
 
       <Accordion elevation={3}>
         <AccordionSummary
@@ -88,14 +132,16 @@ function Home() {
           aria-controls="panel-tag-filters-content"
           id="panel-tag-filters-header"
         >
-          <Typography>Filter Tags</Typography>
+          <Typography variant="h5">Filter Tags</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Stack spacing={2}>
+          {/* <Stack spacing={2}>
             <IncludeTags />
             <ForceExcludeTags />
+            <TagAutocomplete />
 
-          </Stack>
+          </Stack> */}
+          <TagFilters />
         </AccordionDetails>
       </Accordion>
 
@@ -114,7 +160,7 @@ const AppContainer = ({ Contents }) => {
       {/* <WorkerProvider> */}
       <FilesystemProvider>
         <SnackbarProvider>
-          <Container maxWidth={maxWidth} id="content">
+          <Container maxWidth={maxWidth} id="content" sx={{}}>
             <Paper elevation={3} component="main" sx={{}}>
               <Stack
                 sx={{
@@ -134,7 +180,7 @@ const AppContainer = ({ Contents }) => {
         </SnackbarProvider>
       </FilesystemProvider>
       {/* </ WorkerProvider> */}
-    </ColorThemeProvider>
+    </ColorThemeProvider >
   );
 };
 
@@ -143,6 +189,10 @@ const router = createHashRouter([
     path: "/",
     element: AppContainer({ Contents: Home }),
   },
+  // {
+  //   path: "/tags",
+  //   element: AppContainer({ Contents: () => <Tags tags={tags} /> }),
+  // },
   {
     path: "/sql",
     element: AppContainer({ Contents: SQL }),
