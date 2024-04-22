@@ -1,12 +1,15 @@
 import { signal, effect, computed } from "@preact/signals";
 import OpfsDb, { TaguetteDb } from "../sqlite3";
 
-
 export const opfsDb = signal(null);
 export async function updateTagsForHighlight(highlight_id, toRemove, toAdd) {
   const db = opfsDb.value;
   if (opfsDb.value !== null) {
-    await opfsDb.value.updateTagsForHighlight(highlight_id, [...toRemove], [...toAdd]);
+    await opfsDb.value.updateTagsForHighlight(
+      highlight_id,
+      [...toRemove],
+      [...toAdd]
+    );
   }
   await invalidateRam();
 }
@@ -17,6 +20,11 @@ export async function updateTagPaths(updateEntries) {
   }
   await invalidateRam();
 }
+// export async function getHighlight(id) {
+//   const db = opfsDb.value;
+//   if (db === null) return null;
+//   return db.getHighlight(id);
+// }
 
 async function opfs() {
   const name = "database.sqlite3";
@@ -35,8 +43,7 @@ async function opfs() {
   const db = new TaguetteDb(name);
   try {
     await db.open("database");
-  }
-  catch (e) {
+  } catch (e) {
     console.error(e);
     return null;
   }
@@ -62,8 +69,7 @@ export async function clearOpfsDb() {
 //   console.log("opfsDbReady", opfsDb.value !== null);
 // });
 
-
-import { getHighlights } from "../utils/sql.js";
+// import { getHighlights } from "../utils/sql.js";
 
 export const fsAccessRoot = signal(null);
 export const databases = signal([]);
@@ -96,15 +102,15 @@ export const tagIncludeFilter = signal([]);
 export const tagExcludeFilter = signal([]);
 export const tagRequirementFilter = signal([]);
 
-
-
 function getSubTags(tids) {
   function getOneTagSubtags(tid) {
     const tag = tags.value[tid];
     const tagEntries = Object.entries(tags.value);
-    return tagEntries.filter(([_, subTagStr]) => {
-      return subTagStr.startsWith(tag);
-    }).map(([subTid, _]) => Number(subTid));
+    return tagEntries
+      .filter(([_, subTagStr]) => {
+        return subTagStr.startsWith(tag);
+      })
+      .map(([subTid, _]) => Number(subTid));
   }
   return tids.map(getOneTagSubtags);
 }
@@ -114,24 +120,30 @@ export const filteredHighlights = computed(() => {
     let { tagIds: hlTags } = hl;
     hlTags = hlTags || [];
     if (tagIncludeFilter.value.length === 0) return true;
-    return getSubTags(tagIncludeFilter.value).flat().some((tag) => hlTags.includes(tag));
+    return getSubTags(tagIncludeFilter.value)
+      .flat()
+      .some((tag) => hlTags.includes(tag));
   };
   const keepByExclude = (hl) => {
     let { tagIds: hlTags } = hl;
     hlTags = hlTags || [];
     if (tagExcludeFilter.value.length === 0) return true;
-    return !getSubTags(tagExcludeFilter.value).flat().some((tag) => hlTags.includes(tag));
+    return !getSubTags(tagExcludeFilter.value)
+      .flat()
+      .some((tag) => hlTags.includes(tag));
   };
   const keepByRequirement = (hl) => {
     let { tagIds: hlTags } = hl;
     hlTags = hlTags || [];
     if (tagRequirementFilter.value.length === 0) return true;
-    return getSubTags(tagRequirementFilter.value).every((subTagSet) => subTagSet.some((subTag) => hlTags.includes(subTag)));
-  }
-  const keep = (hl) => keepByRequirement(hl) && keepByInclude(hl) && keepByExclude(hl);
+    return getSubTags(tagRequirementFilter.value).every((subTagSet) =>
+      subTagSet.some((subTag) => hlTags.includes(subTag))
+    );
+  };
+  const keep = (hl) =>
+    keepByRequirement(hl) && keepByInclude(hl) && keepByExclude(hl);
   return highlights.value.filter(keep);
-}
-);
+});
 // make an effect to log filtered highlights
 // effect(() => {
 //   console.log("Filtered highlights", filteredHighlights.value);

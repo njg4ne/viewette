@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import { filteredHighlights as highlights, tags } from "../signals/Filesystems";
 import { ManagedTagChooser, TagChooser } from "./TagsFilter";
-import { multiWriteQuery } from "../utils/sql";
+// import { multiWriteQuery } from "../utils/sql";
 // core-js(-pure)/actual|full/set/difference
 // import "core-js/actual/set/difference";
 
@@ -17,18 +17,19 @@ import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import Card from "@mui/material/Card";
 import Button from "@mui/material/Button";
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
-import Tooltip from '@mui/material/Tooltip';
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import Tooltip from "@mui/material/Tooltip";
 import { Link, useSearchParams } from "react-router-dom";
 
-import { signal } from "@preact/signals";
+import { signal, effect, computed } from "@preact/signals";
 
 import LexicalEditor from "./LexicalEditor";
 import { Box } from "@mui/material";
 
 import { convert } from "html-to-text";
 import { opfsDb, updateTagsForHighlight } from "../signals/Filesystems";
+// import
 
 function ChangeExistingTags({ options, onCheck, disabled }) {
   const [checked, setChecked] = React.useState([0]);
@@ -73,20 +74,37 @@ function ChangeExistingTags({ options, onCheck, disabled }) {
   );
 }
 const newTags = signal([]);
+// const highlight = signal(null);
+// effect(async () => {
+//   const { id } = useParams();
+//   highlight.value = await opfsDb.value?.getHighlight(Number(id));
+// });
 export default function EditHighlight() {
   const [searchParams, _] = useSearchParams();
   const { id } = useParams();
-  const highlight = highlights.value?.find((h) => h.id === Number(id));
+  const [highlight, setHighlight] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
+  const [toRemove, setToRemove] = React.useState(new Set());
+  const [toAdd, setToAdd] = React.useState(new Set());
+  useEffect(async () => {
+    if (loading) return;
+    // console.log("fetching highlight", id);
+    const task = opfsDb.value?.getHighlight(Number(id));
+    const h = await task;
+    setHighlight(h);
+    return () => {
+      task.cancel();
+    };
+  }, [id, opfsDb.value, loading]);
   const snippet = highlight?.snippet || "";
   let tids = highlight?.tagIds || [];
   const hlTags = highlight?.tags || [];
+  // console.log("tids", tids);
+  // console.log("hlTags", hlTags);
   const tagEntries = zip([tids || [], hlTags || []]) || [];
-  let unusedTagEntries = Object.entries(tags.value).map(([k, v]) => [Number(k), v]).filter(([tid, _]) => !tids.includes(tid));
-
-  const [loading, setLoading] = React.useState(false);
-
-  const [toRemove, setToRemove] = React.useState(new Set());
-  const [toAdd, setToAdd] = React.useState(new Set());
+  let unusedTagEntries = Object.entries(tags.value)
+    .map(([k, v]) => [Number(k), v])
+    .filter(([tid, _]) => !tids.includes(tid));
 
   const onChange = (event, value) => {
     newTags.value = value;
@@ -105,14 +123,14 @@ export default function EditHighlight() {
   function getNextId() {
     // find this id in highlights, then advance the index wrapping around using % and length
     const idx = highlights.value.findIndex((h) => h.id === Number(id));
-    return highlights.value[(idx + 1) % highlights.value.length]?.id ?? id
+    return highlights.value[(idx + 1) % highlights.value.length]?.id ?? id;
   }
   function getPrevId() {
     // find this id in highlights, then advance the index wrapping around using % and length
     let idx = highlights.value.findIndex((h) => h.id === Number(id));
     idx -= 1;
     idx = idx < 0 ? highlights.value.length - 1 : idx;
-    return highlights.value[idx]?.id ?? id
+    return highlights.value[idx]?.id ?? id;
   }
 
   // use effect to both sets and console log them
@@ -125,7 +143,7 @@ export default function EditHighlight() {
   function save() {
     setLoading(true);
     const hid = Number(id);
-    console.log({ hid, toRemove, toAdd })
+    // console.log({ hid, toRemove, toAdd });
     updateTagsForHighlight(hid, toRemove, toAdd).then(() => {
       newTags.value = [];
       setToAdd(new Set());
@@ -172,20 +190,32 @@ export default function EditHighlight() {
     <Stack alignItems="center" spacing={2} sx={{ pt: 5 }}>
       <Stack direction={"row"}>
         <Tooltip title="Previous highlight">
-          <IconButton aria-label="Previous highlight" component={Link} to={`/highlights/${getPrevId()}${queryStr}`} replace>
+          <IconButton
+            aria-label="Previous highlight"
+            component={Link}
+            to={`/highlights/${getPrevId()}${queryStr}`}
+            replace
+          >
             <NavigateBeforeIcon fontSize="large" />
           </IconButton>
         </Tooltip>
         {/* <Stack > */}
-        <Typography variant="h4" component={Stack} justifyContent={"center"}> Edit Highlight {id}</Typography>
+        <Typography variant="h4" component={Stack} justifyContent={"center"}>
+          {" "}
+          Edit Highlight {id}
+        </Typography>
         {/* </Stack> */}
         <Tooltip title="Next highlight">
-          <IconButton aria-label="Next highlight" component={Link} to={`/highlights/${getNextId()}${queryStr}`} replace>
+          <IconButton
+            aria-label="Next highlight"
+            component={Link}
+            to={`/highlights/${getNextId()}${queryStr}`}
+            replace
+          >
             <NavigateNextIcon fontSize="large" />
           </IconButton>
         </Tooltip>
       </Stack>
-
 
       <Typography dangerouslySetInnerHTML={{ __html: snippet }} />
       {/* <Box sx={{ height: "50vh", width: "100%" }}>
@@ -195,18 +225,16 @@ export default function EditHighlight() {
           loading={loading}
         />
       </Box> */}
-      {
-        tagEntries.length > 0 ? (
-          <>
-            <Typography variant="h5"> Existing Tags</Typography>
-            <ChangeExistingTags
-              options={tagEntries}
-              onCheck={onCheck}
-              disabled={loading}
-            />
-          </>
-        ) : null
-      }
+      {tagEntries.length > 0 ? (
+        <>
+          <Typography variant="h5"> Existing Tags</Typography>
+          <ChangeExistingTags
+            options={tagEntries}
+            onCheck={onCheck}
+            disabled={loading}
+          />
+        </>
+      ) : null}
       <Typography variant="h5"> New Tags</Typography>
       {/* <TagChooser
         options={tagEntries}
@@ -219,16 +247,17 @@ export default function EditHighlight() {
         sx={{ width: "75%" }}
         defaultValue={[]}
         onChange={onChange}
+        // value={[...toAdd].map((num) => num.toString())}
         value={newTags.value}
         disabled={loading}
       />
       <Button onClick={save} disabled={buttonDisabled} variant="contained">
         Save
       </Button>
-    </Stack >
+    </Stack>
   );
 }
 
 function zip(arrays) {
-  return arrays[0].map((_, i) => arrays.map(array => array[i]));
+  return arrays[0].map((_, i) => arrays.map((array) => array[i]));
 }

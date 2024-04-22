@@ -16,7 +16,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 
-
 function CustomToolbar() {
   return (
     <GridToolbarContainer>
@@ -91,7 +90,7 @@ export default function DataViewer() {
     const hlId = params.row.id;
     const tags = searchParams.get("tags");
     const queryStr = tags ? `?tags=${tags}` : "";
-    navigate(`/highlights/${hlId}${queryStr}`);
+    navigate(`/highlights/${hlId}${/*queryStr*/ ""}`);
   }
 
   return (
@@ -104,37 +103,39 @@ export default function DataViewer() {
       initialState={{
         pagination: {
           paginationModel: {
-            pageSize: 10,
+            pageSize: 7,
           },
         },
-        filterModel: {
-          items: [
-            { columnField: "tags", operator: "contains", value: "test" },
-            // { columnField: "snippet", operator: "contains", value: "test" }
-          ],
-        },
+        // filterModel: {
+        //   items: [
+        //     { columnField: "tags", operator: "contains", value: "test" },
+        //     // { columnField: "snippet", operator: "contains", value: "test" }
+        //   ],
+        // },
       }}
       pageSizeOptions={[10]}
-      // checkboxSelection
+      disableColumnFilter
+      disableColumnSorting
+      checkboxSelection
       // disableRowSelectionOnClick
       // disableColumnSelector
       getRowHeight={() => "auto"}
-    // filterModel={{
-    //   // items: [{ field: 'snippet', operator: 'contains', value: 'accel' }, { field: 'tags', operator: 'contains', value: 'accel' }],
-    // }}
-    // slots={{
-    //   toolbar: GridToolbar
-    // }}
-    // slotProps={{
-    //   toolbar: {
-    //     showQuickFilter: true,
-    //     sx: {
-    //       pt: 2,
-    //       pb: 1
-    //     },
+      // filterModel={{
+      //   // items: [{ field: 'snippet', operator: 'contains', value: 'accel' }, { field: 'tags', operator: 'contains', value: 'accel' }],
+      // }}
+      // slots={{
+      //   toolbar: GridToolbar
+      // }}
+      // slotProps={{
+      //   toolbar: {
+      //     showQuickFilter: true,
+      //     sx: {
+      //       pt: 2,
+      //       pb: 1
+      //     },
 
-    //   },
-    // }}
+      //   },
+      // }}
     />
     //{" "}
     // </Box>

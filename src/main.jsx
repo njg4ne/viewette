@@ -22,7 +22,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import { BrowserNotSupported, MailRounded } from "@mui/icons-material";
+import { BrowserNotSupported, Draw, MailRounded } from "@mui/icons-material";
 import {
   ColorThemeProvider,
   ColorModeToggler,
@@ -30,22 +30,29 @@ import {
 import { Paper } from "@mui/material";
 import { FilesystemProvider } from "./contexts/FilesystemContext";
 import DataViewer from "./components/DataViewer";
-import { ForceExcludeTags, ForceIncludeTags, IncludeTags, RequireTags } from "./components/TagsFilter";
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import {
+  ForceExcludeTags,
+  ForceIncludeTags,
+  IncludeTags,
+  RequireTags,
+} from "./components/TagsFilter";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditHighlight from "./components/EditHighlight";
+import Drawer from "./components/Drawer";
+import Home from "./components/Home";
 
-import UploadDatabase from "./components/UploadDatabase";
+import DatabaseManager from "./components/DatabaseManager";
 
 import SQL from "./components/SQL";
 import Tags from "./components/Tags";
 import { tags } from "./signals/Filesystems";
 import { TagAutocomplete, TagFilters } from "./components/Filters";
+import TagTree from "./components/TagTree";
 
-
-function Home() {
+function Highlights() {
   const [dbHandle, setDbHandle] = useState(null);
   useEffect(() => {
     // console.log("Home mounted");
@@ -54,7 +61,6 @@ function Home() {
     //   // console.log("Home unmounted");
     //   worker.terminate();
     // }
-
   }, []);
   // const worker = useWorker();
   // listenToWorker((msg) => {
@@ -63,95 +69,26 @@ function Home() {
 
   return (
     <Stack sx={{ alignItems: "stretch", py: 2 }} spacing={2}>
-      <Typography variant="h4" sx={{ textAlign: "center" }}>
-        Viewette (Taguette 2.0 Prototype)
-      </Typography>
-      <Accordion elevation={3}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel-instructions-content"
-          id="panel-instructions-header"
-        >
-          <Typography variant="h5" >
-            Instructions
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Stack spacing={2}>
-            <Typography variant="body1" sx={{}}>
-              Upload a .sqlite3 database file exported from <Link to="https://www.taguette.org/">Taguette</Link> to view your data. A copy will be saved to your browser to edit. Click on a table row to edit the tags on a highlight. Navigate to <Link to="/tags">/tags</Link> to edit the tag hierarchy using drag and drop!
-            </Typography>
-            <Typography variant="body1" sx={{}}>
-              Unsupported features include managing documents or projects, editing tags by path, merging tags, exporting data, or editing highlights. Please use <Link to="https://www.taguette.org/">Taguette</Link> for these features at this time.
-            </Typography>
-
-          </Stack>
-        </AccordionDetails>
-      </Accordion>
-      <Accordion elevation={3}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel-database-file-control-content"
-          id="panel-database-file-control-header"
-        >
-          <Typography variant="h5" >
-            Manage Database File
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Stack spacing={2}>
-            <UploadDatabase />
-          </Stack>
-        </AccordionDetails>
-      </Accordion>
-
-      {/* <Button variant="contained" onClick={opfs}>Export</Button> */}
-
-      {/* <Typography variant="body1" sx={{}}>
-        Content with link to <Link to="/test-router">/test-router</Link>.
-      </Typography> */}
-      {/*
-       */}
-      {/* <ListedHighights /> */}
-      {/* <Accordion elevation={3}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel-filesystem-content"
-          id="panel-filesystem-header"
-        >
-          <Typography>Filesystem Access</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <FileSystemControls />
-        </AccordionDetails>
-      </Accordion> */}
-
       <Accordion elevation={3}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel-tag-filters-content"
           id="panel-tag-filters-header"
         >
-          <Typography variant="h5">Filter Tags</Typography>
+          <Typography variant="h6">Tag Filters</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {/* <Stack spacing={2}>
-            <IncludeTags />
-            <ForceExcludeTags />
-            <TagAutocomplete />
-
-          </Stack> */}
           <TagFilters />
         </AccordionDetails>
       </Accordion>
-
-      <DataViewer />
+      <Paper elevation={3}>
+        <DataViewer />
+      </Paper>
     </Stack>
   );
 }
 
 const AppContainer = ({ Contents }) => {
-
   // get max width based on screen size
   const maxWidth = /* options are: xs, sm, md, lg, xl */ "md";
   return (
@@ -160,39 +97,56 @@ const AppContainer = ({ Contents }) => {
       {/* <WorkerProvider> */}
       <FilesystemProvider>
         <SnackbarProvider>
-          <Container maxWidth={maxWidth} id="content" sx={{}}>
-            <Paper elevation={3} component="main" sx={{}}>
-              <Stack
-                sx={{
-                  justifyContent: "space-between",
-                  minHeight: "100vh",
-                  p: 2,
-                }}
-                spacing={2}
-              >
-                <Contents />
-                <footer>
-                  <ColorModeToggler />
-                </footer>
-              </Stack>
-            </Paper>
-          </Container>
+          {/* 
+            
+              > */}
+          <Drawer>
+            <Stack
+              sx={{
+                justifyContent: "space-between",
+                // minHeight: "100vh",
+                p: 2,
+              }}
+              spacing={2}
+            >
+              <Contents />
+            </Stack>
+          </Drawer>
+          {/* <ColorModeToggler /> */}
+
+          {/* 
+              
+          */}
         </SnackbarProvider>
       </FilesystemProvider>
       {/* </ WorkerProvider> */}
-    </ColorThemeProvider >
+    </ColorThemeProvider>
   );
 };
 
 const router = createHashRouter([
   {
     path: "/",
+    // element: AppContainer({ Contents: Drawer }),
     element: AppContainer({ Contents: Home }),
   },
-  // {
-  //   path: "/tags",
-  //   element: AppContainer({ Contents: () => <Tags tags={tags} /> }),
-  // },
+  {
+    path: "/highlights",
+    // element: AppContainer({ Contents: Drawer }),
+    element: AppContainer({ Contents: Highlights }),
+  },
+  {
+    path: "/db",
+    element: AppContainer({ Contents: DatabaseManager }),
+  },
+  {
+    path: "/tree",
+    element: AppContainer({ Contents: TagTree }),
+  },
+  {
+    path: "/tags",
+    element: AppContainer({ Contents: () => <Tags tags={tags} /> }),
+  },
   {
     path: "/sql",
     element: AppContainer({ Contents: SQL }),

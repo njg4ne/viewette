@@ -12,7 +12,7 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 
 import { databases, fsAccessRoot } from "../signals/Filesystems";
-import { gainFsAccess, getHighlights } from "../utils/sql";
+// import { gainFsAccess, getHighlights } from "../utils/sql";
 import { SnackbarProvider, useSnackbar } from "notistack";
 async function write10Files(handle) {
   // writes files with names 1.txt, 2.txt, ... 10.txt containing the number
@@ -85,7 +85,7 @@ export default function FileSystemControls() {
     <Box
       id="fs-control"
       sx={{ width: "minContent", alignSelf: "", p: 2 }}
-    // elevation={6}
+      // elevation={6}
     >
       <Stack spacing={2} alignItems="center">
         <Typography component="label" htmlFor="fs-control">
