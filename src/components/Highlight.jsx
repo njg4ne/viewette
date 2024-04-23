@@ -19,7 +19,7 @@ import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import CommentIcon from "@mui/icons-material/Comment";
 
-import { highlights, tags } from "../signals/Filesystems";
+import { highlights, tags } from "../signals";
 
 const style = {
   position: "absolute",

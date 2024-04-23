@@ -9,7 +9,7 @@ import {
   tagIncludeFilter,
   tagExcludeFilter,
   tagRequirementFilter,
-} from "../signals/Filesystems";
+} from "../signals";
 import Switch from "@mui/material/Switch";
 import Box from "@mui/material/Box";
 import { Typography } from "@mui/material";
@@ -32,12 +32,15 @@ function extractTagFilters(searchParam: string): { Λ: number[], V: number[], E:
     let [operator, id] = match;
     switch (operator) {
       case "V":
+        //@ts-expect-error
         V.push(id);
         break;
       case "Λ":
+        //@ts-expect-error
         Λ.push(id);
         break;
       case "E":
+        //@ts-expect-error
         E.push(id);
         break;
       default:
@@ -70,7 +73,7 @@ export function TagAutocomplete(props: {
     }
   }, [tagParam]);
 
-  function onChange(_, newVal: string[]) {
+  function onChange(_: Event, newVal: string[]) {
     const filters = extractTagFilters(tagParam!) ?? { Λ: [], V: [], E: [] };
     filters[which] = newVal as unknown as number[];
     setParams({ tags: generateTagFilters(filters) }, { replace: true });
@@ -103,38 +106,38 @@ export function TagFilters() {
 
 }
 
-export function IncludeTags({ tagSignal }: { tagSignal: typeof tags }) {
-  const [all, setAll] = React.useState(true);
-  React.useEffect(() => {
-    if (all) {
-      tagRequirementFilter.value = tagIncludeFilter.value;
-      tagIncludeFilter.value = [];
-    } else {
-      tagIncludeFilter.value = tagRequirementFilter.value;
-      tagRequirementFilter.value = [];
-    }
-  }, [all]);
-  const onChange = (event, value) => {
-    if (all) {
-      // tagRequirementFilter.value = value = value.map((v) => Number(v[0]));
-    } else {
-      // tagIncludeFilter.value = value = value.map((v) => Number(v[0]));
-    }
-  };
-  const label = all ? "Require All Tags" : "Require Any Tag";
-  const which = all ? "Λ" : "V";
-  return (
-    <Stack direction="row" spacing={1} alignItems={"center"}>
-      <Box sx={{ flexGrow: 1 }}>
-        {/* <Filter onChange={onChange} label={label} /> */}
-        <TagAutocomplete which={which} tagSignal={tagSignal} />
-      </Box>
-      {/* <Typography aria-label="All">All?</Typography> */}
-      <Switch
-        checked={all}
-        onChange={(e) => setAll(e.target.checked)}
-        aria-label="Toggle between requiring any tag or all tags"
-      />
-    </Stack>
-  );
-}
+// export function IncludeTags({ tagSignal }: { tagSignal: typeof tags }) {
+//   const [all, setAll] = React.useState(true);
+//   React.useEffect(() => {
+//     if (all) {
+//       tagRequirementFilter.value = tagIncludeFilter.value;
+//       tagIncludeFilter.value = [];
+//     } else {
+//       tagIncludeFilter.value = tagRequirementFilter.value;
+//       tagRequirementFilter.value = [];
+//     }
+//   }, [all]);
+//   const onChange = (event, value) => {
+//     if (all) {
+//       // tagRequirementFilter.value = value = value.map((v) => Number(v[0]));
+//     } else {
+//       // tagIncludeFilter.value = value = value.map((v) => Number(v[0]));
+//     }
+//   };
+//   const label = all ? "Require All Tags" : "Require Any Tag";
+//   const which = all ? "Λ" : "V";
+//   return (
+//     <Stack direction="row" spacing={1} alignItems={"center"}>
+//       <Box sx={{ flexGrow: 1 }}>
+//         {/* <Filter onChange={onChange} label={label} /> */}
+//         <TagAutocomplete which={which} tagSignal={tagSignal} />
+//       </Box>
+//       {/* <Typography aria-label="All">All?</Typography> */}
+//       <Switch
+//         checked={all}
+//         onChange={(e) => setAll(e.target.checked)}
+//         aria-label="Toggle between requiring any tag or all tags"
+//       />
+//     </Stack>
+//   );
+// }

@@ -1,7 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { filteredHighlights as highlights, tags } from "../signals/Filesystems";
+import { filteredHighlights as highlights, tags } from "../signals";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
@@ -120,22 +120,22 @@ export default function DataViewer() {
       // disableRowSelectionOnClick
       // disableColumnSelector
       getRowHeight={() => "auto"}
-      // filterModel={{
-      //   // items: [{ field: 'snippet', operator: 'contains', value: 'accel' }, { field: 'tags', operator: 'contains', value: 'accel' }],
-      // }}
-      // slots={{
-      //   toolbar: GridToolbar
-      // }}
-      // slotProps={{
-      //   toolbar: {
-      //     showQuickFilter: true,
-      //     sx: {
-      //       pt: 2,
-      //       pb: 1
-      //     },
+    // filterModel={{
+    //   // items: [{ field: 'snippet', operator: 'contains', value: 'accel' }, { field: 'tags', operator: 'contains', value: 'accel' }],
+    // }}
+    // slots={{
+    //   toolbar: GridToolbar
+    // }}
+    // slotProps={{
+    //   toolbar: {
+    //     showQuickFilter: true,
+    //     sx: {
+    //       pt: 2,
+    //       pb: 1
+    //     },
 
-      //   },
-      // }}
+    //   },
+    // }}
     />
     //{" "}
     // </Box>

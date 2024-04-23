@@ -7,7 +7,7 @@ import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import Box from "@mui/material/Box";
 import { useNavigate } from "react-router-dom";
-import { loadOpfsDb, clearOpfsDb } from "../signals/Filesystems";
+import { loadOpfsDb, clearOpfsDb } from "../signals";
 import { ButtonGroup } from "@mui/material";
 
 const VisuallyHiddenInput = styled("input")({

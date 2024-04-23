@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import { filteredHighlights as highlights, tags } from "../signals/Filesystems";
+import { filteredHighlights as highlights, tags } from "../signals";
 import { ManagedTagChooser, TagChooser } from "./TagsFilter";
 // import { multiWriteQuery } from "../utils/sql";
 // core-js(-pure)/actual|full/set/difference
@@ -28,7 +28,7 @@ import LexicalEditor from "./LexicalEditor";
 import { Box } from "@mui/material";
 
 import { convert } from "html-to-text";
-import { opfsDb, updateTagsForHighlight } from "../signals/Filesystems";
+import { opfsDb, updateTagsForHighlight } from "../signals";
 // import
 
 function ChangeExistingTags({ options, onCheck, disabled }) {

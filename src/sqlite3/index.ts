@@ -8,12 +8,20 @@ type Command = "open" | "close" | "config-get" | "exec" | "export";
 
 type Promiser = (command: Command, config: Record<string, any>) => Promise<any>;
 
-// workerReceivedTime: number, workerRespondTime: number, departureTime: number }>;
+type SqliteResult = {
+  resultRows: any[] | null;
+}
+type SqliteError = {
+  result: {
+    message: string;
+  };
+}
+
 type SqliteResponse = {
   dbId: string;
   departureTime: number;
   messageId: string;
-  result: {};
+  result: SqliteResult;
   type: Command;
   workerReceivedTime: number;
   workerRespondTime: number;
@@ -31,8 +39,8 @@ export default class OpfsDb {
    */
   async open(name: string): Promise<SqliteResponse> {
     type F = Function;
-    let onResolve: F = () => {};
-    let onReject: F = () => {};
+    let onResolve: F = () => { };
+    let onReject: F = () => { };
     const promise = new Promise((res: F, rej: F) => {
       onResolve = res;
       onReject = rej;
@@ -123,14 +131,14 @@ export class TaguetteDb extends OpfsDb {
   });
   async getHighlights() {
     const t0 = performance.now();
-    // @ts-expect-error
+
     const {
       result: { resultRows },
       workerReceivedTime: t1,
       workerRespondTime: t2,
     } = await this.exec(this.#qHighlighAio, "object");
     const t3 = performance.now();
-    return resultRows.map(this.#highlightRowConverter);
+    return resultRows?.map(this.#highlightRowConverter);
   }
   async getHighlight($hid: number) {
     const bindings = { $hid };
@@ -149,9 +157,7 @@ export class TaguetteDb extends OpfsDb {
     ;`;
     // const { result: { resultRows } } = await this.exec(q, "object", bindings);
     const response = await this.exec(q, "object", bindings);
-    // @ts-expect-error
-    const result =
-      response?.result?.resultRows?.map(this.#highlightRowConverter).at(0) ??
+    const result = response?.result?.resultRows?.map(this.#highlightRowConverter).at(0) ??
       null;
     // console.log(result);
     return result;
@@ -164,7 +170,7 @@ export class TaguetteDb extends OpfsDb {
       const { result } = await this.exec(q, "object", bindings);
       return Promise.resolve($path);
     } catch (e) {
-      const message = e?.result?.message ?? "?:";
+      const message = (e as SqliteError)?.result?.message ?? "?:";
       const type = message.split(":")[0];
       switch (type) {
         case "SQLITE_CONSTRAINT_UNIQUE":
@@ -175,13 +181,43 @@ export class TaguetteDb extends OpfsDb {
       }
     }
   }
+  // async deleteTag($tid: number) {
+  //   const bindings = { $tid };
+  //   try {
+  //     const { result } = await this.exec(
+  //       `DELETE FROM tags WHERE id = $tid;`,
+  //       "object",
+  //       bindings
+  //     );
+  //     return Promise.resolve($tid);
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // }
+  async deleteTag($path: number) {
+    const bindings = { $path: $path + '%' };
+    const q = `
+    DELETE FROM tags
+      WHERE path LIKE $path
+      RETURNING id, path
+    ;`;
+    try {
+      const response = await this.exec(
+        q,
+        "object",
+        bindings
+      );
+      return Promise.resolve(response?.result?.resultRows);
+    } catch (e) {
+      Promise.reject(e);
+    }
+  }
 
   async getTags() {
-    // @ts-expect-error
     const {
       result: { resultRows },
     } = await this.exec(this.#qTags);
-    return resultRows.reduce(
+    return resultRows?.reduce(
       (acc: Record<number, string>, [tagId, tag]: [number, string]) => {
         acc[tagId] = tag;
         return acc;

@@ -22,7 +22,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import { BrowserNotSupported, Draw, MailRounded } from "@mui/icons-material";
+import { BrowserNotSupported, Draw, MailRounded, Tag } from "@mui/icons-material";
 import {
   ColorThemeProvider,
   ColorModeToggler,
@@ -43,12 +43,11 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditHighlight from "./components/EditHighlight";
 import Drawer from "./components/Drawer";
 import Home from "./components/Home";
-
 import DatabaseManager from "./components/DatabaseManager";
 
 import SQL from "./components/SQL";
 import Tags from "./components/Tags";
-import { tags } from "./signals/Filesystems";
+import { tags } from "./signals";
 import { TagAutocomplete, TagFilters } from "./components/Filters";
 import TagTree from "./components/TagTree";
 

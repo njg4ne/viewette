@@ -19,7 +19,7 @@ import IconButton from '@mui/material/IconButton';
 import RemoveIcon from '@mui/icons-material/Remove';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import { updateTagPaths } from "../signals/Filesystems";
+import { updateTagPaths } from "../signals";
 import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 
