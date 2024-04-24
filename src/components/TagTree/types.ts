@@ -1,1 +1,1 @@
-export type TagEntry = [id: string, path: string];
+// export type Tag.Entry = [id: string, path: string];

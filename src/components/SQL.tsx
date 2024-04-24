@@ -16,7 +16,7 @@ declare global {
   }
 }
 
-import OpfsDb, { TaguetteDb } from "../sqlite3";
+import OpfsDb, { TaguetteDb } from "../db";
 async function opfs() {
   const opfsRoot: FileSystemDirectoryHandle =
     await navigator.storage.getDirectory();

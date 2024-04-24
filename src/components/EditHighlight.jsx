@@ -27,7 +27,7 @@ import { signal, effect, computed } from "@preact/signals";
 import LexicalEditor from "./LexicalEditor";
 import { Box } from "@mui/material";
 
-import { convert } from "html-to-text";
+// import { convert } from "html-to-text";
 import { opfsDb, updateTagsForHighlight } from "../signals";
 // import
 

@@ -1,5 +1,5 @@
 import { signal, effect, computed } from "@preact/signals";
-import OpfsDb, { TaguetteDb } from "../sqlite3";
+import OpfsDb, { TaguetteDb } from "../db";
 
 export const opfsDb = signal(null);
 export async function updateTagsForHighlight(highlight_id, toRemove, toAdd) {
