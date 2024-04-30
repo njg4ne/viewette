@@ -2,6 +2,9 @@ import { signal, effect, computed } from "@preact/signals";
 import OpfsDb, { TaguetteDb } from "../db";
 
 export const opfsDb = signal(null);
+export const signalReady = (s) => s.value !== null && s.value !== undefined;
+// export const signalReady = (signal) => sdb && sdb.value !== null;
+export const db = () => opfsDb.value;
 export async function updateTagsForHighlight(highlight_id, toRemove, toAdd) {
   const db = opfsDb.value;
   if (opfsDb.value !== null) {
@@ -81,6 +84,7 @@ export async function reloadHighlights() {
     return;
   }
   highlights.value = await db.getHighlights();
+  // await db.collection("tags");
 }
 effect(reloadHighlights); // do this when db changes
 

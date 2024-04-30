@@ -1,8 +1,10 @@
 import { OpfsDb } from "../";
 import queries from "./sql";
-import transactFunc from "./transact";
+// import transactFunc from "./transact";
 import deletion from "./crud/delete";
-
+import updateTagsPaths from "./crud/update/tags/byId";
+import readTags from "./crud/read/tags";
+import readTaggingsByPath from "./crud/read/taggingsByPath";
 // make a class that extends opfsdb called TaguetteDb that has methods for each of the taguette queries
 export default class TaguetteDb extends OpfsDb {
   #highlightRowConverter = ({
@@ -105,7 +107,7 @@ export default class TaguetteDb extends OpfsDb {
   async getTags() {
     const {
       result: { resultRows },
-    } = await this.exec(queries.tags);
+    } = await this.exec(`SELECT tags.id as tagId, tags.path as tag FROM tags;`);
     return resultRows?.reduce(
       (acc: Record<number, string>, [tagId, tag]: [number, string]) => {
         acc[tagId] = tag;
@@ -114,16 +116,11 @@ export default class TaguetteDb extends OpfsDb {
       {}
     );
   }
-
-  //   transact: SQLite3.Delegate.Transactor = (
-  //     ...args: AllParametersButLast<Parameters<typeof transact>>
-  //   ) => transact(...args, this);
-  //   async transact(
-  //     ...args: AllParametersButLast<Parameters<typeof transactFunc>>
-  //   ) {
-  //     console.log(this.exec);
-  //     return transactFunc(...args, this);
-  //   }
+  read = {
+    tags: async () => await readTags(this),
+    taggingsByPath: async (paths: string[]) =>
+      await readTaggingsByPath(paths, this),
+  };
   delete = {
     tags: {
       byExactPaths: async (paths: string[]) =>
@@ -132,8 +129,9 @@ export default class TaguetteDb extends OpfsDb {
   };
   update = {
     tags: {
-      paths: (updateEntries: Array<[number, string]>) =>
-        updateTagPaths(updateEntries, this.exec),
+      byId: (updateEntries: Array<[number, string]>) =>
+        // updateTagPaths(updateEntries, this.exec),
+        updateTagsPaths(updateEntries, this),
     },
   };
 }
@@ -142,49 +140,49 @@ export default class TaguetteDb extends OpfsDb {
 //   exec: SQLite3.Delegate.Executor
 // ) {}
 
-async function updateTagPaths(
-  updateEntries: Array<[number, string]>,
-  exec: SQLite3.Delegate.Executor
-) {
-  // updateEntries would look like
-  // [[1, "newTagPathForTagWithId1"], [22, "newTagPathForTagWithId22"], ...]]
-  let bindings: Record<string, any> = {};
-  // for all entries add to binding $e0: tagId, $e1: tagPath
-  bindings = updateEntries.reduce(
-    (
-      acc: Record<string, any>,
-      [tagId, tagPath]: [number, string],
-      i: number
-    ) => {
-      acc[`$e${i}id`] = tagId;
-      acc[`$e${i}path`] = tagPath;
-      return acc;
-    },
-    bindings
-  );
-  // console.log(bindings);
-  let q = "BEGIN;";
-  if (updateEntries.length > 0) {
-    const placeholders = updateEntries
-      .map(
-        ([tagId, tagPath]: [number, string], i: number) =>
-          `WHEN $e${i}id THEN $e${i}path`
-      )
-      .join(" ");
-    q += `UPDATE tags SET path = CASE id ${placeholders} END WHERE id IN (${updateEntries
-      .map(([tagId, tagPath]: [number, string], i: number) => `$e${i}id`)
-      .join(",")});`;
-  }
-  q += "COMMIT;";
-  // console.log(q);
-  try {
-    const res = await exec(q, "object", bindings);
-    // const { result: { resultRows } } = res;
-  } catch (e) {
-    console.error(e);
-    await exec("ROLLBACK;");
-  }
-}
+// async function updateTagPaths(
+//   updateEntries: Array<[number, string]>,
+//   exec: SQLite3.Delegate.Executor
+// ) {
+//   // updateEntries would look like
+//   // [[1, "newTagPathForTagWithId1"], [22, "newTagPathForTagWithId22"], ...]]
+//   let bindings: Record<string, any> = {};
+//   // for all entries add to binding $e0: tagId, $e1: tagPath
+//   bindings = updateEntries.reduce(
+//     (
+//       acc: Record<string, any>,
+//       [tagId, tagPath]: [number, string],
+//       i: number
+//     ) => {
+//       acc[`$e${i}id`] = tagId;
+//       acc[`$e${i}path`] = tagPath;
+//       return acc;
+//     },
+//     bindings
+//   );
+//   // console.log(bindings);
+//   let q = "BEGIN;";
+//   if (updateEntries.length > 0) {
+//     const placeholders = updateEntries
+//       .map(
+//         ([tagId, tagPath]: [number, string], i: number) =>
+//           `WHEN $e${i}id THEN $e${i}path`
+//       )
+//       .join(" ");
+//     q += `UPDATE tags SET path = CASE id ${placeholders} END WHERE id IN (${updateEntries
+//       .map(([tagId, tagPath]: [number, string], i: number) => `$e${i}id`)
+//       .join(",")});`;
+//   }
+//   q += "COMMIT;";
+//   // console.log(q);
+//   try {
+//     const res = await exec(q, "object", bindings);
+//     // const { result: { resultRows } } = res;
+//   } catch (e) {
+//     console.error(e);
+//     await exec("ROLLBACK;");
+//   }
+// }
 async function updateTagsForHighlight(
   hid: number,
   remove: number[],

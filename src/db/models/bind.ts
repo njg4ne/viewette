@@ -16,3 +16,19 @@ export function bindObject(object: Record<string, string | number>): {
   }
   return { bindings, placeholders };
 }
+export function bindArray(array: Array<string | number>): {
+  bindings: Record<string, string | number>;
+  placeholders: string;
+} {
+  let bindings: Record<string, any> = {};
+  let placeholders: string = "";
+  for (let i = 0; i < array.length; i++) {
+    const key = `$${i}`;
+    bindings[key] = array[i];
+    placeholders += `${key},`;
+  }
+  if (placeholders.endsWith(",")) {
+    placeholders = placeholders.slice(0, -1);
+  }
+  return { bindings, placeholders };
+}

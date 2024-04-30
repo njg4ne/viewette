@@ -1,5 +1,5 @@
-import { LoadingProvider } from "./contexts/Loading";
-import { TreeProvider } from "./contexts/Tree";
+import { LoadingProvider } from "./contexts/LoadingContext";
+import { TreeProvider } from "./contexts/TagTreeContext";
 import TagTree from "./TagTree";
 
 export default function TagTreeWithContext() {

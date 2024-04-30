@@ -1,4 +1,5 @@
 import { sqlite3Worker1Promiser } from "@sqlite.org/sqlite-wasm";
+import queries from "./models/sql";
 
 export default class OpfsDb {
   #sqlite: SQLite3.Worker1.Promiser | null = null;
@@ -75,17 +76,28 @@ export default class OpfsDb {
   }
   async transact(
     sql: string,
-    rowMode?: "array" | "object",
+    rowMode: "array" | "object" = "object",
     bindings?: Record<string, any>
   ) {
     const q = `BEGIN;${sql}COMMIT;`;
     try {
-      const res = await this.exec(q, "object", bindings);
+      const res = await this.exec(q, rowMode, bindings);
       return Promise.resolve(res);
     } catch (e) {
       // return Promise.reject(e);
       await this.exec("ROLLBACK;");
       return Promise.reject(e);
     }
+  }
+  async collection(name: string) {
+    const bindings = { $collection: name };
+    const response = await this.transact(
+      queries.validateCollection,
+      "object",
+      bindings
+    );
+    let { existence } = response?.result?.resultRows?.at(0) ?? {};
+    existence = Boolean(existence);
+    if (!existence) throw `Collection ${name} does not exist.`;
   }
 }

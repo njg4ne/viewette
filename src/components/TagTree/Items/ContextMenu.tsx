@@ -15,39 +15,19 @@ import ContentCopy from "@mui/icons-material/ContentCopy";
 import Typography from "@mui/material/Typography";
 import ChildIcon from "@mui/icons-material/SubdirectoryArrowRight";
 
-import { useLoadingContext } from "../contexts/Loading";
-import { useTreeContext } from "../contexts/Tree";
-import { useTagTreeItemContext } from "./Context";
+import { useLoadingContext } from "../contexts/LoadingContext";
+import { useTreeContext } from "../contexts/TagTreeContext";
+import { useTagTreeItemContext } from "./TagTreeItemContext";
 import { SEPARATOR } from "../utils";
 import StyledTreeItem from "./StyledTreeItem";
-import RenderMultipleTagTreeItems from "./Multiple";
+import RenderMultipleTagTreeItems from "./MultipleTagTreeItems";
 import DeleteMenuItems from "./DeleteMenuItems";
+import RenameMenuItem from "./RenameMenuItem";
 
 export { ContextMenu };
 export default ContextMenu;
-function ContextMenu({
-  // contextMenuPosition,
-  // closeContextMenu,
-  // undefined,
-  isTag,
-  label,
-}: // e,
-// Event,
-// ref,
-// setCreateTagValue,
-// setTimeout,
-// SEPARATOR,
-// createTagFieldRef,
-// current,
-// focus,
-// DeleteSelected,
-// deleteTag
-{
-  isTag: boolean;
-  label: string;
-  // deleteTag: Function;
-}) {
-  const { closeContextMenu, handleContextMenu, contextMenuPosition } =
+function ContextMenu() {
+  const { item, closeContextMenu, handleContextMenu, contextMenuPosition } =
     useTagTreeItemContext();
   const { createTagFieldRef, setCreateTagValue, selectedItems } =
     useTreeContext();
@@ -84,15 +64,15 @@ function ContextMenu({
               width: "fit-content",
             }}
           >
-            {!isTag ? "Category: " : null}
-            {label}
+            {!item.isTag ? "Category: " : null}
+            {item.path}
           </Typography>
         </ListItemText>
       </MenuItem>
       <Divider />
       <MenuItem
         onClick={(e: Event) => {
-          navigator.clipboard.writeText(label);
+          navigator.clipboard.writeText(item.path);
           closeContextMenu();
         }}
       >
@@ -114,10 +94,10 @@ function ContextMenu({
 
           if (ref) {
             console.log(ref);
-            setCreateTagValue(label); // do again after a second
+            // setCreateTagValue(label); // do again after a second
             // Race Condition
             setTimeout(() => {
-              setCreateTagValue(label + SEPARATOR);
+              setCreateTagValue(item.path + SEPARATOR);
               createTagFieldRef?.current?.focus();
             }, 100);
           }
@@ -128,7 +108,8 @@ function ContextMenu({
         </ListItemIcon>
         <ListItemText>Create subtag</ListItemText>
       </MenuItem>
-      <DeleteMenuItems isTag={isTag} label={label} />
+      <DeleteMenuItems />
+      <RenameMenuItem />
     </Menu>
   );
 }

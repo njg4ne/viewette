@@ -1,8 +1,4 @@
-import RenderMultipleTagTreeItems from "./Multiple";
-import RenderSingleTagTreeItem from "./Single";
+import RenderMultipleTagTreeItems from "./MultipleTagTreeItems";
+import RenderSingleTagTreeItem from "./SingleTagTreeItem";
 
-export {
-  RenderMultipleTagTreeItems,
-  RenderSingleTagTreeItem,
-};
-
+export { RenderMultipleTagTreeItems, RenderSingleTagTreeItem };

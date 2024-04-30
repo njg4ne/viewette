@@ -1,9 +1,11 @@
 // import highlightsWithTags from "./highlightsWithTags";
 import highlightsWithTags from "./highlightsWithTags.sql?raw";
-import tags from "./tags.sql?raw";
+import readTags from "./readTags.sql?raw";
+import validateCollection from "./validateCollection.sql?raw";
 export const queries = {
   highlightsWithTags,
-  tags,
+  readTags,
+  validateCollection,
 };
 export default queries;
 

@@ -3,6 +3,7 @@ import {
   useState,
   createContext,
   useContext,
+  useEffect,
   useRef,
   MutableRefObject,
 } from "react";
@@ -10,7 +11,15 @@ import { useTreeViewApiRef } from "@mui/x-tree-view";
 import { UseTreeViewItemsPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewItems/useTreeViewItems.types";
 import { UseTreeViewExpansionPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewExpansion/useTreeViewExpansion.types";
 import { UseTreeViewFocusPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewFocus/useTreeViewFocus.types";
+import { useHotkeys } from "react-hotkeys-hook";
+import { useLoadingContext } from "./LoadingContext";
+import { opfsDb, signalReady } from "../../../signals";
+import { TaguetteDb } from "../../../db";
+import { useSnackbar } from "notistack";
+import * as popups from "../../../popups";
+import { getAllPartialPaths } from "../utils";
 type TagMap = Record<string | number, string>;
+
 const defaults = {
   expandedItems: [] as string[],
   setExpandedItems: {} as StateUpdater<string[]>,
@@ -28,19 +37,60 @@ const defaults = {
         UseTreeViewFocusPublicAPI)
     | undefined
   >,
+  allTags: [] as Taguette.Tag[],
+  taggings: [] as Taguette.ParentTaggingCount[],
 };
 export const TreeContext = createContext(defaults);
 
 export function TreeProvider({ children }: { children: React.ReactNode }) {
+  const { enqueueSnackbar: sbqr } = useSnackbar();
+
+  const { loading, setLoading } = useLoadingContext();
+  const [allTags, setAllTags] = useState<Taguette.Tag[]>([]);
+  const [taggings, setTaggings] = useState<Taguette.ParentTaggingCount[]>([]);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [createTagValue, setCreateTagValue] = useState<string>("");
   const [tags, setTags] = useState<TagMap>({});
   const createTagFieldRef = useRef<HTMLElement>(null);
   const apiRef = useTreeViewApiRef();
-  const numTagsSelected = selectedItems.filter((path) =>
-    Object.values(tags).includes(path)
-  ).length;
+  const selectedTags = selectedItems.filter((path) =>
+    allTags.map((tag) => tag.path).includes(path)
+  );
+  const numTagsSelected = selectedTags.length;
+  useHotkeys("delete", () => {
+    if (numTagsSelected === 0) return;
+    deleteTags(selectedTags);
+  });
+  useEffect(() => {
+    if (loading || !signalReady(opfsDb)) return;
+    console.log("opfsDb", opfsDb.value);
+    const dbv: TaguetteDb = opfsDb.value;
+    dbv.read.tags().then(setAllTags);
+  }, [opfsDb.value, loading]);
+  useEffect(() => {
+    if (loading || !signalReady(opfsDb)) return;
+    console.log("opfsDb", opfsDb.value);
+    const dbv: TaguetteDb = opfsDb.value;
+    dbv.read.taggingsByPath(allItemPaths(allTags)).then((taggings) => {
+      // console.log("taggings", taggings);
+      setTaggings(taggings);
+    });
+  }, [allTags, loading]);
+
+  async function deleteTags(paths: string[]) {
+    if (loading) return;
+    try {
+      setLoading(true);
+      const num = await opfsDb.value?.delete.tags.byExactPaths(paths);
+      popups.success(sbqr, `Deleted ${num} tags`);
+    } catch (e) {
+      console.error(e);
+      popups.error(sbqr, `Failed to delete tags`);
+    } finally {
+      setLoading(false);
+    }
+  }
   return (
     <TreeContext.Provider
       value={{
@@ -55,6 +105,8 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
         setTags,
         numTagsSelected,
         apiRef,
+        allTags,
+        taggings,
       }}
     >
       {children}
@@ -68,4 +120,16 @@ export function useTreeContext() {
     throw new Error("useTree must be used within a TreeProvider");
   }
   return context;
+}
+
+function allItemPaths(tags: Taguette.Tag[]): string[] {
+  const res = tags.reduce((acc: string[], tag: Taguette.Tag) => {
+    const morePaths = getAllPartialPaths(tag.path);
+    acc.push(...morePaths);
+    return acc;
+  }, []);
+  // console.log(res);
+  res.sort();
+  // console.log(res);
+  return [...new Set(res)];
 }

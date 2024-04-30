@@ -4,59 +4,39 @@ import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import { useEffect, useState } from "react";
 import { opfsDb } from "../../signals";
-import { Typography } from "@mui/material";
+// import { Box, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import { useTreeViewApiRef } from "@mui/x-tree-view";
-import { useLoadingContext } from "./contexts/Loading";
-import { useTreeContext } from "./contexts/Tree";
+import { useLoadingContext } from "./contexts/LoadingContext";
+import { useTreeContext } from "./contexts/TagTreeContext";
 import { getAllPartialPaths, getGenealogy, getTopLevelTags } from "./utils";
-import MultipleTagTreeItems from "./Items/Multiple";
+import MultipleTagTreeItems from "./Items/MultipleTagTreeItems";
+import MultipleTagTreeItems2 from "./Items/MultipleTagTreeItems";
 import CreateTagForm from "./CreateTagForm";
-
+import HighlightList from "../HighlightList";
+import AcUnitIcon from "@mui/icons-material/AcUnit";
 export default function TagTree({}) {
+  const { loading, setLoading } = useLoadingContext();
   const {
+    allTags,
     expandedItems,
     setExpandedItems,
     selectedItems,
     setSelectedItems,
-    tags,
-    setTags,
-    numTagsSelected,
     apiRef,
+    numTagsSelected,
   } = useTreeContext();
-
-  const { loading, setLoading } = useLoadingContext();
-
-  useEffect(() => {
-    if (loading) return;
-    const task = opfsDb.value?.getTags();
-    task?.then((newTags: Record<string, string>) => {
-      setTags(newTags);
-      setSelectedItems((prev) =>
-        prev.filter((path) => Object.values(newTags).includes(path))
-      );
-      // setExpandedItems((prev) => {
-      //   const tlts = getTopLevelTags(newTags);
-      //   const family = getGenealogy(tlts, newTags);
-      //   console.log(tlts, family);
-      //   console.log(prev);
-      //   return prev.filter((path) => family.includes(path));
-      // });
-    });
-    // filter any tags from selectedItems in the selectedItems state that died, including dead ancestors
-
-    return () => {};
-  }, [opfsDb.value, loading]);
+  // const numTagsSelected = selectedItems.length || 0;
   const handleSelectedItemsChange = (event: Event, itemIds: string[]) => {
-    // console.log("change")
-    // apiRef.current?.focusItem(event, itemIds.at(0)!);
-    // setSelectedItems(itemIds);
+    // do nothing
   };
   const selectChildrenToo = (
     event: Event,
     itemId: string,
     isSelected: boolean
   ): void => {
-    const family = getGenealogy([itemId], tags);
+    const family = getGenealogy([itemId], allTags);
     if (isSelected) {
       setExpandedItems((prev) => [...new Set(prev.concat(family))]);
       setSelectedItems((prev) => [...new Set(prev.concat(family))]);
@@ -72,14 +52,11 @@ export default function TagTree({}) {
     setExpandedItems(itemIds);
   };
   const handleExpandClick = () => {
-    const allNodeIds = Object.entries(tags).reduce(
-      (acc: string[], [id, path]) => {
-        const morePaths = getAllPartialPaths(path);
-        acc.push(...morePaths);
-        return acc;
-      },
-      []
-    );
+    const allNodeIds = allTags.reduce((acc: string[], tag: Taguette.Tag) => {
+      const morePaths = getAllPartialPaths(tag.path);
+      acc.push(...morePaths);
+      return acc;
+    }, []);
     setExpandedItems((oldExpanded) =>
       oldExpanded.length === 0 ? allNodeIds : []
     );
@@ -100,25 +77,59 @@ export default function TagTree({}) {
           ? `${numTagsSelected} tag${numTagsSelected > 1 ? "s" : ""} selected`
           : "No tags selected"}
       </Typography>
-      <Button onClick={handleExpandClick} variant="contained" color="secondary">
+      {/* <Button onClick={handleExpandClick} variant="contained" color="secondary">
         {expandedItems.length === 0 ? "Expand All" : "Collapse All"}
-      </Button>
-      <SimpleTreeView
-        // autoFocus={false}
-        // key={Date.now().toString()}
-        selectedItems={selectedItems}
-        apiRef={apiRef}
-        onSelectedItemsChange={handleSelectedItemsChange}
-        onItemSelectionToggle={selectChildrenToo}
-        sx={{ maxWidth: "100%" }}
-        multiSelect
-        expandedItems={expandedItems}
-        onExpandedItemsChange={handleExpandedItemsChange}
-      >
-        {tags && (
-          <MultipleTagTreeItems tags={Object.entries(tags)} level={-1} />
-        )}
-      </SimpleTreeView>
+      </Button> */}
+      <Stack direction="row" sx={{ alignSelf: "stretch" }}>
+        <Box
+          sx={{
+            flexGrow: 0,
+            overflow: "auto",
+            resize: "horizontal",
+            // minWidth: "fit-content",
+            paddingRight: 1,
+          }}
+        >
+          <SimpleTreeView
+            // autoFocus={false}
+            // key={Date.now().toString()}
+            selectedItems={selectedItems}
+            apiRef={apiRef}
+            onSelectedItemsChange={handleSelectedItemsChange}
+            onItemSelectionToggle={selectChildrenToo}
+            // sx={{ maxWidth: "50%" }}
+            multiSelect
+            expandedItems={allItemIds(allTags)}
+            onExpandedItemsChange={handleExpandedItemsChange}
+          >
+            {/* {tags && (
+              <MultipleTagTreeItems tags={Object.entries(tags)} level={-1} />
+            )} */}
+            <MultipleTagTreeItems2 tags={allTags} level={-1} />
+          </SimpleTreeView>
+        </Box>
+        <Box
+          sx={{
+            // height: "100vh",
+            // bgcolor: "orange",
+            overflow: "auto",
+            // resize: "horizontal",
+            // width: "100%",
+            flexGrow: 1,
+          }}
+        >
+          {/* <HighlightList></HighlightList> */}
+          {/* highlights */}
+        </Box>
+      </Stack>
     </Paper>
   );
+}
+
+function allItemIds(tags: Taguette.Tag[]): string[] {
+  return tags.reduce((acc: string[], tag: Taguette.Tag) => {
+    const morePaths = getAllPartialPaths(tag.path);
+    acc.push(...morePaths);
+    return acc;
+  }, []);
 }
