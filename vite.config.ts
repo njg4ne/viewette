@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [preact()],
   // build to docs folder for github pages
   build: {
+    target: "esnext",
     outDir: "docs",
   },
   base: "/viewette/",

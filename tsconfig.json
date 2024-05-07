@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES6",
+    // "target": "ES6",
+    "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": [
       "es2022",
