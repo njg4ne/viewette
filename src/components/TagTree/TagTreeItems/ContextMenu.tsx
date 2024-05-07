@@ -3,20 +3,25 @@ import { enqueueSnackbar, useSnackbar } from "notistack";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { useState, useRef } from "react";
-import { opfsDb } from "../../../signals";
+// import { opfsDb } from "../../../signals";
+// import { db } from "../../../db/models/TaguetteDb";
 import Divider from "@mui/material/Divider";
 import popup, * as popups from "../../../popups";
 
-import TagIcon from "@mui/icons-material/Sell";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import TrashXIcon from "@mui/icons-material/DeleteForever";
 import ContentCopy from "@mui/icons-material/ContentCopy";
 import Typography from "@mui/material/Typography";
 import ChildIcon from "@mui/icons-material/SubdirectoryArrowRight";
+import FolderIcon from "@mui/icons-material/Folder";
+import StarFolderIcon from "@mui/icons-material/FolderSpecial";
+import TagIcon from "@mui/icons-material/Sell";
 
-import { useLoadingContext } from "../contexts/LoadingContext";
-import { useTreeContext } from "../contexts/TagTreeContext";
+import { dbs, signalReady } from "../../../signals";
+
+import { useLoadingContext } from "../../../contexts/LoadingContext";
+import { useTreeContext } from "../../../contexts/TagTreeContext";
 import { useTagTreeItemContext } from "./TagTreeItemContext";
 import { SEPARATOR } from "../utils";
 import StyledTreeItem from "./StyledTreeItem";
@@ -32,6 +37,7 @@ function ContextMenu() {
   const { createTagFieldRef, setCreateTagValue, selectedItems } =
     useTreeContext();
   const { enqueueSnackbar: sbqr } = useSnackbar();
+  const Icon = item.isTag ? TagIcon : FolderIcon;
   return (
     <Menu
       open={contextMenuPosition !== null}
@@ -52,7 +58,9 @@ function ContextMenu() {
         }}
       >
         <ListItemIcon>
-          <TagIcon fontSize="small" />
+          {/* <TagIcon fontSize="small" />
+           */}
+          <Icon fontSize="small" />
         </ListItemIcon>
         <ListItemText>
           <Typography
@@ -123,10 +131,11 @@ function DeleteSelectedMenuItem(label: string) {
   const isSelected = (id: string) => selectedItems.includes(id);
 
   const deleteTags = async (paths: string[]) => {
-    if (loading) return;
+    if (loading || !signalReady(dbs)) return;
     try {
       setLoading(true);
-      const num = await opfsDb.value?.delete.tags.byExactPaths(paths);
+      const db = dbs.value;
+      const num = await db.delete.tags.byExactPaths(paths);
       popups.success(sbqr, `Deleted ${num} tags`);
     } catch (e) {
       console.error(e);

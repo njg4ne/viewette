@@ -11,7 +11,7 @@ import ListSubheader from "@mui/material/ListSubheader";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 
-import { databases, fsAccessRoot } from "../signals";
+// import { databases, fsAccessRoot } from "../signals";
 // import { gainFsAccess, getHighlights } from "../utils/sql";
 import { SnackbarProvider, useSnackbar } from "notistack";
 async function write10Files(handle) {

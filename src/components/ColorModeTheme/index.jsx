@@ -113,10 +113,11 @@ export function ColorThemeProvider({ children }) {
                 // palette values for light mode
                 primary: indigo,
                 // divider: amber[200],
-                // text: {
-                //     primary: grey[900],
-                //     secondary: grey[800],
-                // },
+                // text: "black",
+                text: {
+                    primary: grey[900],
+                    secondary: grey[800],
+                },
               }
             : {
                 // palette values for dark mode
@@ -126,10 +127,11 @@ export function ColorThemeProvider({ children }) {
                 //     default: deepOrange[900],
                 //     paper: deepOrange[900],
                 // },
-                // text: {
-                //     primary: '#fff',
-                //     secondary: grey[500],
-                // },
+                // text: "white",
+                text: {
+                    primary: '#fff',
+                    secondary: grey[500],
+                },
               }),
           // primary: {
           //     dark: 'red',

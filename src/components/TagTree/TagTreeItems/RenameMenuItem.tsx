@@ -2,11 +2,16 @@ import { ContentCopy } from "@mui/icons-material";
 import { MenuItem, ListItemIcon, ListItemText, TextField } from "@mui/material";
 import { useTagTreeItemContext } from "./TagTreeItemContext";
 import RenameIcon from "@mui/icons-material/DriveFileRenameOutline";
+import SaveIcon from "@mui/icons-material/Save";
+import IconButton from "@mui/material/IconButton";
+import Divider from "@mui/material/Divider";
+import Stack from "@mui/material/Stack";
+
 import { useRef, useState } from "react";
 import Menu from "@mui/material/Menu";
-import { useLoadingContext } from "../contexts/LoadingContext";
+import { useLoadingContext } from "../../../contexts/LoadingContext";
 import * as popups from "../../../popups";
-import { opfsDb } from "../../../signals";
+import { dbs, signalReady } from "../../../signals";
 import { useSnackbar } from "notistack";
 import { SEPARATOR } from "../utils";
 import { useTreeContext } from "@minoru/react-dnd-treeview";
@@ -26,6 +31,11 @@ export default function RenameMenuItem() {
     e.preventDefault();
     if (loading) return;
     const updates: Record<string, string> = {};
+    if (renamePrefix === item.label) {
+      popups.info(sbqr, "No change detected");
+      closeContextMenu();
+      return;
+    }
     for (const tag of item.familyTags) {
       const parts = tag.path.split(SEPARATOR);
       console.log(
@@ -46,7 +56,7 @@ export default function RenameMenuItem() {
     }
     try {
       setLoading(true);
-      const num = await opfsDb.value?.update.tags.byId(updateEntries);
+      const num = await dbs.value?.update.tags.byId(updateEntries);
       // throw "Not implemented";
       if (num > 0) {
         let msg: string;
@@ -104,22 +114,39 @@ export default function RenameMenuItem() {
           "aria-labelledby": "lock-button",
           role: "listbox",
         }}
-        component="form"
-        onSubmit={doRename}
+        // component="form"
+        // onSubmit={doRename}
       >
-        <TextField
-          id="standard-basic"
-          label="Rename"
-          variant="standard"
-          inputRef={renameFieldRef}
-          value={renamePrefix}
-          onChange={onChangeInput}
-          placeholder={item.label}
-          inputProps={{ "aria-label": `rename ${item.label} tags` }}
-          sx={{ mx: 2, my: 1 }}
-          name="renamedTag"
-          disabled={loading}
-        />
+        <Stack
+          direction="row"
+          alignItems="center"
+          component="form"
+          onSubmit={doRename}
+          sx={{ mx: 1 }}
+          // spacing={2}
+        >
+          <TextField
+            id="standard-basic"
+            label="Rename"
+            variant="standard"
+            inputRef={renameFieldRef}
+            value={renamePrefix}
+            onChange={onChangeInput}
+            placeholder={item.label}
+            inputProps={{ "aria-label": `rename ${item.label} tags` }}
+            // sx={{ mx: 2, my: 1 }}
+            name="renamedTag"
+            disabled={loading}
+          />
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ marginLeft: 2, marginRight: 1 }}
+          />
+          <IconButton aria-label="save new name" type="submit" color="primary">
+            <SaveIcon />
+          </IconButton>
+        </Stack>
       </Menu>
     </>
   );

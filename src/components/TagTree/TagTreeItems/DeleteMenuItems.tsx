@@ -12,12 +12,13 @@ import Menu from "@mui/material/Menu";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import TrashXIcon from "@mui/icons-material/DeleteForever";
-import { useTreeContext } from "../contexts/TagTreeContext";
+import { useTreeContext } from "../../../contexts/TagTreeContext";
 import { getGenealogy } from "../utils";
-import { useLoadingContext } from "../contexts/LoadingContext";
+import { useLoadingContext } from "../../../contexts/LoadingContext";
 import { useSnackbar } from "notistack";
 import { useTagTreeItemContext } from "./TagTreeItemContext";
-import { opfsDb } from "../../../signals";
+import { dbs, signalReady } from "../../../signals";
+// import { db } from "../../../db/models/TaguetteDb";
 import * as popups from "../../../popups";
 // const options = ["...", "Squash and merge", "Rebase and merge"];
 
@@ -42,10 +43,11 @@ export default function DeleteMenuItems() {
   // const {  } = useTagTreeItemContext();
 
   const deleteTags = async (paths: string[]) => {
-    if (loading) return;
+    if (loading || !signalReady(dbs)) return;
     try {
       setLoading(true);
-      const num = await opfsDb.value?.delete.tags.byExactPaths(paths);
+      const db = dbs.value;
+      const num = await db.delete.tags.byExactPaths(paths);
       popups.success(sbqr, `Deleted ${num} tags`);
     } catch (e) {
       console.error(e);

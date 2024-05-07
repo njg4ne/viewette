@@ -1,6 +1,6 @@
 import { StateUpdater } from "preact/hooks";
 import { useState, createContext, useContext, MutableRefObject } from "react";
-import { useTreeContext } from "../contexts/TagTreeContext";
+import { useTreeContext } from "../../../contexts/TagTreeContext";
 import { UseTreeViewExpansionPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewExpansion/useTreeViewExpansion.types";
 import { UseTreeViewFocusPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewFocus/useTreeViewFocus.types";
 import { UseTreeViewItemsPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewItems/useTreeViewItems.types";
@@ -39,6 +39,9 @@ export function TagTreeItemProvider({ item, children }: PropTypes) {
     taggings.find(({ parentPath }) => {
       return item.path === parentPath;
     })?.highlights || 0;
+  const tag: Taguette.Tag | undefined = allTags.find(
+    (tag) => tag.path === item.path
+  );
 
   // const family = getGenealogy([item.partialPath], tags);
   // const familyTags = family.filter(
@@ -52,7 +55,7 @@ export function TagTreeItemProvider({ item, children }: PropTypes) {
         closeContextMenu,
         handleContextMenu,
         contextMenuPosition: contextMenu,
-        item: { ...item, useCount },
+        item: { ...item, useCount, tag },
       }}
     >
       {children}

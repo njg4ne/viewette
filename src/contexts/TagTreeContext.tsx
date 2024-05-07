@@ -13,11 +13,13 @@ import { UseTreeViewExpansionPublicAPI } from "@mui/x-tree-view/internals/plugin
 import { UseTreeViewFocusPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewFocus/useTreeViewFocus.types";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useLoadingContext } from "./LoadingContext";
-import { opfsDb, signalReady } from "../../../signals";
-import { TaguetteDb } from "../../../db";
+import { dbs, signalReady } from "../signals";
+// import { db } from "../db/models/TaguetteDb";
+import { TaguetteDb } from "../db";
 import { useSnackbar } from "notistack";
-import * as popups from "../../../popups";
-import { getAllPartialPaths } from "../utils";
+import * as popups from "../popups";
+import { getAllPartialPaths } from "../components/TagTree/utils";
+// import { db } from "../db/models/TaguetteDb.ts";
 type TagMap = Record<string | number, string>;
 
 const defaults = {
@@ -62,27 +64,36 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
     if (numTagsSelected === 0) return;
     deleteTags(selectedTags);
   });
+  // useEffect(() => {
+  //   if (loading || !signalReady(opfsDb)) return;
+  //   // console.log("opfsDb", opfsDb.value);
+  //   const dbv: TaguetteDb = opfsDb.value;
+  //   dbv.read.tags().then(setAllTags);
+
+  // }, [opfsDb.value, loading]);
   useEffect(() => {
-    if (loading || !signalReady(opfsDb)) return;
-    console.log("opfsDb", opfsDb.value);
-    const dbv: TaguetteDb = opfsDb.value;
-    dbv.read.tags().then(setAllTags);
-  }, [opfsDb.value, loading]);
+    if (loading || !signalReady(dbs)) return;
+    const db = dbs.value;
+    db.read.tags().then(setAllTags);
+  }, [loading, dbs.value]);
+
   useEffect(() => {
-    if (loading || !signalReady(opfsDb)) return;
-    console.log("opfsDb", opfsDb.value);
-    const dbv: TaguetteDb = opfsDb.value;
-    dbv.read.taggingsByPath(allItemPaths(allTags)).then((taggings) => {
+    if (loading || !signalReady(dbs) || allTags.length === 0) return;
+    // // console.log("opfsDb", opfsDb.value);
+    // const dbv: TaguetteDb = opfsDb.value;
+    const db: TaguetteDb = dbs.value;
+    db.read.taggingsByPath(allItemPaths(allTags)).then((taggings) => {
       // console.log("taggings", taggings);
       setTaggings(taggings);
     });
-  }, [allTags, loading]);
+  }, [allTags, loading, dbs.value]);
 
   async function deleteTags(paths: string[]) {
-    if (loading) return;
+    if (loading || !signalReady(dbs)) return;
     try {
       setLoading(true);
-      const num = await opfsDb.value?.delete.tags.byExactPaths(paths);
+      const db: TaguetteDb = dbs.value;
+      const num = await db.delete.tags.byExactPaths(paths);
       popups.success(sbqr, `Deleted ${num} tags`);
     } catch (e) {
       console.error(e);

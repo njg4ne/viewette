@@ -3,8 +3,10 @@ import queries from "./sql";
 // import transactFunc from "./transact";
 import deletion from "./crud/delete";
 import updateTagsPaths from "./crud/update/tags/byId";
+import updateTag from "./crud/update/tag";
 import readTags from "./crud/read/tags";
 import readTaggingsByPath from "./crud/read/taggingsByPath";
+import readTagById from "./crud/read/tagById";
 // make a class that extends opfsdb called TaguetteDb that has methods for each of the taguette queries
 export default class TaguetteDb extends OpfsDb {
   #highlightRowConverter = ({
@@ -23,7 +25,7 @@ export default class TaguetteDb extends OpfsDb {
     tags: tags === null ? [] : tags.split(","),
     tagIds: tagIds === null ? [] : tagIds.split(",").map(Number),
   });
-  async getHighlights() {
+  async getHighlights(): Promise<Taguette.Highlight[]> {
     const t0 = performance.now();
 
     const {
@@ -32,7 +34,7 @@ export default class TaguetteDb extends OpfsDb {
       workerRespondTime: t2,
     } = await this.exec(queries.highlightsWithTags, "object");
     const t3 = performance.now();
-    return resultRows?.map(this.#highlightRowConverter);
+    return resultRows?.map(this.#highlightRowConverter) ?? [];
   }
   async getHighlight($hid: number) {
     const bindings = { $hid };
@@ -117,6 +119,9 @@ export default class TaguetteDb extends OpfsDb {
     );
   }
   read = {
+    tag: {
+      byId: async (tagId: number) => readTagById(tagId, this),
+    },
     tags: async () => await readTags(this),
     taggingsByPath: async (paths: string[]) =>
       await readTaggingsByPath(paths, this),
@@ -128,6 +133,7 @@ export default class TaguetteDb extends OpfsDb {
     },
   };
   update = {
+    tag: async (tag: Taguette.Tag) => await updateTag(tag, this),
     tags: {
       byId: (updateEntries: Array<[number, string]>) =>
         // updateTagPaths(updateEntries, this.exec),
@@ -229,3 +235,26 @@ async function updateTagsForHighlight(
     await exec("ROLLBACK;");
   }
 }
+
+// function generateDatabase() {
+//   const dbName = "database";
+//   // const fileName = `${dbName}.sqlite3`;
+//   // async function files() {
+//   //   const files = [];
+//   //   const opfsRoot = await navigator.storage.getDirectory();
+//   //   //@ts-expect-error
+//   //   for await (const entry of opfsRoot.values()) {
+//   //     files.push(entry.name);
+//   //   }
+//   //   return files;
+//   // }
+//   // const filesList = await files();
+//   // if (!filesList.includes(fileName)) {
+//   //   return null;
+//   // }
+//   const db = new TaguetteDb(dbName);
+//   // const openTask: Promise<SQLite3.Worker1.Response> = db.open(dbName);
+//   return db;
+// }
+// const db = new TaguetteDb("database");
+// export { db };

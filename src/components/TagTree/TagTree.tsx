@@ -3,17 +3,18 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import { useEffect, useState } from "react";
-import { opfsDb } from "../../signals";
+// import { opfsDb } from "../../signals";
 // import { Box, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
 import { useTreeViewApiRef } from "@mui/x-tree-view";
-import { useLoadingContext } from "./contexts/LoadingContext";
-import { useTreeContext } from "./contexts/TagTreeContext";
+import { useLoadingContext } from "../../contexts/LoadingContext";
+import { useTreeContext } from "../../contexts/TagTreeContext";
 import { getAllPartialPaths, getGenealogy, getTopLevelTags } from "./utils";
-import MultipleTagTreeItems from "./Items/MultipleTagTreeItems";
-import MultipleTagTreeItems2 from "./Items/MultipleTagTreeItems";
+import MultipleTagTreeItems from "./TagTreeItems/MultipleTagTreeItems";
 import CreateTagForm from "./CreateTagForm";
+// import VirtualList from "../VirtualList";
 import HighlightList from "../HighlightList";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 export default function TagTree({}) {
@@ -77,49 +78,39 @@ export default function TagTree({}) {
           ? `${numTagsSelected} tag${numTagsSelected > 1 ? "s" : ""} selected`
           : "No tags selected"}
       </Typography>
-      {/* <Button onClick={handleExpandClick} variant="contained" color="secondary">
-        {expandedItems.length === 0 ? "Expand All" : "Collapse All"}
-      </Button> */}
-      <Stack direction="row" sx={{ alignSelf: "stretch" }}>
-        <Box
+      <Stack direction="row" alignSelf={"stretch"}>
+        <Stack
+          direction="row"
+          spacing={0}
+          justifyContent="space-between"
           sx={{
-            flexGrow: 0,
             overflow: "auto",
-            resize: "horizontal",
-            // minWidth: "fit-content",
-            paddingRight: 1,
+            // resize: "horizontal",
+            //both
+            resize: "both",
+            width: "fit-content",
           }}
         >
           <SimpleTreeView
-            // autoFocus={false}
-            // key={Date.now().toString()}
+            sx={{
+              flexGrow: 1,
+              overflow: "auto",
+              paddingRight: 1,
+            }}
             selectedItems={selectedItems}
             apiRef={apiRef}
             onSelectedItemsChange={handleSelectedItemsChange}
             onItemSelectionToggle={selectChildrenToo}
-            // sx={{ maxWidth: "50%" }}
             multiSelect
             expandedItems={allItemIds(allTags)}
             onExpandedItemsChange={handleExpandedItemsChange}
           >
-            {/* {tags && (
-              <MultipleTagTreeItems tags={Object.entries(tags)} level={-1} />
-            )} */}
-            <MultipleTagTreeItems2 tags={allTags} level={-1} />
+            <MultipleTagTreeItems tags={allTags} level={-1} />
           </SimpleTreeView>
-        </Box>
-        <Box
-          sx={{
-            // height: "100vh",
-            // bgcolor: "orange",
-            overflow: "auto",
-            // resize: "horizontal",
-            // width: "100%",
-            flexGrow: 1,
-          }}
-        >
-          {/* <HighlightList></HighlightList> */}
-          {/* highlights */}
+          <Divider orientation="vertical" flexItem />
+        </Stack>
+        <Box flexGrow={1}>
+          <HighlightList />
         </Box>
       </Stack>
     </Paper>

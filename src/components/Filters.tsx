@@ -4,19 +4,21 @@ import Chip from "@mui/material/Chip";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
-import {
-  tags,
-  tagIncludeFilter,
-  tagExcludeFilter,
-  tagRequirementFilter,
-} from "../signals";
+// import {
+//   tags,
+//   tagIncludeFilter,
+//   tagExcludeFilter,
+//   tagRequirementFilter,
+// } from "../signals";
 import Switch from "@mui/material/Switch";
 import Box from "@mui/material/Box";
 import { Typography } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { cons } from "fp-ts/lib/ReadonlyNonEmptyArray";
 
-function extractTagFilters(searchParam: string): { Λ: number[], V: number[], E: number[] } | null {
+function extractTagFilters(
+  searchParam: string
+): { Λ: number[]; V: number[]; E: number[] } | null {
   const [Λ, V, E] = [[], [], []];
   const obj = () => ({ Λ, V, E });
   const validatorRegex: RegExp = /(?:[ΛVE]\d+)+$/;
@@ -26,7 +28,9 @@ function extractTagFilters(searchParam: string): { Λ: number[], V: number[], E:
   if (!isValid) {
     return null;
   }
-  const matches = [...searchParam.matchAll(matcherRegex)].map((m) => m.slice(1, 3 + 1)) as ["E" | "V" | "Λ", number][]; // [operator, id]
+  const matches = [...searchParam.matchAll(matcherRegex)].map((m) =>
+    m.slice(1, 3 + 1)
+  ) as ["E" | "V" | "Λ", number][]; // [operator, id]
   // console.log(matches);
   for (const match of matches) {
     let [operator, id] = match;
@@ -50,7 +54,15 @@ function extractTagFilters(searchParam: string): { Λ: number[], V: number[], E:
   // console.log(obj());
   return obj();
 }
-function generateTagFilters({ Λ, V, E }: { Λ: number[], V: number[], E: number[] }) {
+function generateTagFilters({
+  Λ,
+  V,
+  E,
+}: {
+  Λ: number[];
+  V: number[];
+  E: number[];
+}) {
   const intersectStr = Λ.map((id) => `Λ${id}`).join("");
   const unionStr = V.map((id) => `V${id}`).join("");
   const excludeStr = E.map((id) => `E${id}`).join("");
@@ -58,8 +70,12 @@ function generateTagFilters({ Λ, V, E }: { Λ: number[], V: number[], E: number
 }
 
 export function TagAutocomplete(props: {
-  which: "V" | "Λ" | "E", tagSignal: typeof tags,
-  filterSignal: typeof tagIncludeFilter | typeof tagRequirementFilter | typeof tagExcludeFilter
+  which: "V" | "Λ" | "E";
+  tagSignal: typeof tags;
+  filterSignal:
+    | typeof tagIncludeFilter
+    | typeof tagRequirementFilter
+    | typeof tagExcludeFilter;
 }) {
   const { which, tagSignal, filterSignal } = props;
   const [params, setParams] = useSearchParams();
@@ -77,33 +93,50 @@ export function TagAutocomplete(props: {
     const filters = extractTagFilters(tagParam!) ?? { Λ: [], V: [], E: [] };
     filters[which] = newVal as unknown as number[];
     setParams({ tags: generateTagFilters(filters) }, { replace: true });
-
   }
   const labels = {
     V: "Require Any Tag",
     Λ: "Require All Tags",
     E: "Exclude Tags",
   };
-  return <Autocomplete
-    options={Object.keys(tagSignal.value)}
-    value={(extractTagFilters(tagParam!)?.[which] ?? []).map((id) => id.toString())}
-    onChange={onChange}
-    getOptionLabel={id => (tagSignal.value as Record<number, string>)[Number(id)]}
-    isOptionEqualToValue={(option, value) => value === option}
-    renderInput={(params) => <TextField {...params} label={labels[which]} />}
-    multiple
-    filterSelectedOptions
-  />;
+  return (
+    <Autocomplete
+      options={Object.keys(tagSignal.value)}
+      value={(extractTagFilters(tagParam!)?.[which] ?? []).map((id) =>
+        id.toString()
+      )}
+      onChange={onChange}
+      getOptionLabel={(id) =>
+        (tagSignal.value as Record<number, string>)[Number(id)]
+      }
+      isOptionEqualToValue={(option, value) => value === option}
+      renderInput={(params) => <TextField {...params} label={labels[which]} />}
+      multiple
+      filterSelectedOptions
+    />
+  );
 }
 
-
 export function TagFilters() {
-  return <Stack spacing={2} alignItems={"stretch"}>
-    <TagAutocomplete which="E" tagSignal={tags} filterSignal={tagExcludeFilter} />
-    <TagAutocomplete which="Λ" tagSignal={tags} filterSignal={tagRequirementFilter} />
-    <TagAutocomplete which="V" tagSignal={tags} filterSignal={tagIncludeFilter} />
-  </Stack>;
-
+  return (
+    <Stack spacing={2} alignItems={"stretch"}>
+      <TagAutocomplete
+        which="E"
+        tagSignal={tags}
+        filterSignal={tagExcludeFilter}
+      />
+      <TagAutocomplete
+        which="Λ"
+        tagSignal={tags}
+        filterSignal={tagRequirementFilter}
+      />
+      <TagAutocomplete
+        which="V"
+        tagSignal={tags}
+        filterSignal={tagIncludeFilter}
+      />
+    </Stack>
+  );
 }
 
 // export function IncludeTags({ tagSignal }: { tagSignal: typeof tags }) {

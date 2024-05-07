@@ -41,13 +41,14 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditHighlight from "./components/EditHighlight";
+import EditTag from "./components/EditTag";
 import Drawer from "./components/Drawer";
 import Home from "./components/Home";
 import DatabaseManager from "./components/DatabaseManager";
 
 import SQL from "./components/SQL";
 import Tags from "./components/Tags";
-import { tags } from "./signals";
+// import { tags } from "./signals";
 import { TagAutocomplete, TagFilters } from "./components/Filters";
 import TagTree from "./components/TagTree";
 
@@ -100,16 +101,17 @@ const AppContainer = ({ Contents }) => {
             
               > */}
           <Drawer>
-            <Stack
+            {/* <Stack
               sx={{
                 justifyContent: "space-between",
                 // minHeight: "100vh",
                 p: 2,
               }}
               spacing={2}
-            >
-              <Contents />
-            </Stack>
+            > */}
+            <Box sx={{m:2}}>
+              <Contents /></Box>
+            {/* </Stack> */}
           </Drawer>
           {/* <ColorModeToggler /> */}
 
@@ -127,32 +129,43 @@ const router = createHashRouter([
   {
     path: "/",
     // element: AppContainer({ Contents: Drawer }),
-    element: AppContainer({ Contents: Home }),
+    element: AppContainer({ Contents: TagTree }),
+    // element: AppContainer({ Contents: Home }),
   },
   {
-    path: "/highlights",
-    // element: AppContainer({ Contents: Drawer }),
-    element: AppContainer({ Contents: Highlights }),
+    path: "/help",
+    element: AppContainer({ Contents: Home }),
   },
+  // {
+  //   path: "/highlights",
+  //   // element: AppContainer({ Contents: Drawer }),
+  //   // element: AppContainer({ Contents: Highlights }),
+  //   element: AppContainer({ Contents: null }),
+  // },
   {
     path: "/db",
     element: AppContainer({ Contents: DatabaseManager }),
   },
-  {
-    path: "/tree",
-    element: AppContainer({ Contents: TagTree }),
-  },
-  {
-    path: "/tags",
-    element: AppContainer({ Contents: () => <Tags tags={tags} /> }),
-  },
-  {
-    path: "/sql",
-    element: AppContainer({ Contents: SQL }),
-  },
+  // {
+  //   path: "/tree",
+  //   element: AppContainer({ Contents: TagTree }),
+  // },
+  // {
+  //   path: "/tags",
+  //   element: AppContainer({ Contents: () => <Tags tags={tags} /> }),
+  // },
+  // {
+  //   path: "/sql",
+  //   element: AppContainer({ Contents: SQL }),
+  // },
   {
     path: "/highlights/:id",
-    element: AppContainer({ Contents: EditHighlight }),
+    // element: AppContainer({ Contents: EditHighlight }),
+    element: AppContainer({ Contents: null }),
+  },
+  {
+    path: "/tags/:id",
+    element: AppContainer({ Contents: EditTag }),
   },
   {
     path: "/test-router",

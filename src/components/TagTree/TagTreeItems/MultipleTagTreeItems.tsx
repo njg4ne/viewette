@@ -1,6 +1,6 @@
 import RenderSingleTagTreeItem from "./SingleTagTreeItem";
 import { getTagParts, pathUpToLevel, SEPARATOR } from "../utils";
-import { useTreeContext } from "../contexts/TagTreeContext";
+import { useTreeContext } from "../../../contexts/TagTreeContext";
 import { TagTreeItemProvider } from "./TagTreeItemContext";
 export type TagTreeItem = {
   path: string;
@@ -9,6 +9,7 @@ export type TagTreeItem = {
   label: string;
   isTag: boolean;
   useCount: number;
+  tag?: Taguette.Tag;
 };
 type TagGroups = Map<string, Taguette.Tag[]>;
 type TagTreeNodeSetProps = {

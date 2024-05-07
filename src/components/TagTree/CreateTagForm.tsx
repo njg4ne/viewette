@@ -5,10 +5,12 @@ import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import Divider from "@mui/material/Divider";
 import ClearIcon from "@mui/icons-material/Clear";
-import { useLoadingContext } from "./contexts/LoadingContext";
-import { opfsDb } from "../../signals";
-import { useTreeContext } from "./contexts/TagTreeContext";
+import { useLoadingContext } from "../../contexts/LoadingContext";
+import { dbs, signalReady } from "../../signals";
+import { useTreeContext } from "../../contexts/TagTreeContext";
 import { useState } from "react";
+import { TaguetteDb } from "../../db";
+// import { db } from "../../db/models/TaguetteDb";
 
 export default function CreateTagForm() {
   const { loading, setLoading } = useLoadingContext();
@@ -34,7 +36,7 @@ export default function CreateTagForm() {
         }}
         onSubmit={async (e: Event) => {
           e.preventDefault();
-          if (loading) return;
+          if (loading || !signalReady(dbs)) return;
           setLoading(true);
 
           const formData = new FormData(e.target as HTMLFormElement);
@@ -43,8 +45,8 @@ export default function CreateTagForm() {
             setLoading(false);
             return;
           }
-          opfsDb.value
-            ?.createTag(newTag)
+          const db: TaguetteDb = dbs.value;
+          db.createTag(newTag)
             .then(
               (newTag: string) => (
                 enqueueSnackbar(`Created tag: '${newTag}'`, {

@@ -2,12 +2,13 @@ import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import { filteredHighlights as highlights, tags } from "../signals";
+// import { filteredHighlights as highlights, tags } from "../signals";
 import { ManagedTagChooser, TagChooser } from "./TagsFilter";
 // import { multiWriteQuery } from "../utils/sql";
 // core-js(-pure)/actual|full/set/difference
 // import "core-js/actual/set/difference";
-
+import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -28,7 +29,8 @@ import LexicalEditor from "./LexicalEditor";
 import { Box } from "@mui/material";
 
 // import { convert } from "html-to-text";
-import { opfsDb, updateTagsForHighlight } from "../signals";
+import { dbs, signalReady } from "../signals";
+// import {db} from "../db/models/TaguetteDb";
 // import
 
 function ChangeExistingTags({ options, onCheck, disabled }) {
@@ -87,15 +89,16 @@ export default function EditHighlight() {
   const [toRemove, setToRemove] = React.useState(new Set());
   const [toAdd, setToAdd] = React.useState(new Set());
   useEffect(async () => {
-    if (loading) return;
+    if (loading || !signalReady(dbs)) return;
     // console.log("fetching highlight", id);
-    const task = opfsDb.value?.getHighlight(Number(id));
+    const db = dbs.value;
+    const task = db.getHighlight(Number(id));
     const h = await task;
     setHighlight(h);
     return () => {
       task.cancel();
     };
-  }, [id, opfsDb.value, loading]);
+  }, [id, loading]);
   const snippet = highlight?.snippet || "";
   let tids = highlight?.tagIds || [];
   const hlTags = highlight?.tags || [];
@@ -133,12 +136,6 @@ export default function EditHighlight() {
     return highlights.value[idx]?.id ?? id;
   }
 
-  // use effect to both sets and console log them
-  // React.useEffect(() => {
-  //     console.log("toRemove", toRemove);
-  //     console.log("toAdd", toAdd);
-  // }, [toRemove, toAdd]);
-
   const buttonDisabled = toRemove.size === 0 && toAdd.size === 0;
   function save() {
     setLoading(true);
@@ -151,32 +148,6 @@ export default function EditHighlight() {
       setLoading(false);
     });
   }
-  // const tags_to_remove = [...toRemove];
-  // const tags_to_add = [...toAdd];
-  // console.log(
-  //   `save ${highlight_id} remove ${tags_to_remove} add ${tags_to_add}`
-  // );
-  // let q = "";
-  // if (tags_to_remove.length > 0) {
-  //   q += `DELETE FROM highlight_tags WHERE highlight_id=${highlight_id} AND tag_id IN (${tags_to_remove.join(
-  //     ", "
-  //   )});`;
-  // }
-  // if (tags_to_add.length > 0) {
-  //   q += `INSERT INTO highlight_tags (highlight_id, tag_id) VALUES ${tags_to_add
-  //     .map((tid) => `(${highlight_id}, ${tid})`)
-  //     .join(", ")};`;
-  // }
-  // console.log(q);
-  // newTags.value = [];
-  // setLoading(true);
-  // multiWriteQuery(q).then(() => {
-
-  //   setLoading(false);
-  //   // TODO update the page controls
-  // });
-
-  //   Button__root___1gz0c define background: yellow for this class
   function saveText(newText) {
     const q = `UPDATE highlights SET snippet='${newText}' WHERE id=${id};`;
     setLoading(true);
@@ -187,7 +158,12 @@ export default function EditHighlight() {
   const tagParams = searchParams.get("tags");
   const queryStr = tagParams ? `?tags=${tagParams}` : "";
   return (
-    <Stack alignItems="center" spacing={2} sx={{ pt: 5 }}>
+    <Container
+      maxWidth="md"
+      sx={{ alignSelf: "center", }}
+    >
+    <Stack alignItems="center" spacing={2} sx={{ p: 3, my:3 }} component={Paper}
+      elevation={1}>
       <Stack direction={"row"}>
         <Tooltip title="Previous highlight">
           <IconButton
@@ -255,6 +231,7 @@ export default function EditHighlight() {
         Save
       </Button>
     </Stack>
+    </Container>
   );
 }
 

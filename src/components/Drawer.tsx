@@ -22,6 +22,7 @@ import ListItemText from "@mui/material/ListItemText";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import HomeIcon from "@mui/icons-material/Home";
 import StorageIcon from "@mui/icons-material/Storage";
+import TextIcon from "@mui/icons-material/Subject";
 
 import { Link } from "react-router-dom";
 import MuiLink from "@mui/material/Link";
@@ -29,13 +30,13 @@ import MuiLink from "@mui/material/Link";
 import { ColorModeToggler } from "./ColorModeTheme";
 
 import TagIcon from "@mui/icons-material/Sell";
-import HighlightIcon from "@mui/icons-material/ShortText";
-
+import ShortTextIcon from "@mui/icons-material/ShortText";
+import HelpIcon from "@mui/icons-material/Help";
 const sections = [
-  { text: "Instructions", icon: <HomeIcon />, path: "/" },
-  { text: "Tags", icon: <TagIcon />, path: "/tree" },
-  { text: "Highlights", icon: <HighlightIcon />, path: "/highlights" },
+  { text: "Home", icon: <HomeIcon />, path: "/" },
+  // { text: "Highlights", icon: <TextIcon />, path: "/highlights" },
   { text: "Database", icon: <StorageIcon />, path: "/db" },
+  { text: "Help", icon: <HelpIcon />, path: "/help" },
 ];
 
 const drawerWidth = 240;
@@ -140,10 +141,11 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-export default function MiniDrawer({ children }: {
+export default function MiniDrawer({
+  children,
+}: {
   children: React.ReactNode[] | React.ReactNode;
-}
-) {
+}) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
 
