@@ -22,7 +22,12 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import { BrowserNotSupported, Draw, MailRounded, Tag } from "@mui/icons-material";
+import {
+  BrowserNotSupported,
+  Draw,
+  MailRounded,
+  Tag,
+} from "@mui/icons-material";
 import {
   ColorThemeProvider,
   ColorModeToggler,
@@ -55,6 +60,11 @@ import TagTree from "./components/TagTree";
 function Highlights() {
   const [dbHandle, setDbHandle] = useState(null);
   useEffect(() => {
+    let utterance = new SpeechSynthesisUtterance(
+      "Hi Claire. Zola has the stomach flu!"
+    );
+    console.log("Highlights mounted");
+    window.speechSynthesis.speak(utterance);
     // console.log("Home mounted");
     // const worker = new Worker(workerUrl);
     // return () => {
@@ -109,8 +119,9 @@ const AppContainer = ({ Contents }) => {
               }}
               spacing={2}
             > */}
-            <Box sx={{m:2}}>
-              <Contents /></Box>
+            <Box sx={{ m: 2 }}>
+              <Contents />
+            </Box>
             {/* </Stack> */}
           </Drawer>
           {/* <ColorModeToggler /> */}

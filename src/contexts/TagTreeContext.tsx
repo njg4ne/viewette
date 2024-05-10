@@ -41,6 +41,7 @@ const defaults = {
   >,
   allTags: [] as Taguette.Tag[],
   taggings: [] as Taguette.ParentTaggingCount[],
+  selectedTags: [] as string[],
 };
 export const TreeContext = createContext(defaults);
 
@@ -118,6 +119,7 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
         apiRef,
         allTags,
         taggings,
+        selectedTags,
       }}
     >
       {children}

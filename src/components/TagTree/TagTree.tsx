@@ -18,6 +18,13 @@ import CreateTagForm from "./CreateTagForm";
 import HighlightList from "../HighlightList";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 export default function TagTree({}) {
+  // useEffect(() => {
+  //   console.log("App Container");
+  //   let utterance = new SpeechSynthesisUtterance("I am working very hard");
+
+  //   window.speechSynthesis.speak(utterance);
+  //   // }
+  // }, []);
   const { loading, setLoading } = useLoadingContext();
   const {
     allTags,

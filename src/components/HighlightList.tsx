@@ -26,36 +26,79 @@ import VirtualList from "./VirtualList";
 import Typography from "@mui/material/Typography";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { Signal, computed, effect } from "@preact/signals";
+import { useTreeContext } from "../contexts/TagTreeContext";
 
 export default Parent;
 
+function reducer(
+  accumulator: Record<string, string>,
+  currentValue: string,
+  currentIndex: number,
+  initialValue: string[]
+): typeof accumulator {
+  accumulator[]
+  return accumulator;
+}
+
 function Parent() {
-  const [numHlts, setNumHlts] = useState<number>(0);
+  // const [numHlts, setNumHlts] = useState<number>(0);
+  const [hlIds, setHlIds] = useState<number[]>([]);
+  const { selectedTags } = useTreeContext();
+  const selectedTagPlaceholders = selectedTags.map((t, i) => `$${i + 1}`);
+  const optionsPlaceholder = `${selectedTagPlaceholders.join(",")}`;
+  const maybeFilter =
+    selectedTags.length === 0 ? "" : `WHERE t.path in (${optionsPlaceholder})`;
+  const bindings = selectedTags.reduce(reducer, {} as Record<string, string>);
+  useEffect(() => {
+    console.log(optionsPlaceholder);
+  }, [selectedTags]);
+  const numHlts = hlIds.length;
   useEffect(() => {
     const db = dbs.value;
-    const q = `SELECT COUNT(hlts.id) as count FROM highlights as hlts;`;
-    db.transactAll([{ sql: q }]).then(([[{ count }]]) => {
-      setNumHlts(count);
+    // const q = `SELECT COUNT(hlts.id) as count FROM highlights as hlts;`;
+    const q = `
+    SELECT h.id
+    FROM highlights as h
+      LEFT JOIN highlight_tags AS ht
+        ON h.id = ht.highlight_id
+      LEFT JOIN tags as t
+        ON t.id = ht.tag_id
+        ${maybeFilter}
+    ;`;
+    db.transactAll([{ sql: q, bindings }]).then(([ids]) => {
+      setHlIds(ids.map(({ id }) => id));
     });
-  }, []);
+  }, [maybeFilter]);
 
-  const childContent = (i: number) => <Child i={i} />;
-  return <Virtuoso totalCount={numHlts} itemContent={childContent} />;
+  const childContent = (i: number, hlId: number) => <HighlightCard id={hlId} />;
+  return (
+    <Virtuoso totalCount={numHlts} itemContent={childContent} data={hlIds} />
+  );
 }
-function Child({ i }: { i: number }) {
+function HighlightCard({ id }: { id: number }) {
   const [hl, setHl] = useState<Taguette.Highlight | null>(null);
+
   useEffect(() => {
     // console.log("Mounting child");
-    const bindings = { $index: i };
+    const bindings = { $id: id };
     const sql = `
     SELECT highlights.id,
         highlights.snippet,
         GROUP_CONCAT(tags.path) AS tags,
         GROUP_CONCAT(tags.id) AS tagIds
-    FROM (SELECT * FROM highlights LIMIT 1 OFFSET ${"$index"}) as highlights
+    FROM (SELECT * FROM highlights WHERE id = ${"$id"}) as highlights
         LEFT JOIN highlight_tags ON highlights.id = highlight_tags.highlight_id
         LEFT JOIN tags ON highlight_tags.tag_id = tags.id
     GROUP BY highlights.id;`;
+    // const sql = `
+    // SELECT highlights.id,
+    //     highlights.snippet,
+    //     GROUP_CONCAT(tags.path) AS tags,
+    //     GROUP_CONCAT(tags.id) AS tagIds
+    // FROM (SELECT * FROM highlights LIMIT 1 OFFSET ${"$index"}) as highlights
+    //     LEFT JOIN highlight_tags ON highlights.id = highlight_tags.highlight_id
+    //     LEFT JOIN tags ON highlight_tags.tag_id = tags.id
+    // GROUP BY highlights.id;`;
     dbs.value
       .transactAll([
         { sql, bindings },
@@ -80,17 +123,10 @@ function Child({ i }: { i: number }) {
 function HighlightListItem({ highlight }: { highlight: Taguette.Highlight }) {
   return (
     <ListItem component={Paper} elevation={4} sx={{ minWidth: "fit-content" }}>
-      {/* <Stack flexDirection="row" flexWrap="nowrap"> */}
       <Stack>
         {ListItemText({
-          // sx: { minWidth: "fit-content" },
           primary: (
             <Typography
-              // sx={
-              //   {
-              //     // maxWidth: "100%",
-              //   }
-              // }
               dangerouslySetInnerHTML={{ __html: highlight.snippet }}
             ></Typography>
           ),
@@ -100,21 +136,10 @@ function HighlightListItem({ highlight }: { highlight: Taguette.Highlight }) {
           sx={{
             bgcolor: "",
             flexWrap: "wrap",
-            // justifyContent: "center",
             py: 1,
           }}
         >
           {highlight.tags?.map((tag, i) => (
-            // <Chip
-            //   key={i}
-            //   sx={{
-            //     mr: 0.35,
-            //     mt: 0.35,
-            //     bgcolor: "primary.main",
-            //     color: "primary.contrastText",
-            //   }}
-            //   label={tag}
-            // />
             <TagChip
               key={i}
               tag={tag}
@@ -128,7 +153,6 @@ function HighlightListItem({ highlight }: { highlight: Taguette.Highlight }) {
           ))}
         </Stack>
       </Stack>
-      {/* </Stack> */}
     </ListItem>
   );
 }
