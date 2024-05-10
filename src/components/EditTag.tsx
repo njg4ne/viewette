@@ -1,4 +1,4 @@
-// import React, { useEffect } from "react";
+// import React, { useEffect } from "preact/compat";
 import { useParams } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
@@ -38,7 +38,8 @@ import { dbs, signalReady } from "../signals";
 import { LoadingProvider, useLoadingContext } from "../contexts/LoadingContext";
 import { useSnackbar } from "notistack";
 import { TaguetteDb } from "../db";
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent, useRef } from "preact/compat";
+import { useHotkeys } from "react-hotkeys-hook";
 
 export default () => (
   <LoadingProvider>
@@ -55,6 +56,7 @@ function EditTag() {
   useEffect(() => {
     if (loading || !signalReady(dbs)) return;
     const db: TaguetteDb = dbs.value;
+
     db.read.tag.byId(Number(id)).then(setTag);
   }, [loading, dbs.value]);
   function save() {
@@ -65,35 +67,6 @@ function EditTag() {
   return !tag ? null : (
     <Container maxWidth="md" sx={{ alignSelf: "center" }}>
       <EditTagCard tag={tag} />
-      {/* <Stack
-        alignItems="center"
-        spacing={2}
-        sx={{ p: 3, my: 3 }}
-        component={Paper}
-        elevation={1}
-      >
-        <Paper
-          sx={{
-            bgcolor: "primary.main",
-            color: "primary.contrastText",
-            p: 0.5,
-          }}
-        >
-          <Typography
-            variant="h4"
-            sx={{
-              px: 1,
-            }}
-          >
-            {tag.path}
-          </Typography>
-        </Paper>
-        <Typography variant="h5">Description</Typography>
-        <Typography>{tag.description}</Typography>
-        <Button onClick={save} disabled={loading} variant="contained">
-          Save
-        </Button>
-      </Stack> */}
     </Container>
   );
 }
@@ -127,13 +100,17 @@ function TagCard({ tag }: { tag: Taguette.Tag }) {
 }
 
 function EditTagCard({ tag }: { tag: Taguette.Tag }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const { loading, setLoading } = useLoadingContext();
   const { enqueueSnackbar: sbqr } = useSnackbar();
   const onSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
     if (loading || !signalReady(dbs)) return;
     const db: TaguetteDb = dbs.value;
+    setLoading(true);
     await db.update.tag({ ...tag, description: form.description });
+    sbqr("Tag updated", { variant: "success" });
+    setLoading(false);
   };
   const onReset = (e?: Event) => {
     e?.preventDefault();
@@ -148,16 +125,26 @@ function EditTagCard({ tag }: { tag: Taguette.Tag }) {
     loading ||
     form.description === tag.description ||
     form.description.trim().length === 0;
+
   const resetDisabled = loading || form.description === tag.description;
+
+  var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)
+    ? true
+    : false;
+  const modifierKey = isMacLike ? "Cmd" : "Ctrl";
+  const modifierKeySymbol = isMacLike ? "⌘" : "Ctrl";
   return (
-    <Card component="form" {...{ onSubmit }} value={tag} onReset={onReset}>
+    <Card
+      component="form"
+      {...{ onSubmit }}
+      value={tag}
+      onReset={onReset}
+      ref={formRef}
+    >
       <CardContent>
         <Typography color="text.secondary">Tag Path</Typography>
         <Typography fontSize={"1.5rem"}>{tag.path}</Typography>
 
-        {/* <Typography color="text.secondary" gutterBottom>
-          Description
-        </Typography> */}
         <Typography color="text.secondary">Description</Typography>
         <TextField
           multiline
@@ -169,7 +156,16 @@ function EditTagCard({ tag }: { tag: Taguette.Tag }) {
           }}
           value={form.description}
           fullWidth
-          inputProps={{ "aria-label": "edit tag description" }}
+          inputProps={{
+            "aria-label": "edit tag description",
+            onKeyDown: function (e) {
+              if ((e.ctrlKey || e.metaKey) && e.key == "Enter") {
+                if (!saveDisabled) {
+                  formRef.current?.requestSubmit();
+                }
+              }
+            },
+          }}
           sx={
             {
               // wordWrap: "break-word", whiteSpace: "normal",
@@ -189,7 +185,7 @@ function EditTagCard({ tag }: { tag: Taguette.Tag }) {
         spacing={1}
       >
         <Button type="submit" disabled={saveDisabled} variant="outlined">
-          Save
+          Save ({modifierKeySymbol} + Enter)
         </Button>
         <Button type="reset" disabled={resetDisabled} variant="outlined">
           Reset

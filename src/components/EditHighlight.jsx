@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from "preact/compat";
 import { useParams } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";

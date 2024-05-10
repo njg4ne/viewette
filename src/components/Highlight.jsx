@@ -1,7 +1,7 @@
-import React from "react";
+import React from "preact/compat";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import { useState } from "react";
+import { useState } from "preact/compat";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Modal from "@mui/material/Modal";

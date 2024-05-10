@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from "preact/compat";
 import { styled, useTheme, Theme, CSSObject } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";

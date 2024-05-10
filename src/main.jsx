@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "preact/compat";
 import ReactDOM from "react-dom/client";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 import { ListedHighights } from "./components/Highlight";
@@ -45,11 +45,12 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import EditHighlight from "./components/EditHighlight";
+// import EditHighlight from "./components/EditHighlight";
 import EditTag from "./components/EditTag";
 import Drawer from "./components/Drawer";
 import Home from "./components/Home";
 import DatabaseManager from "./components/DatabaseManager";
+import EditHighlight from "./components/EditHighlight2";
 
 import SQL from "./components/SQL";
 import Tags from "./components/Tags";
@@ -171,8 +172,8 @@ const router = createHashRouter([
   // },
   {
     path: "/highlights/:id",
-    // element: AppContainer({ Contents: EditHighlight }),
-    element: AppContainer({ Contents: null }),
+    element: AppContainer({ Contents: EditHighlight }),
+    // element: AppContainer({ Contents: null }),
   },
   {
     path: "/tags/:id",

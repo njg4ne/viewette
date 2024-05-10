@@ -6,7 +6,7 @@ import {
   useEffect,
   useRef,
   MutableRefObject,
-} from "react";
+} from "preact/compat";
 import { useTreeViewApiRef } from "@mui/x-tree-view";
 import { UseTreeViewItemsPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewItems/useTreeViewItems.types";
 import { UseTreeViewExpansionPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewExpansion/useTreeViewExpansion.types";
@@ -19,6 +19,7 @@ import { TaguetteDb } from "../db";
 import { useSnackbar } from "notistack";
 import * as popups from "../popups";
 import { getAllPartialPaths } from "../components/TagTree/utils";
+import { useSearchParams } from "react-router-dom";
 // import { db } from "../db/models/TaguetteDb.ts";
 type TagMap = Record<string | number, string>;
 
@@ -55,6 +56,33 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [createTagValue, setCreateTagValue] = useState<string>("");
   const [tags, setTags] = useState<TagMap>({});
+
+  // let [searchParams, setSearchParams] = useSearchParams();
+  // useEffect(() => {
+  //   const key = "selected";
+  //   let selectedParam = searchParams.get(key);
+  //   if (!selectedParam) {
+  //     const keepOldAndNullSelected = (prev: URLSearchParams) => {
+  //       prev.delete(key);
+  //       return prev;
+  //     };
+  //     setSearchParams(keepOldAndNullSelected);
+  //   }
+  //   // filter whitespaces of any kind
+  //   selectedParam = (selectedParam ?? "").replace(/\s/g, "");
+  //   // regular expression for [] with maybe some number of comma-separated numbers inside
+  //   const re = /(\d+(?:∪\d+)*)/;
+  //   const satisfies = re.test(selectedParam || "");
+  //   console.log("satisfies", satisfies, selectedParam);
+  //   if (!satisfies) return;
+  //   let nums = selectedParam.split("∪").map((s) => parseInt(s));
+  //   nums = [...new Set(nums)];
+  //   setSearchParams((prev: URLSearchParams) => {
+  //     prev.set(key, nums.join("∪"));
+  //     return prev;
+  //   });
+  // }, [searchParams]);
+
   const createTagFieldRef = useRef<HTMLElement>(null);
   const apiRef = useTreeViewApiRef();
   const selectedTags = selectedItems.filter((path) =>

@@ -1,9 +1,9 @@
-import { useState, createContext, useContext } from "react";
-import { StateUpdater } from "preact/hooks";
+import { useState, useContext, StateUpdater } from "preact/hooks";
+import { createContext, Dispatch } from "preact/compat";
 
 export const LoadingContext = createContext({
   loading: false,
-  setLoading: {} as StateUpdater<boolean>,
+  setLoading: {} as Dispatch<StateUpdater<boolean>>,
 });
 
 export function LoadingProvider({ children }: { children: React.ReactNode }) {

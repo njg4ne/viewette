@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from "preact/compat";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import { useTheme, ThemeProvider, createTheme } from "@mui/material/styles";

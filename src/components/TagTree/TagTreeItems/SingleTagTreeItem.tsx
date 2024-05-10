@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import { useSnackbar } from "notistack";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { useState, useRef } from "react";
+import { useState, useRef } from "preact/compat";
 import { signalReady, dbs } from "../../../signals";
 import Divider from "@mui/material/Divider";
 

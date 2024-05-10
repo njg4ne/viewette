@@ -1,5 +1,5 @@
 // from https://mui.com/material-ui/react-button/#file-upload
-import * as React from "react";
+import * as React from "preact/compat";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";

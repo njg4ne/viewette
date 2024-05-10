@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from "preact/compat";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";

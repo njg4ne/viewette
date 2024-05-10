@@ -1,5 +1,10 @@
 import { StateUpdater } from "preact/hooks";
-import { useState, createContext, useContext, MutableRefObject } from "react";
+import {
+  useState,
+  createContext,
+  useContext,
+  MutableRefObject,
+} from "preact/compat";
 import { useTreeContext } from "../../../contexts/TagTreeContext";
 import { UseTreeViewExpansionPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewExpansion/useTreeViewExpansion.types";
 import { UseTreeViewFocusPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewFocus/useTreeViewFocus.types";

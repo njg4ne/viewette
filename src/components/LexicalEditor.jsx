@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef } from "preact/compat";
 import { Editor } from "@tinymce/tinymce-react";
 // import { convert } from "html-to-text";
 

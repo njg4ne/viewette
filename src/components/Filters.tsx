@@ -1,5 +1,5 @@
-import * as React from "react";
-import { useEffect } from "react";
+import * as React from "preact/compat";
+import { useEffect } from "preact/compat";
 import Chip from "@mui/material/Chip";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";

@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from "preact/compat";
 import { Button } from "@mui/material";
 // import { useFilesystem, initFilesystem } from '../contexts/FilesystemContext';
 

@@ -23,7 +23,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 
-import { useState } from "react";
+import { useState } from "preact/compat";
 import {
     Tree,
     getBackendOptions,

@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from "preact/compat";
 import Box from "@mui/material/Box";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 // import { filteredHighlights as highlights, tags } from "../signals";

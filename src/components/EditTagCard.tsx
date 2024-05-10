@@ -7,7 +7,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { useLoadingContext } from "../contexts/LoadingContext";
 import { useSnackbar } from "notistack";
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "preact/compat";
 
 export function EditTagCard({ tag }: { tag: Taguette.Tag }) {
   const { loading, setLoading } = useLoadingContext();

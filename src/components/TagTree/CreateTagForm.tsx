@@ -8,7 +8,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { useLoadingContext } from "../../contexts/LoadingContext";
 import { dbs, signalReady } from "../../signals";
 import { useTreeContext } from "../../contexts/TagTreeContext";
-import { useState } from "react";
+import { useState } from "preact/compat";
 import { TaguetteDb } from "../../db";
 // import { db } from "../../db/models/TaguetteDb";
 

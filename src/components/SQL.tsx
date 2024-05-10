@@ -2,7 +2,7 @@
 
 // import sqlWorkerUrl from "./mimic/sqlite3/worker1.js?url";
 // import "./mimic/sqlite3/promiser.js";
-import { useEffect } from "react";
+import { useEffect } from "preact/compat";
 // import { signal, effect } from "@preact/signals-react";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
