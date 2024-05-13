@@ -38,14 +38,17 @@ function TagPathFilter() {
       value={tagLikeFilter}
       onChange={(e: InputEvent) => {
         const newValue = (e.target as HTMLInputElement).value.trimStart();
-        setSearchParams((sp) => {
-          if (newValue === "") {
-            sp.delete("tagLike");
-          } else {
-            sp.set("tagLike", newValue);
-          }
-          return sp;
-        });
+        setSearchParams(
+          (sp) => {
+            if (newValue === "") {
+              sp.delete("tagLike");
+            } else {
+              sp.set("tagLike", newValue);
+            }
+            return sp;
+          },
+          { replace: true }
+        );
       }}
     />
   );

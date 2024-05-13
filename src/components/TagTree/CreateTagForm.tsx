@@ -36,20 +36,26 @@ export default function CreateTagForm() {
   // };
   const onChangeInput = (e: InputEvent) => {
     const newValue = (e.target as HTMLInputElement).value.trimStart();
-    setSearchParams((sp: URLSearchParams) => {
-      if (newValue === "") {
-        sp.delete(searchKey);
-      } else {
-        sp.set(searchKey, newValue);
-      }
-      return sp;
-    });
+    setSearchParams(
+      (sp: URLSearchParams) => {
+        if (newValue === "") {
+          sp.delete(searchKey);
+        } else {
+          sp.set(searchKey, newValue);
+        }
+        return sp;
+      },
+      { replace: true }
+    );
   };
   const onReset = () => {
-    setSearchParams((sp: URLSearchParams) => {
-      sp.delete(searchKey);
-      return sp;
-    });
+    setSearchParams(
+      (sp: URLSearchParams) => {
+        sp.delete(searchKey);
+        return sp;
+      },
+      { replace: true }
+    );
   };
   return (
     <>

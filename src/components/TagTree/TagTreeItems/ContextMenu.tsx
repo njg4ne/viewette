@@ -99,10 +99,13 @@ function ContextMenu() {
       </MenuItem> */}
       <MenuItem
         onClick={() => {
-          setSearchParams((sp: URLSearchParams) => {
-            sp.set("newTag", item.path + SEPARATOR);
-            return sp;
-          });
+          setSearchParams(
+            (sp: URLSearchParams) => {
+              sp.set("newTag", item.path + SEPARATOR);
+              return sp;
+            },
+            { replace: true }
+          );
           closeContextMenu();
         }}
       >
