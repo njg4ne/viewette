@@ -10,16 +10,46 @@ import { dbs, signalReady } from "../../signals";
 import { useTreeContext } from "../../contexts/TagTreeContext";
 import { useState } from "preact/compat";
 import { TaguetteDb } from "../../db";
+import { useSearchParams } from "react-router-dom";
+import { useRef, useEffect } from "preact/compat";
 // import { db } from "../../db/models/TaguetteDb";
 
 export default function CreateTagForm() {
   const { loading, setLoading } = useLoadingContext();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const { createTagValue, setCreateTagValue, createTagFieldRef } =
-    useTreeContext();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchKey = "newTag";
+  const newTag = searchParams.get(searchKey) || "";
 
-  const onChangeInput = (e: Event) => {
-    setCreateTagValue((e.target as HTMLInputElement).value);
+  // const { createTagFieldRef } = useTreeContext();
+  const createTagFieldRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (createTagFieldRef.current) {
+      setTimeout(() => {
+        createTagFieldRef.current?.focus();
+      }, 0);
+    }
+  }, [newTag]);
+
+  // const onChangeInput = (e: Event) => {
+  //   setCreateTagValue((e.target as HTMLInputElement).value);
+  // };
+  const onChangeInput = (e: InputEvent) => {
+    const newValue = (e.target as HTMLInputElement).value.trimStart();
+    setSearchParams((sp: URLSearchParams) => {
+      if (newValue === "") {
+        sp.delete(searchKey);
+      } else {
+        sp.set(searchKey, newValue);
+      }
+      return sp;
+    });
+  };
+  const onReset = () => {
+    setSearchParams((sp: URLSearchParams) => {
+      sp.delete(searchKey);
+      return sp;
+    });
   };
   return (
     <>
@@ -34,6 +64,7 @@ export default function CreateTagForm() {
           alignItems: "center",
           width: "100%",
         }}
+        onReset={onReset}
         onSubmit={async (e: Event) => {
           e.preventDefault();
           if (loading || !signalReady(dbs)) return;
@@ -77,7 +108,8 @@ export default function CreateTagForm() {
           variant="standard"
           fullWidth
           inputRef={createTagFieldRef}
-          value={createTagValue}
+          // value={createTagValue}
+          value={newTag}
           onChange={onChangeInput}
           placeholder="tag.subtag.subsubtag"
           inputProps={{ "aria-label": "create a new tag" }}

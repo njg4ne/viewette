@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 // import { filteredHighlights as highlights, tags } from "../signals";
-import { ManagedTagChooser, TagChooser } from "./TagsFilter";
+import { ManagedTagChooser, TagChooser } from "../TagsFilter";
 // import { multiWriteQuery } from "../utils/sql";
 // core-js(-pure)/actual|full/set/difference
 // import "core-js/actual/set/difference";
@@ -25,11 +25,11 @@ import { Link, useSearchParams } from "react-router-dom";
 
 import { signal, effect, computed } from "@preact/signals";
 
-import LexicalEditor from "./LexicalEditor";
+import LexicalEditor from "../LexicalEditor";
 import { Box } from "@mui/material";
 
 // import { convert } from "html-to-text";
-import { dbs, signalReady } from "../signals";
+import { dbs, signalReady } from "../../signals";
 // import {db} from "../db/models/TaguetteDb";
 // import
 
@@ -158,83 +158,81 @@ export default function EditHighlight() {
   const tagParams = searchParams.get("tags");
   const queryStr = tagParams ? `?tags=${tagParams}` : "";
   return (
-    <Container
-      maxWidth="md"
-      sx={{ alignSelf: "center", }}
-    >
-    <Stack alignItems="center" spacing={2} sx={{ p: 3, my:3 }} component={Paper}
-      elevation={1}>
-      <Stack direction={"row"}>
-        <Tooltip title="Previous highlight">
-          <IconButton
-            aria-label="Previous highlight"
-            component={Link}
-            to={`/highlights/${getPrevId()}${queryStr}`}
-            replace
-          >
-            <NavigateBeforeIcon fontSize="large" />
-          </IconButton>
-        </Tooltip>
-        {/* <Stack > */}
-        <Typography variant="h4" component={Stack} justifyContent={"center"}>
-          {" "}
-          Edit Highlight {id}
-        </Typography>
-        {/* </Stack> */}
-        <Tooltip title="Next highlight">
-          <IconButton
-            aria-label="Next highlight"
-            component={Link}
-            to={`/highlights/${getNextId()}${queryStr}`}
-            replace
-          >
-            <NavigateNextIcon fontSize="large" />
-          </IconButton>
-        </Tooltip>
-      </Stack>
+    <Container maxWidth="md" sx={{ alignSelf: "center" }}>
+      <Stack
+        alignItems="center"
+        spacing={2}
+        sx={{ p: 3, my: 3 }}
+        component={Paper}
+        elevation={1}
+      >
+        <Stack direction={"row"}>
+          <Tooltip title="Previous highlight">
+            <IconButton
+              aria-label="Previous highlight"
+              component={Link}
+              to={`/highlights/${getPrevId()}${queryStr}`}
+              replace
+            >
+              <NavigateBeforeIcon fontSize="large" />
+            </IconButton>
+          </Tooltip>
+          {/* <Stack > */}
+          <Typography variant="h4" component={Stack} justifyContent={"center"}>
+            {" "}
+            Edit Highlight {id}
+          </Typography>
+          {/* </Stack> */}
+          <Tooltip title="Next highlight">
+            <IconButton
+              aria-label="Next highlight"
+              component={Link}
+              to={`/highlights/${getNextId()}${queryStr}`}
+              replace
+            >
+              <NavigateNextIcon fontSize="large" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
 
-      <Typography dangerouslySetInnerHTML={{ __html: snippet }} />
-      {/* <Box sx={{ height: "50vh", width: "100%" }}>
+        <Typography dangerouslySetInnerHTML={{ __html: snippet }} />
+        {/* <Box sx={{ height: "50vh", width: "100%" }}>
         <LexicalEditor
           defaultValue={snippet}
           onSave={saveText}
           loading={loading}
         />
       </Box> */}
-      {tagEntries.length > 0 ? (
-        <>
-          <Typography variant="h5"> Existing Tags</Typography>
-          <ChangeExistingTags
-            options={tagEntries}
-            onCheck={onCheck}
-            disabled={loading}
-          />
-        </>
-      ) : null}
-      <Typography variant="h5"> New Tags</Typography>
-      {/* <TagChooser
+        {tagEntries.length > 0 ? (
+          <>
+            <Typography variant="h5"> Existing Tags</Typography>
+            <ChangeExistingTags
+              options={tagEntries}
+              onCheck={onCheck}
+              disabled={loading}
+            />
+          </>
+        ) : null}
+        <Typography variant="h5"> New Tags</Typography>
+        {/* <TagChooser
         options={tagEntries}
         sx={{ width: "75%" }}
         defaultValue={[]}
         onChange={onChange}
       /> */}
-      <ManagedTagChooser
-        options={unusedTagEntries}
-        sx={{ width: "75%" }}
-        defaultValue={[]}
-        onChange={onChange}
-        // value={[...toAdd].map((num) => num.toString())}
-        value={newTags.value}
-        disabled={loading}
-      />
-      <Button onClick={save} disabled={buttonDisabled} variant="contained">
-        Save
-      </Button>
-    </Stack>
+        <ManagedTagChooser
+          options={unusedTagEntries}
+          sx={{ width: "75%" }}
+          defaultValue={[]}
+          onChange={onChange}
+          // value={[...toAdd].map((num) => num.toString())}
+          value={newTags.value}
+          disabled={loading}
+        />
+        <Button onClick={save} disabled={buttonDisabled} variant="contained">
+          Save
+        </Button>
+      </Stack>
     </Container>
   );
-}
-
-function zip(arrays) {
-  return arrays[0].map((_, i) => arrays.map((array) => array[i]));
 }

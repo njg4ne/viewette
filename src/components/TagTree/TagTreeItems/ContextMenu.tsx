@@ -28,10 +28,12 @@ import StyledTreeItem from "./StyledTreeItem";
 import RenderMultipleTagTreeItems from "./MultipleTagTreeItems";
 import DeleteMenuItems from "./DeleteMenuItems";
 import RenameMenuItem from "./RenameMenuItem";
+import { useSearchParams } from "react-router-dom";
 
 export { ContextMenu };
 export default ContextMenu;
 function ContextMenu() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { item, closeContextMenu, handleContextMenu, contextMenuPosition } =
     useTagTreeItemContext();
   const { createTagFieldRef, setCreateTagValue, selectedItems } =
@@ -97,18 +99,11 @@ function ContextMenu() {
       </MenuItem> */}
       <MenuItem
         onClick={() => {
+          setSearchParams((sp: URLSearchParams) => {
+            sp.set("newTag", item.path + SEPARATOR);
+            return sp;
+          });
           closeContextMenu();
-          const ref = createTagFieldRef.current;
-
-          if (ref) {
-            console.log(ref);
-            // setCreateTagValue(label); // do again after a second
-            // Race Condition
-            setTimeout(() => {
-              setCreateTagValue(item.path + SEPARATOR);
-              createTagFieldRef?.current?.focus();
-            }, 100);
-          }
         }}
       >
         <ListItemIcon>

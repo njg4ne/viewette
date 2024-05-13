@@ -7,6 +7,7 @@ namespace Taguette {
     snippet: string;
     tags: string[];
     tagIds: number[];
+    source: string;
   };
   type Tag = {
     id: number;

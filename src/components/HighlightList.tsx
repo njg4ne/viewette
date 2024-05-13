@@ -16,6 +16,7 @@ import {
   useState,
   useRef,
 } from "preact/hooks";
+import LaunchIcon from "@mui/icons-material/Launch";
 
 import { TaguetteDb } from "../db";
 import { useSnackbar } from "notistack";
@@ -27,7 +28,9 @@ import Typography from "@mui/material/Typography";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { Signal, computed, effect } from "@preact/signals";
 import { useTreeContext } from "../contexts/TagTreeContext";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import IconButton from "@mui/material/IconButton";
 
 export default Parent;
 
@@ -45,20 +48,26 @@ function Parent() {
   const [numHlts, setNumHlts] = useState<number>(0);
   const [hlIds, setHlIds] = useState<number[]>([]);
   const { selectedTags } = useTreeContext();
+  const tagsAreSelected = selectedTags.length > 0;
+  const infoText = `Showing${
+    !tagsAreSelected ? " all" : ""
+  } ${numHlts} highlights${
+    tagsAreSelected ? ` with any of ${selectedTags.length} selected tags` : ""
+  }.`;
   const selectedTagPlaceholders = selectedTags.map((t, i) => `$${i + 1}`);
   const optionsPlaceholder = `${selectedTagPlaceholders.join(",")}`;
   const maybeFilter =
     selectedTags.length === 0 ? "" : `WHERE t.path in (${optionsPlaceholder})`;
 
   useEffect(() => {
-    console.log(optionsPlaceholder);
+    // console.log(optionsPlaceholder);
     setNumHlts(hlIds.length);
   }, [hlIds]);
   // const numHlts = hlIds.length;
   useEffect(() => {
     const db = dbs.value;
     const q = `
-    SELECT h.id
+    SELECT DISTINCT h.id
     FROM highlights as h
       LEFT JOIN highlight_tags AS ht
         ON h.id = ht.highlight_id
@@ -80,7 +89,33 @@ function Parent() {
   }, [selectedTags]);
 
   const childContent = (i: number) => <HighlightCard id={hlIds[i]} />;
-  return <Virtuoso totalCount={numHlts} itemContent={childContent} />;
+  return (
+    <>
+      {/* <Stack direction="row" alignItems="stretch">
+        <Stack direction="column" alignItems="stretch">
+           */}
+      <Stack direction="column" sx={{ height: "100%" }} spacing={0}>
+        <Typography children={infoText} sx={{ px: 2, py: 1 }} />
+        {/* <Box
+          sx={{
+            // flexGrow: 1,
+            // overflow: "auto",
+            bgcolor: "red",
+            // width: "100%",
+            height: "5in",
+          }}
+        ></Box> */}
+        <Virtuoso totalCount={numHlts} itemContent={childContent} />
+      </Stack>
+      {/*  */}
+      {/* 
+      </Stack> */}
+      {/* </Box> */}
+    </>
+    // <>
+
+    // </>
+  );
 }
 function HighlightCard({ id }: { id: number }) {
   const [hl, setHl] = useState<Taguette.Highlight | null>(null);
@@ -91,10 +126,12 @@ function HighlightCard({ id }: { id: number }) {
     SELECT highlights.id,
         highlights.snippet,
         GROUP_CONCAT(tags.path) AS tags,
-        GROUP_CONCAT(tags.id) AS tagIds
+        GROUP_CONCAT(tags.id) AS tagIds,
+        d.name AS source
     FROM (SELECT * FROM highlights as h WHERE h.id = ${"$id"}) as highlights
         LEFT JOIN highlight_tags ON highlights.id = highlight_tags.highlight_id
         LEFT JOIN tags ON highlight_tags.tag_id = tags.id
+        LEFT JOIN documents AS d ON highlights.document_id = d.id
     GROUP BY highlights.id;`;
     // const sql = `
     // SELECT highlights.id,
@@ -117,7 +154,7 @@ function HighlightCard({ id }: { id: number }) {
       });
   }, []);
   return (
-    <Box sx={{ m: 1 }}>
+    <Box sx={{ m: 1, mt: 0 }}>
       {hl ? (
         <HighlightListItem highlight={hl} />
       ) : (
@@ -127,31 +164,55 @@ function HighlightCard({ id }: { id: number }) {
   );
 }
 function HighlightListItem({ highlight }: { highlight: Taguette.Highlight }) {
-  const navigate = useNavigate();
-  const onClick = () => {
-    navigate(`/highlights/${highlight.id}`);
+  // const navigate = useNavigate();
+  // const onClick = () => {
+  //   navigate(`/highlights/${highlight.id}`);
+  // };
+  const action = {
+    label: "view highlight and taggings",
+    icon: LaunchIcon,
+    link: `/highlights/${highlight.id}`,
   };
   return (
     <ListItem
       component={Paper}
       elevation={4}
-      sx={{ minWidth: "fit-content" }}
-      onClick={onClick}
+      sx={{
+        minWidth: "fit-content",
+        pr: 0,
+        py: 0.25,
+        display: "flex",
+        flexWrap: "nowrap",
+        alignItems: "stretch",
+        justifyContent: "space-between",
+      }}
     >
-      <Stack>
+      <Stack
+        sx={{
+          py: 0.75,
+        }}
+        spacing={1}
+      >
+        {/* <Paper variant="outlined" sx={{ px: 1 }}> */}
         {ListItemText({
           primary: (
             <Typography
-              dangerouslySetInnerHTML={{ __html: highlight.snippet }}
+              // fontSize="1rem"
+              // fontWeight={400}
+              display="inline"
+              dangerouslySetInnerHTML={{
+                __html: highlight.snippet,
+              }}
             ></Typography>
           ),
         })}
+        {/* </Paper> */}
         <Stack
           direction="row"
           sx={{
             bgcolor: "",
             flexWrap: "wrap",
-            py: 1,
+            // py: 0.5,
           }}
         >
           {highlight.tags?.map((tag, i) => (
@@ -161,13 +222,120 @@ function HighlightListItem({ highlight }: { highlight: Taguette.Highlight }) {
               sx={{
                 fontSize: "small",
                 fontWeight: "500",
-                mr: 0.35,
-                mt: 0.35,
+                mr: 0.5,
+                mt: 0.5,
               }}
             />
           ))}
         </Stack>
+        <Typography fontWeight={800}>
+          Source: <Typography display="inline">{highlight.source}</Typography>
+        </Typography>
+      </Stack>
+      <Stack>
+        <IconButton
+          aria-label={action.label}
+          // onClick={() => action?.action()}
+          component={Link}
+          to={action.link}
+          sx={{
+            borderRadius: 1,
+            ml: 0.5,
+            // mr: 2,
+            // p: 0.5,
+          }}
+        >
+          {action.icon({
+            // fontSize: ".25rem",
+            sx: {
+              fontSize: "1.5rem",
+            },
+          })}
+        </IconButton>
       </Stack>
     </ListItem>
   );
 }
+
+// import Stack from "@mui/material/Stack";
+// import { Virtuoso } from "react-virtuoso";
+// import { useEffect, useState } from "preact/hooks";
+// import { dbs } from "../signals";
+// import Typography from "@mui/material/Typography";
+// import { useTreeContext } from "../contexts/TagTreeContext";
+// import { reducer, HighlightCard } from "./HighlightList";
+
+// export function Parent() {
+//   const [numHlts, setNumHlts] = useState<number>(0);
+//   const [hlIds, setHlIds] = useState<number[]>([]);
+//   const { selectedTags } = useTreeContext();
+//   const tagsAreSelected = selectedTags.length > 0;
+//   const infoText = `Showing${
+//     !tagsAreSelected ? " all" : ""
+//   } ${numHlts} highlights${
+//     tagsAreSelected
+//       ? ` tagged with any of ${selectedTags.length} selected tags`
+//       : ""
+//   }.`;
+//   const selectedTagPlaceholders = selectedTags.map((t, i) => `$${i + 1}`);
+//   const optionsPlaceholder = `${selectedTagPlaceholders.join(",")}`;
+//   const maybeFilter =
+//     selectedTags.length === 0 ? "" : `WHERE t.path in (${optionsPlaceholder})`;
+
+//   useEffect(() => {
+//     console.log(optionsPlaceholder);
+//     setNumHlts(hlIds.length);
+//   }, [hlIds]);
+//   // const numHlts = hlIds.length;
+//   useEffect(() => {
+//     const db = dbs.value;
+//     const q = `
+//     SELECT DISTINCT h.id
+//     FROM highlights as h
+//       LEFT JOIN highlight_tags AS ht
+//         ON h.id = ht.highlight_id
+//       LEFT JOIN tags as t
+//         ON t.id = ht.tag_id
+//         ${maybeFilter}
+//     ;`;
+//     const bindings = selectedTags.reduce(
+//       ((a, c, i, arr) => {
+//         a[selectedTagPlaceholders[i]] = c;
+//         return a;
+//       }) as reducer,
+//       {} as Record<string, string>
+//     );
+//     db.transactAll([{ sql: q, bindings }]).then(([ids]) => {
+//       setNumHlts(0);
+//       setHlIds(ids.map(({ id }) => id));
+//     });
+//   }, [selectedTags]);
+
+//   const childContent = (i: number) => <HighlightCard id={hlIds[i]} />;
+//   return (
+//     <>
+//       {/* <Stack direction="row" alignItems="stretch">
+//               <Stack direction="column" alignItems="stretch">
+//                  */}
+//       <Stack direction="column" sx={{ height: "100%" }} spacing={0}>
+//         <Typography children={infoText} sx={{ p: 2 }} />
+//         {/* <Box
+//               sx={{
+//                 // flexGrow: 1,
+//                 // overflow: "auto",
+//                 bgcolor: "red",
+//                 // width: "100%",
+//                 height: "5in",
+//               }}
+//             ></Box> */}
+//         <Virtuoso totalCount={numHlts} itemContent={childContent} />
+//       </Stack>
+//       {/*  */}
+//       {/*
+//             </Stack> */}
+//       {/* </Box> */}
+//     </>
+//     // <>
+//     // </>
+//   );
+// }

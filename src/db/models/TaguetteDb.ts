@@ -138,6 +138,8 @@ export default class TaguetteDb extends OpfsDb {
       byId: (updateEntries: Array<[number, string]>) =>
         // updateTagPaths(updateEntries, this.exec),
         updateTagsPaths(updateEntries, this),
+      forHighlight: (hid: number, remove: number[], add: number[]) =>
+        updateTagsForHighlight(hid, remove, add, this),
     },
   };
 }
@@ -193,7 +195,55 @@ async function updateTagsForHighlight(
   hid: number,
   remove: number[],
   add: number[],
-  exec: SQLite3.Delegate.Executor
+  db: TaguetteDb
+  // exec: SQLite3.Delegate.Executor
+) {
+  // var bindings: Array<any> = [hid];
+  var bindings: Record<string, any> = { $hid: hid };
+  let sql = "";
+  // console.log(remove, add);
+  if (remove.length > 0) {
+    // bindings = [...bindings, ...remove];
+    const key = (id: number) => `$deleteTag${id}`;
+    remove.forEach((tagId) => {
+      bindings[key(tagId)] = tagId;
+    });
+    // const placeholders = remove.map((_) => "?").join(",");
+    const placeholders = remove.map((tagId) => key(tagId)).join(",");
+    sql += `DELETE FROM highlight_tags WHERE highlight_id=$hid AND tag_id IN (${placeholders});`;
+  }
+  const transactions = [];
+  transactions.push({ sql, bindings });
+  bindings = { $hid: hid };
+  sql = "";
+  if (add.length > 0) {
+    const key = (id: number) => `$addTag${id}`;
+    bindings = add.reduce((acc: Record<string, any>, tagId: number) => {
+      acc[key(tagId)] = tagId;
+      return acc;
+    }, bindings);
+    const placeholders = add
+      .map(key)
+      .map((k) => `($hid,${k})`)
+      .join(",");
+    sql += `INSERT INTO highlight_tags (highlight_id, tag_id) VALUES ${placeholders};`;
+  }
+  transactions.push({ sql, bindings });
+  await db.transactAll(transactions);
+  const changePromise = db.exec("SELECT changes() as changes");
+  const getNumChanges: (response: any) => any = ({
+    result: {
+      resultRows: [first],
+    },
+  }) => first;
+  return null;
+}
+async function _updateTagsForHighlight(
+  hid: number,
+  remove: number[],
+  add: number[],
+  db: TaguetteDb
+  // exec: SQLite3.Delegate.Executor
 ) {
   // let bindings: Record<string, any> = { $hid: hid };
   let bindings: Array<any> = [hid];
@@ -206,12 +256,13 @@ async function updateTagsForHighlight(
   }
   q += "COMMIT;";
   try {
-    const res = await exec(q, "object", bindings);
+    const res = await db.exec(q, "object", bindings);
     // const { result: { resultRows } } = res;
   } catch (e) {
     console.error(e);
-    await exec("ROLLBACK;");
+    await db.exec("ROLLBACK;");
   }
+
   let bindings2: Record<string, any> = { $hid: hid };
   q = "BEGIN;";
   if (add.length > 0) {
@@ -228,11 +279,11 @@ async function updateTagsForHighlight(
   }
   q += "COMMIT;";
   try {
-    const res = await exec(q, "object", bindings2);
+    const res = await db.exec(q, "object", bindings2);
     // const { result: { resultRows } } = res;
   } catch (e) {
     console.error(e);
-    await exec("ROLLBACK;");
+    await db.exec("ROLLBACK;");
   }
 }
 

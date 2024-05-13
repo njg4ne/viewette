@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "preact/compat";
 import ReactDOM from "react-dom/client";
 import { createHashRouter, RouterProvider } from "react-router-dom";
-import { ListedHighights } from "./components/Highlight";
+// import { ListedHighights } from "./components/Highlight";
 import FileSystemControls from "./components/FilesystemControls";
 import "./styles/colors.css";
 import "./styles/main.css";
@@ -50,7 +50,7 @@ import EditTag from "./components/EditTag";
 import Drawer from "./components/Drawer";
 import Home from "./components/Home";
 import DatabaseManager from "./components/DatabaseManager";
-import EditHighlight from "./components/EditHighlight2";
+import EditHighlight from "./components/EditHighlight";
 
 import SQL from "./components/SQL";
 import Tags from "./components/Tags";

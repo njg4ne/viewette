@@ -20,6 +20,7 @@ import { useSnackbar } from "notistack";
 import * as popups from "../popups";
 import { getAllPartialPaths } from "../components/TagTree/utils";
 import { useSearchParams } from "react-router-dom";
+import { useDb } from "../hooks";
 // import { db } from "../db/models/TaguetteDb.ts";
 type TagMap = Record<string | number, string>;
 
@@ -29,8 +30,8 @@ const defaults = {
   selectedItems: [] as string[],
   setSelectedItems: {} as StateUpdater<string[]>,
   createTagValue: "" as string,
-  setCreateTagValue: {} as StateUpdater<string>,
-  createTagFieldRef: {} as React.RefObject<HTMLElement>,
+  // setCreateTagValue: {} as StateUpdater<string>,
+  // createTagFieldRef: {} as React.RefObject<HTMLElement>,
   tags: {} as TagMap,
   setTags: {} as StateUpdater<TagMap>,
   numTagsSelected: 0 as number,
@@ -48,6 +49,8 @@ export const TreeContext = createContext(defaults);
 
 export function TreeProvider({ children }: { children: React.ReactNode }) {
   const { enqueueSnackbar: sbqr } = useSnackbar();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tagLikeFilter = searchParams.get("tagLike") || "";
 
   const { loading, setLoading } = useLoadingContext();
   const [allTags, setAllTags] = useState<Taguette.Tag[]>([]);
@@ -56,6 +59,19 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [createTagValue, setCreateTagValue] = useState<string>("");
   const [tags, setTags] = useState<TagMap>({});
+
+  useEffect(() => {
+    if (loading || !signalReady(dbs)) return;
+    const db = dbs.value;
+    const bindings = { $tagLike: `%${tagLikeFilter}%` };
+    const sql = `SELECT * FROM tags${
+      tagLikeFilter.length > 0 ? ` WHERE path LIKE $tagLike` : ""
+    };`;
+    db.transactAll([{ sql, bindings }]).then(([newTags]) => {
+      setAllTags(newTags as Taguette.Tag[]);
+    });
+    // db.read.tags().then(setAllTags);
+  }, [loading, dbs.value, searchParams.get("tagLike")]);
 
   // let [searchParams, setSearchParams] = useSearchParams();
   // useEffect(() => {
@@ -83,7 +99,7 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   //   });
   // }, [searchParams]);
 
-  const createTagFieldRef = useRef<HTMLElement>(null);
+  // const createTagFieldRef = useRef<HTMLElement>(null);
   const apiRef = useTreeViewApiRef();
   const selectedTags = selectedItems.filter((path) =>
     allTags.map((tag) => tag.path).includes(path)
@@ -100,11 +116,6 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   //   dbv.read.tags().then(setAllTags);
 
   // }, [opfsDb.value, loading]);
-  useEffect(() => {
-    if (loading || !signalReady(dbs)) return;
-    const db = dbs.value;
-    db.read.tags().then(setAllTags);
-  }, [loading, dbs.value]);
 
   useEffect(() => {
     if (loading || !signalReady(dbs) || allTags.length === 0) return;
@@ -139,8 +150,8 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
         selectedItems,
         setSelectedItems,
         createTagValue,
-        setCreateTagValue,
-        createTagFieldRef,
+        // setCreateTagValue,
+        // createTagFieldRef,
         tags,
         setTags,
         numTagsSelected,

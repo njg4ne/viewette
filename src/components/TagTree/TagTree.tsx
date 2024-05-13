@@ -15,9 +15,44 @@ import { getAllPartialPaths, getGenealogy, getTopLevelTags } from "./utils";
 import MultipleTagTreeItems from "./TagTreeItems/MultipleTagTreeItems";
 import CreateTagForm from "./CreateTagForm";
 // import VirtualList from "../VirtualList";
+// import HighlightList from "../Parent";
 import HighlightList from "../HighlightList";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
+import TextField from "@mui/material/TextField";
+import { useSearchParams } from "react-router-dom";
+
+function TagPathFilter() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tagLikeFilter = searchParams.get("tagLike") || "";
+  return (
+    <TextField
+      fullWidth
+      id="tag-filter"
+      name="tag-filter"
+      label="Filter Tags"
+      sx={{ my: 1 }}
+      inputProps={{
+        "aria-label": "tag filter",
+      }}
+      width="100%"
+      value={tagLikeFilter}
+      onChange={(e: InputEvent) => {
+        const newValue = (e.target as HTMLInputElement).value.trimStart();
+        setSearchParams((sp) => {
+          if (newValue === "") {
+            sp.delete("tagLike");
+          } else {
+            sp.set("tagLike", newValue);
+          }
+          return sp;
+        });
+      }}
+    />
+  );
+}
+
 export default function TagTree({}) {
+  // useEffect(() => {}, [searchParams.get("tagLike")]);
   // useEffect(() => {
   //   console.log("App Container");
   //   let utterance = new SpeechSynthesisUtterance("I am working very hard");
@@ -78,13 +113,14 @@ export default function TagTree({}) {
       spacing={2}
       direction="column"
       alignItems="flex-start"
+      // minHeight="100vh"
     >
       <CreateTagForm />
-      <Typography variant="body2">
+      {/* <Typography variant="body2">
         {numTagsSelected > 0
           ? `${numTagsSelected} tag${numTagsSelected > 1 ? "s" : ""} selected`
           : "No tags selected"}
-      </Typography>
+      </Typography> */}
       <Stack direction="row" alignSelf={"stretch"}>
         <Stack
           direction="row"
@@ -95,6 +131,7 @@ export default function TagTree({}) {
             // resize: "horizontal",
             //both
             resize: "both",
+            // minHeight: "50vh",
             width: "fit-content",
           }}
         >
@@ -112,6 +149,7 @@ export default function TagTree({}) {
             expandedItems={allItemIds(allTags)}
             onExpandedItemsChange={handleExpandedItemsChange}
           >
+            <TagPathFilter />
             <MultipleTagTreeItems tags={allTags} level={-1} />
           </SimpleTreeView>
           <Divider orientation="vertical" flexItem />
