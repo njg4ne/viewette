@@ -20,6 +20,7 @@ import HighlightList from "../HighlightList";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import TextField from "@mui/material/TextField";
 import { useSearchParams } from "react-router-dom";
+import { HighlightsProvider } from "../../contexts/HighlightsContext";
 
 function TagPathFilter() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -107,15 +108,14 @@ export default function TagTree({}) {
       oldExpanded.length === 0 ? allNodeIds : []
     );
   };
-
   return (
     <Paper
       elevation={1}
       component={Stack}
-      sx={{ p: 2 }}
+      sx={{ p: 2, height: "100%", overflow: "auto" }}
       spacing={2}
       direction="column"
-      alignItems="flex-start"
+      // alignItems="flex-start"
       // minHeight="100vh"
     >
       <CreateTagForm />
@@ -124,25 +124,35 @@ export default function TagTree({}) {
           ? `${numTagsSelected} tag${numTagsSelected > 1 ? "s" : ""} selected`
           : "No tags selected"}
       </Typography> */}
-      <Stack direction="row" alignSelf={"stretch"}>
+      <Stack
+        direction="row"
+        alignSelf="stretch"
+        // height="100%"
+        // maxHeight="100%"
+        sx={{
+          overflow: "auto",
+        }}
+      >
         <Stack
           direction="row"
           spacing={0}
           justifyContent="space-between"
           sx={{
+            // backgroundColor: "white",
+            // maxHeight: "100%",
             overflow: "auto",
-            // resize: "horizontal",
-            //both
             resize: "both",
-            // minHeight: "50vh",
+            // resize: "horizontal",
             width: "fit-content",
           }}
         >
+          {/* <Box maxHeight="100%" sx={{ overflow: "auto" }}> */}
           <SimpleTreeView
             sx={{
               flexGrow: 1,
               overflow: "auto",
               paddingRight: 1,
+              // maxHeight: "50vh",
             }}
             selectedItems={selectedItems}
             apiRef={apiRef}
@@ -155,10 +165,14 @@ export default function TagTree({}) {
             <TagPathFilter />
             <MultipleTagTreeItems tags={allTags} level={-1} />
           </SimpleTreeView>
+          {/* </div> */}
+          {/* </Box> */}
           <Divider orientation="vertical" flexItem />
         </Stack>
         <Box flexGrow={1}>
-          <HighlightList />
+          <HighlightsProvider>
+            <HighlightList />
+          </HighlightsProvider>
         </Box>
       </Stack>
     </Paper>

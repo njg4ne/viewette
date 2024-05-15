@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -20,6 +20,14 @@ import { useTreeContext } from "../../contexts/TagTreeContext";
 import Button from "@mui/material/Button";
 import { useDb, useModel } from "../../hooks";
 import { signal } from "@preact/signals";
+
+import IconButton from "@mui/material/IconButton";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import Tooltip from "@mui/material/Tooltip";
+import Stack from "@mui/material/Stack";
+import { cons } from "fp-ts/lib/ReadonlyNonEmptyArray";
+
 export default () => (
   <LoadingProvider>
     <EditHighlight />
@@ -44,7 +52,7 @@ function EditHighlight() {
     db.transactAll([{ sql, bindings }]).then(([[newHl]]) => {
       setHl(newHl);
     });
-  }, [loading, dbs.value]);
+  }, [loading, dbs.value, id]);
   function save() {
     console.log("save");
   }
@@ -116,10 +124,14 @@ function HlCard({ hl }: { hl: Taguette.Highlight }) {
   return (
     <Card>
       <CardContent>
-        <Typography color="text.secondary">Title</Typography>
-        <Typography fontSize={"1.5rem"} gutterBottom>
-          Highlight ID {hl.id} from {hl.source}
-        </Typography>
+        <TitlewithNavigationArrows>
+          <Stack>
+            <Typography color="text.secondary">Title</Typography>
+            <Typography fontSize={"1.5rem"} gutterBottom>
+              Highlight ID {hl.id} from {hl.source}
+            </Typography>{" "}
+          </Stack>
+        </TitlewithNavigationArrows>
         <Typography color="text.secondary">Text Snippet</Typography>
         <Typography
           fontSize={"1.2rem"}
@@ -155,114 +167,53 @@ function HlCard({ hl }: { hl: Taguette.Highlight }) {
     </Card>
   );
 }
-// function zip(arrays) {
-//   return arrays[0].map((_, i) => arrays.map((array) => array[i]));
-// }
 
-// const [hl, setHl] = useState<Taguette.Highlight | null>(null);
-// useEffect(() => {
-//   if (loading || !signalReady(dbs)) return;
-//   const db: TaguetteDb = dbs.value;
-//   const bindings = { $id: Number(id) };
-//   const sql = `SELECT * FROM highlights WHERE id = $id;`;
-//   db.transactAll([{ sql, bindings }]).then(([[newHl]]) => {
-//     setHl(newHl);
-//   });
-// }, [loading, dbs.value]);
-
-// function EditHighlightCard({ hl }: { hl: Taguette.Highlight }) {
-//   const formRef = useRef<HTMLFormElement>(null);
-//   const { loading, setLoading } = useLoadingContext();
-//   const { enqueueSnackbar: sbqr } = useSnackbar();
-//   const onSubmit = async (e: SubmitEvent) => {
-//     e.preventDefault();
-//     if (loading || !signalReady(dbs)) return;
-//     const db: TaguetteDb = dbs.value;
-//     setLoading(true);
-//     const sql = `UPDATE highlights SET snippet = $snippet WHERE id = $id;`;
-//     const bindings = { $snippet: form.snippet, $id: hl.id };
-//     await db.transactAll([{ sql, bindings }]);
-//     // await db.update.tag({ ...hl, snippet: form.snippet });
-//     sbqr("Highlight updated", { variant: "success" });
-//     setLoading(false);
-//   };
-//   const onReset = (e?: Event) => {
-//     e?.preventDefault();
-//     setForm({ snippet: hl.snippet });
-//   };
-//   const [form, setForm] = useState({ snippet: "" });
-
-//   useEffect(() => {
-//     onReset();
-//   }, [hl]);
-//   const saveDisabled =
-//     loading || form.snippet === hl.snippet || form.snippet.trim().length === 0;
-
-//   const resetDisabled = loading || form.snippet === hl.snippet;
-
-//   var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)
-//     ? true
-//     : false;
-//   const modifierKey = isMacLike ? "Cmd" : "Ctrl";
-//   const modifierKeySymbol = isMacLike ? "⌘" : "Ctrl";
-//   return (
-//     <Card
-//       component="form"
-//       {...{ onSubmit }}
-//       // value={new FormData(hl)}
-//       onReset={onReset}
-//       ref={formRef}
-//     >
-//       <CardContent>
-//         <Typography color="text.secondary">Tag Path</Typography>
-//         <Typography fontSize={"1.5rem"}>Highlight ID: {hl.id}</Typography>
-
-//         <Typography color="text.secondary">Highlight Text</Typography>
-//         <TextField
-//           multiline
-//           id="snippet-editor"
-//           // label="Edit Description"
-//           variant="standard"
-//           onChange={(e: Event) => {
-//             setForm({ snippet: (e.target as HTMLInputElement).value });
-//           }}
-//           value={form.snippet}
-//           fullWidth
-//           inputProps={{
-//             "aria-label": "edit tag snippet",
-//             onKeyDown: function (e) {
-//               if ((e.ctrlKey || e.metaKey) && e.key == "Enter") {
-//                 if (!saveDisabled) {
-//                   formRef.current?.requestSubmit();
-//                 }
-//               }
-//             },
-//           }}
-//           sx={
-//             {
-//               // wordWrap: "break-word", whiteSpace: "normal",
-//             }
-//           }
-//           name="snippet"
-//         />
-//       </CardContent>
-//       <Stack
-//         component={CardActions}
-//         direction="row"
-//         // justifyContent="space-around"
-//         sx={{
-//           marginBottom: 1,
-//           marginLeft: 1,
-//         }}
-//         spacing={1}
-//       >
-//         <Button type="submit" disabled={saveDisabled} variant="outlined">
-//           Save ({modifierKeySymbol} + Enter)
-//         </Button>
-//         <Button type="reset" disabled={resetDisabled} variant="outlined">
-//           Reset
-//         </Button>
-//       </Stack>
-//     </Card>
-//   );
-// }
+function TitlewithNavigationArrows({
+  children,
+}: {
+  children?: JSX.Element | JSX.Element[];
+}) {
+  // use the router state
+  const { id } = useParams();
+  let { state } = useLocation();
+  state = state || { hlIds: [id] };
+  const { hlIds } = state;
+  const index = hlIds?.indexOf(Number(id));
+  const prevIndex = (index + hlIds.length - 1) % hlIds.length;
+  const nextIndex = (index + 1) % hlIds.length;
+  const getPrevId = () => hlIds[prevIndex];
+  const getNextId = () => hlIds[nextIndex];
+  return (
+    <Stack
+      direction={"row"}
+      fullWidth
+      // bgcolor={"red"}
+      justifyContent={"space-between"}
+      alignItems="flex-start"
+    >
+      {children}
+      <Tooltip title="Previous highlight">
+        <IconButton
+          aria-label="Previous highlight"
+          component={Link}
+          state={state}
+          to={`/highlights/${getPrevId()}`}
+          replace
+        >
+          <NavigateBeforeIcon fontSize="large" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Next highlight">
+        <IconButton
+          aria-label="Next highlight"
+          component={Link}
+          to={`/highlights/${getNextId()}`}
+          state={state}
+          replace
+        >
+          <NavigateNextIcon fontSize="large" />
+        </IconButton>
+      </Tooltip>
+    </Stack>
+  );
+}

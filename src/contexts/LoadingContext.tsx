@@ -3,7 +3,7 @@ import { createContext, Dispatch } from "preact/compat";
 
 export const LoadingContext = createContext({
   loading: false,
-  setLoading: {} as StateUpdater<boolean>,
+  setLoading: {} as StateUpdater<boolean> | Dispatch<boolean>,
 });
 
 export function LoadingProvider({ children }: { children: React.ReactNode }) {

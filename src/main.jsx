@@ -120,7 +120,7 @@ const AppContainer = ({ Contents }) => {
               }}
               spacing={2}
             > */}
-            <Box sx={{ m: 2 }}>
+            <Box sx={{ m: 2, flexGrow:1 }}>
               <Contents />
             </Box>
             {/* </Stack> */}

@@ -6,6 +6,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import Skeleton from "@mui/material/Skeleton";
+import type { ListRange } from "react-virtuoso";
 import { Virtuoso } from "react-virtuoso";
 import Chip from "@mui/material/Chip";
 import { TagChip } from "./TagTree/TagTreeItems/SingleTagTreeItem";
@@ -28,93 +29,45 @@ import Typography from "@mui/material/Typography";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { Signal, computed, effect } from "@preact/signals";
 import { useTreeContext } from "../contexts/TagTreeContext";
+import { useHighlightsContext } from "../contexts/HighlightsContext";
 // import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 
 export default Parent;
-
-type reducer = typeof _reducer;
-function _reducer(
-  accumulator: Record<string, string>,
-  currentValue: string,
-  currentIndex: number,
-  initialValue: string[]
-): typeof accumulator {
-  return accumulator;
-}
-
+const SEARCH_KEY = "hlOffset";
 function Parent() {
-  const [numHlts, setNumHlts] = useState<number>(0);
-  const [hlIds, setHlIds] = useState<number[]>([]);
-  const { selectedTags } = useTreeContext();
-  const tagsAreSelected = selectedTags.length > 0;
-  const infoText = `Showing${
-    !tagsAreSelected ? " all" : ""
-  } ${numHlts} highlights${
-    tagsAreSelected ? ` with any of ${selectedTags.length} selected tags` : ""
-  }.`;
-  const selectedTagPlaceholders = selectedTags.map((t, i) => `$${i + 1}`);
-  const optionsPlaceholder = `${selectedTagPlaceholders.join(",")}`;
-  const maybeFilter =
-    selectedTags.length === 0 ? "" : `WHERE t.path in (${optionsPlaceholder})`;
-
-  useEffect(() => {
-    // console.log(optionsPlaceholder);
-    setNumHlts(hlIds.length);
-  }, [hlIds]);
-  // const numHlts = hlIds.length;
-  useEffect(() => {
-    const db = dbs.value;
-    const q = `
-    SELECT DISTINCT h.id
-    FROM highlights as h
-      LEFT JOIN highlight_tags AS ht
-        ON h.id = ht.highlight_id
-      LEFT JOIN tags as t
-        ON t.id = ht.tag_id
-        ${maybeFilter}
-    ;`;
-    const bindings = selectedTags.reduce(
-      ((a, c, i, arr) => {
-        a[selectedTagPlaceholders[i]] = c;
-        return a;
-      }) as reducer,
-      {} as Record<string, string>
+  const { hlIds, infoText, numHlts } = useHighlightsContext();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const hlOffset = Number(searchParams.get(SEARCH_KEY)) || 0;
+  const setOffset = (offset: number) =>
+    setSearchParams(
+      (sp) => {
+        sp.set(SEARCH_KEY, offset.toString());
+        return sp;
+      },
+      { replace: true }
     );
-    db.transactAll([{ sql: q, bindings }]).then(([ids]) => {
-      setNumHlts(0);
-      setHlIds(ids.map(({ id }) => id));
-    });
-  }, [selectedTags]);
+
+  const onRange = ({ startIndex: i }: ListRange) => setOffset(i);
+
+  // useEffect(() => {
+  //   setOffset(0);
+  // }, [hlIds]);
 
   const childContent = (i: number) => <HighlightCard id={hlIds[i]} />;
   return (
     <>
-      {/* <Stack direction="row" alignItems="stretch">
-        <Stack direction="column" alignItems="stretch">
-           */}
       <Stack direction="column" sx={{ height: "100%" }} spacing={0}>
         <Typography children={infoText} sx={{ px: 2, py: 1 }} />
-        {/* <Box
-          sx={{
-            // flexGrow: 1,
-            // overflow: "auto",
-            bgcolor: "red",
-            // width: "100%",
-            height: "5in",
-          }}
-        ></Box> */}
-        <Virtuoso totalCount={numHlts} itemContent={childContent} />
+        <Virtuoso
+          totalCount={numHlts}
+          itemContent={childContent}
+          rangeChanged={onRange}
+          initialTopMostItemIndex={hlOffset}
+        />
       </Stack>
-      {/*  */}
-      {/* 
-      </Stack> */}
-      {/* </Box> */}
     </>
-    // <>
-
-    // </>
   );
 }
 function HighlightCard({ id }: { id: number }) {
@@ -168,10 +121,12 @@ function HighlightListItem({ highlight }: { highlight: Taguette.Highlight }) {
   // const onClick = () => {
   //   navigate(`/highlights/${highlight.id}`);
   // };
+  const { hlIds } = useHighlightsContext();
   const action = {
     label: "view highlight and taggings",
     icon: LaunchIcon,
     link: `/highlights/${highlight.id}`,
+    state: { hlIds },
   };
   return (
     <ListItem
@@ -238,6 +193,7 @@ function HighlightListItem({ highlight }: { highlight: Taguette.Highlight }) {
           // onClick={() => action?.action()}
           component={Link}
           to={action.link}
+          state={action.state}
           sx={{
             borderRadius: 1,
             ml: 0.5,

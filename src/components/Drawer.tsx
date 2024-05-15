@@ -100,6 +100,11 @@ const Main = styled(Container, {
   ...(!open && {
     ...closedMixinMain(theme),
   }),
+  minHeight: "100vh",
+  display: "flex",
+  flexDirection: "column",
+  flexWrap: "nowrap",
+  // backgroundColor: "red",
 }));
 
 interface AppBarProps extends MuiAppBarProps {
@@ -158,7 +163,12 @@ export default function MiniDrawer({
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+      }}
+    >
       <CssBaseline />
       <AppBar position="fixed" open={open}>
         <Toolbar>
