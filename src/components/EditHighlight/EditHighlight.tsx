@@ -1,4 +1,9 @@
-import { useLocation, useParams } from "react-router-dom";
+import {
+  LinkProps,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -26,12 +31,11 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import Tooltip from "@mui/material/Tooltip";
 import Stack from "@mui/material/Stack";
-import { cons } from "fp-ts/lib/ReadonlyNonEmptyArray";
+import RightArrowKeyIcon from "@mui/icons-material/Forward";
 
 export default () => (
-  <LoadingProvider>
-    <EditHighlight />
-  </LoadingProvider>
+  // <LoadingProvider>
+  <EditHighlight />
 );
 
 function EditHighlight() {
@@ -70,24 +74,40 @@ function entrify(tags: Taguette.Tag[]): [number, string][] {
 }
 const newTags = signal([]);
 function HlCard({ hl }: { hl: Taguette.Highlight }) {
+  const { id } = useParams();
   const { loading, setLoading } = useLoadingContext();
   const { enqueueSnackbar: sbqr } = useSnackbar();
-  const bindings = { $hid: hl.id };
+  const bindings = { $hid: id };
   const sql = `
   SELECT id, path FROM tags 
   JOIN highlight_tags ON tags.id = highlight_tags.tag_id 
   WHERE highlight_tags.highlight_id = $hid;`;
-  const data = useDb<Taguette.Tag[]>([], sql, bindings);
+  // const [currentTags, setCurrentTags] = useState<Taguette.Tag[]>([]);
+  // const [data, setData] = useState<Taguette.Tag[]>([]);
+  // function getCurrentTags() {
+  //   if (!signalReady(dbs)) return;
+  //   const db: TaguetteDb = dbs.value;
+  //   db.transactAll([{ sql, bindings }]).then(([newData]) => {
+  //     setCurrentTags(newData as Taguette.Tag[]);
+  //   });
+  // }
+
+  const currentTags = useDb<Taguette.Tag[]>([], [id], sql, bindings);
+  const allTags = useModel<Taguette.Tag[]>([], (db) => db.read.tags, [id]);
+  console.log("currentTags", ...currentTags, id, bindings);
   const tagEntries = [] as const;
   const [toRemove, setToRemove] = useState<Set<number>>(new Set());
   const [toAdd, setToAdd] = useState<Set<number>>(new Set());
-  const allTags = useModel<Taguette.Tag[]>([], (db) => db.read.tags);
+
   const unusedTagEntries = entrify(
-    allTags.filter(({ id }) => !data.some((t) => t.id === id))
+    allTags.filter(({ id }) => !currentTags.some((t) => t.id === id))
   );
-  // useEffect(() => {
-  //   console.log("toRemove", allTags);
-  // }, [allTags]);
+  useEffect(() => {
+    // if (loading) return;
+    newTags.value = [];
+    setToAdd(new Set());
+    setToRemove(new Set());
+  }, [id]);
 
   function onCheck(checked: boolean, id: number) {
     setToRemove((s) => {
@@ -150,7 +170,7 @@ function HlCard({ hl }: { hl: Taguette.Highlight }) {
           />
           <Typography color="text.secondary">Remove Existing Tags</Typography>
           <ExistingTagsEditor
-            options={entrify(data)}
+            options={entrify(currentTags)}
             onCheck={onCheck}
             disabled={loading}
           />
@@ -173,9 +193,14 @@ function TitlewithNavigationArrows({
 }: {
   children?: JSX.Element | JSX.Element[];
 }) {
-  // use the router state
+  const leftButtonRef = useRef<HTMLButtonElement>(null);
+  const rightButtonRef = useRef<
+    LinkProps & React.RefAttributes<HTMLAnchorElement>
+  >(null);
   const { id } = useParams();
   let { state } = useLocation();
+  const navigate = useNavigate();
+
   state = state || { hlIds: [id] };
   const { hlIds } = state;
   const index = hlIds?.indexOf(Number(id));
@@ -183,37 +208,55 @@ function TitlewithNavigationArrows({
   const nextIndex = (index + 1) % hlIds.length;
   const getPrevId = () => hlIds[prevIndex];
   const getNextId = () => hlIds[nextIndex];
+
+  const onKeyRight = () => navigate(`/highlights/${getNextId()}`, { state });
+  const onKeyLeft = () => navigate(`/highlights/${getPrevId()}`, { state });
+  useHotkeys("right", onKeyRight);
+  useHotkeys("left", onKeyLeft);
+
   return (
     <Stack
-      direction={"row"}
-      fullWidth
+      direction="row"
+      // fullWidth
       // bgcolor={"red"}
       justifyContent={"space-between"}
       alignItems="flex-start"
     >
       {children}
-      <Tooltip title="Previous highlight">
-        <IconButton
-          aria-label="Previous highlight"
-          component={Link}
-          state={state}
-          to={`/highlights/${getPrevId()}`}
-          replace
-        >
-          <NavigateBeforeIcon fontSize="large" />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Next highlight">
-        <IconButton
-          aria-label="Next highlight"
-          component={Link}
-          to={`/highlights/${getNextId()}`}
-          state={state}
-          replace
-        >
-          <NavigateNextIcon fontSize="large" />
-        </IconButton>
-      </Tooltip>
+      <Stack direction="row">
+        {/* <RightKey /> */}
+        <Tooltip title="Previous highlight">
+          <IconButton
+            ref={leftButtonRef}
+            aria-label="Previous highlight (left key)"
+            component={Link}
+            state={state}
+            to={`/highlights/${getPrevId()}`}
+            replace
+          >
+            {/* <NavigateBeforeIcon fontSize="large" />
+             */}
+            <RightArrowKeyIcon
+              fontSize="large"
+              sx={{ transform: "rotate(180deg)" }}
+            />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Next highlight (right key)">
+          <IconButton
+            ref={rightButtonRef}
+            aria-label="Next highlight"
+            component={Link}
+            to={`/highlights/${getNextId()}`}
+            state={state}
+            replace
+          >
+            {/* <NavigateNextIcon fontSize="large" />
+             */}
+            <RightArrowKeyIcon fontSize="large" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
     </Stack>
   );
 }

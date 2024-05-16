@@ -4,10 +4,10 @@ import TagTree from "./TagTree";
 
 export default function TagTreeWithContext() {
   return (
-    <LoadingProvider>
+    // <LoadingProvider>
       <TreeProvider>
         <TagTree />
       </TreeProvider>
-    </LoadingProvider>
+    // </LoadingProvider>
   );
 }

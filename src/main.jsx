@@ -57,6 +57,7 @@ import Tags from "./components/Tags";
 // import { tags } from "./signals";
 import { TagAutocomplete, TagFilters } from "./components/Filters";
 import TagTree from "./components/TagTree";
+import { LoadingProvider } from "./contexts/LoadingContext";
 
 function Highlights() {
   const [dbHandle, setDbHandle] = useState(null);
@@ -104,10 +105,11 @@ const AppContainer = ({ Contents }) => {
   const maxWidth = /* options are: xs, sm, md, lg, xl */ "md";
   return (
     <ColorThemeProvider>
+    
       <CssBaseline enableColorScheme />
       {/* <WorkerProvider> */}
       <FilesystemProvider>
-        <SnackbarProvider>
+        <SnackbarProvider><LoadingProvider>
           {/* 
             
               > */}
@@ -129,9 +131,10 @@ const AppContainer = ({ Contents }) => {
 
           {/* 
               
-          */}
+          */}</LoadingProvider>
         </SnackbarProvider>
       </FilesystemProvider>
+      
       {/* </ WorkerProvider> */}
     </ColorThemeProvider>
   );

@@ -5,14 +5,23 @@ import { useState, useEffect } from "preact/compat";
 
 export default function useModel<T>(
   initialValue: T,
-  model: (db: TaguetteDb) => () => Promise<T>
+  model: (db: TaguetteDb) => () => Promise<T>,
+  dependencies: unknown[]
 ) {
   const { loading } = useLoadingContext();
   const [data, setData] = useState<T>(initialValue);
-  useEffect(() => {
-    if (loading || !signalReady(dbs)) return;
+  const getData = async () => {
+    if (!signalReady(dbs)) return;
     const db: TaguetteDb = dbs.value;
-    model(db)().then(setData);
-  }, [loading, dbs.value]);
+    setData(await model(db)());
+  };
+  useEffect(() => {
+    if (loading) return;
+    getData();
+  }, [loading]);
+
+  useEffect(() => {
+    getData();
+  }, [dbs.value, ...dependencies]);
   return data;
 }

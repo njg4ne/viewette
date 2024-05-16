@@ -72,8 +72,9 @@ function Parent() {
 }
 function HighlightCard({ id }: { id: number }) {
   const [hl, setHl] = useState<Taguette.Highlight | null>(null);
-
+  const { loading } = useLoadingContext();
   useEffect(() => {
+    if (loading || !signalReady(dbs)) return;
     const bindings = { $id: id };
     const sql = `
     SELECT highlights.id,
@@ -105,7 +106,7 @@ function HighlightCard({ id }: { id: number }) {
         hl.tagIds = hl.tagIds ? hl.tagIds.split(",").map(Number) : [];
         setHl(hl);
       });
-  }, []);
+  }, [loading]);
   return (
     <Box sx={{ m: 1, mt: 0 }}>
       {hl ? (

@@ -3,6 +3,7 @@ import { createContext, Dispatch } from "preact/compat";
 import { useEffect, useState, useRef } from "preact/hooks";
 import { useTreeContext } from "../contexts/TagTreeContext";
 import { dbs } from "../signals";
+import { useLoadingContext } from "./LoadingContext";
 export const HighlightsContext = createContext({
   hlIds: ([] as Taguette.Highlight[]).map((hl) => hl.id),
   infoText: "",
@@ -16,6 +17,7 @@ export function HighlightsProvider({
   const [numHlts, setNumHlts] = useState<number>(0);
   const [hlIds, setHlIds] = useState<number[]>([]);
   const { selectedTags } = useTreeContext();
+  const { loading } = useLoadingContext();
   const tagsAreSelected = selectedTags.length > 0;
   const infoText = `Showing${
     !tagsAreSelected ? " all" : ""
@@ -35,18 +37,9 @@ export function HighlightsProvider({
   //   console.log("HighlightsProvider useEffect");
   // }, []);
   const prevSelectedTagsRef = useRef<string[]>([]);
-  useEffect(() => {
-    if (
-      numHlts !== 0 &&
-      JSON.stringify(prevSelectedTagsRef.current) ===
-        JSON.stringify(selectedTags)
-    ) {
-      prevSelectedTagsRef.current = selectedTags;
-      return; // Exit early
-    }
-    prevSelectedTagsRef.current = selectedTags;
-    console.log("HighlightsProvider useEffect");
+  function getData() {
     const db = dbs.value;
+    if (!db) return;
     const q = `
     SELECT DISTINCT h.id
     FROM highlights as h
@@ -65,10 +58,30 @@ export function HighlightsProvider({
     );
     db.transactAll([{ sql: q, bindings }]).then(([ids]) => {
       setNumHlts(0);
+      // setHlIds([]);
+      console.log("setting new data");
       setHlIds(ids.map(({ id }) => id));
     });
+  }
+  useEffect(() => {
+    if (
+      numHlts !== 0 &&
+      JSON.stringify(prevSelectedTagsRef.current) ===
+        JSON.stringify(selectedTags)
+    ) {
+      prevSelectedTagsRef.current = selectedTags;
+      return; // Exit early
+    }
+    prevSelectedTagsRef.current = selectedTags;
+    // console.log("HighlightsProvider useEffect");
+    getData();
   }, [selectedTags]);
+  useEffect(() => {
+    if (loading) return;
+    console.log("Loading Changed");
 
+    getData();
+  }, [loading]);
   return (
     <HighlightsContext.Provider value={{ hlIds, infoText, numHlts }}>
       {children}

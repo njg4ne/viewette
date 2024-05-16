@@ -42,9 +42,9 @@ import { useState, useEffect, ChangeEvent, useRef } from "preact/compat";
 import { useHotkeys } from "react-hotkeys-hook";
 
 export default () => (
-  <LoadingProvider>
-    <EditTag />
-  </LoadingProvider>
+  // <LoadingProvider>
+  <EditTag />
+  // </LoadingProvider>
 );
 
 function EditTag() {
