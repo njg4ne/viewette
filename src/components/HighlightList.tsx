@@ -40,27 +40,29 @@ function Parent() {
   const { hlIds, infoText, numHlts } = useHighlightsContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const hlOffset = Number(searchParams.get(SEARCH_KEY)) || 0;
-  const setOffset = (offset: number) =>
+  const setOffset = (offset: number, replace: boolean = true) =>
     setSearchParams(
       (sp) => {
         sp.set(SEARCH_KEY, offset.toString());
         return sp;
       },
-      { replace: true }
+      { replace }
     );
 
   const onRange = ({ startIndex: i }: ListRange) => setOffset(i);
 
-  // useEffect(() => {
-  //   setOffset(0);
-  // }, [hlIds]);
+  useEffect(() => {
+    setOffset(0, false);
+    // console.log("first highlight id", hlIds[0]);
+  }, [hlIds]);
 
-  const childContent = (i: number) => <HighlightCard id={hlIds[i]} />;
+  const childContent = (_i: number, hid: number) => <HighlightCard id={hid} />;
   return (
     <>
       <Stack direction="column" sx={{ height: "100%" }} spacing={0}>
         <Typography children={infoText} sx={{ px: 2, py: 1 }} />
         <Virtuoso
+          data={hlIds}
           totalCount={numHlts}
           itemContent={childContent}
           rangeChanged={onRange}
@@ -71,6 +73,8 @@ function Parent() {
   );
 }
 function HighlightCard({ id }: { id: number }) {
+  // const { hlIds } = useHighlightsContext();
+  // const id = hlIds[index];
   const [hl, setHl] = useState<Taguette.Highlight | null>(null);
   const { loading } = useLoadingContext();
   useEffect(() => {
@@ -106,7 +110,7 @@ function HighlightCard({ id }: { id: number }) {
         hl.tagIds = hl.tagIds ? hl.tagIds.split(",").map(Number) : [];
         setHl(hl);
       });
-  }, [loading]);
+  }, [loading, id]);
   return (
     <Box sx={{ m: 1, mt: 0 }}>
       {hl ? (

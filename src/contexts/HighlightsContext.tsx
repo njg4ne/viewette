@@ -14,8 +14,9 @@ export function HighlightsProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [numHlts, setNumHlts] = useState<number>(0);
+  // const [numHlts, setNumHlts] = useState<number>(0);
   const [hlIds, setHlIds] = useState<number[]>([]);
+  const numHlts = hlIds.length;
   const { selectedTags } = useTreeContext();
   const { loading } = useLoadingContext();
   const tagsAreSelected = selectedTags.length > 0;
@@ -30,7 +31,7 @@ export function HighlightsProvider({
     selectedTags.length === 0 ? "" : `WHERE t.path in (${optionsPlaceholder})`;
 
   useEffect(() => {
-    setNumHlts(hlIds.length);
+    // setNumHlts(hlIds.length);
   }, [hlIds]);
 
   // useEffect(() => {
@@ -57,9 +58,6 @@ export function HighlightsProvider({
       {} as Record<string, string>
     );
     db.transactAll([{ sql: q, bindings }]).then(([ids]) => {
-      setNumHlts(0);
-      // setHlIds([]);
-      console.log("setting new data");
       setHlIds(ids.map(({ id }) => id));
     });
   }
