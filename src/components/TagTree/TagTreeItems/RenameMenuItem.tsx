@@ -110,10 +110,10 @@ export default function RenameMenuItem() {
         anchorEl={anchorRef.current}
         open={open}
         onClose={handleClose}
-        MenuListProps={{
-          "aria-labelledby": "lock-button",
-          role: "listbox",
-        }}
+        // MenuListProps={{
+        //   "aria-labelledby": "lock-button",
+        //   role: "listbox",
+        // }}
         // component="form"
         // onSubmit={doRename}
       >

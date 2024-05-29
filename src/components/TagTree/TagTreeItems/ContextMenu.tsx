@@ -29,6 +29,7 @@ import RenderMultipleTagTreeItems from "./MultipleTagTreeItems";
 import DeleteMenuItems from "./DeleteMenuItems";
 import RenameMenuItem from "./RenameMenuItem";
 import { useSearchParams } from "react-router-dom";
+import MergeMenuItem from "./MergeMenuItem";
 
 export { ContextMenu };
 export default ContextMenu;
@@ -42,6 +43,7 @@ function ContextMenu() {
   const Icon = item.isTag ? TagIcon : FolderIcon;
   return (
     <Menu
+      width="100%"
       open={contextMenuPosition !== null}
       onClose={closeContextMenu}
       anchorReference="anchorPosition"
@@ -116,6 +118,7 @@ function ContextMenu() {
       </MenuItem>
       <DeleteMenuItems />
       <RenameMenuItem />
+      <MergeMenuItem />
     </Menu>
   );
 }

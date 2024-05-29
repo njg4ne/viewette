@@ -76,7 +76,7 @@ export function HighlightsProvider({
   }, [selectedTags]);
   useEffect(() => {
     if (loading) return;
-    console.log("Loading Changed");
+    // console.log("Loading Changed");
 
     getData();
   }, [loading]);

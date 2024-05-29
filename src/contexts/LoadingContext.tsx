@@ -22,7 +22,7 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
   // This event fires only when another tab changes local storage unless we dispatch it
   function onStorageEvent(e: StorageEvent | OwnStorageEvent) {
     const loadingStorageValue: boolean = e.newValue === "true";
-    console.log("storage event", loadingStorageValue);
+    // console.log("storage event", loadingStorageValue);
     if (e.key === "loading") {
       setLoadingState(loadingStorageValue);
       if (!loadingStorageValue && e.constructor.name !== OwnStorageEvent.name) {
@@ -45,7 +45,7 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
   }
 
   function setLoading(newValue: boolean) {
-    console.log("setLoading", newValue);
+    // console.log("setLoading", newValue);
     const oldValue = window.localStorage.getItem("loading") === "true";
     if (newValue === oldValue) return;
     window.localStorage.setItem("loading", newValue.toString());

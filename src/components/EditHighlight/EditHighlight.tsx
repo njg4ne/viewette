@@ -69,7 +69,7 @@ function EditHighlight() {
   );
 }
 
-function entrify(tags: Taguette.Tag[]): [number, string][] {
+export function entrify(tags: Taguette.Tag[]): [number, string][] {
   return tags.map(({ id, path }: Taguette.Tag) => [id, path]);
 }
 const newTags = signal([]);
