@@ -209,8 +209,10 @@ function TitlewithNavigationArrows({
   const getPrevId = () => hlIds[prevIndex];
   const getNextId = () => hlIds[nextIndex];
 
-  const onKeyRight = () => navigate(`/highlights/${getNextId()}`, { state });
-  const onKeyLeft = () => navigate(`/highlights/${getPrevId()}`, { state });
+  const onKeyRight = () =>
+    navigate(`/highlights/${getNextId()}`, { state, replace: true });
+  const onKeyLeft = () =>
+    navigate(`/highlights/${getPrevId()}`, { state, replace: true });
   useHotkeys("right", onKeyRight);
   useHotkeys("left", onKeyLeft);
 
