@@ -6,7 +6,10 @@ import MenuItem from "@mui/material/MenuItem";
 import { useState, useRef } from "preact/compat";
 import { signalReady, dbs } from "../../../signals";
 import Divider from "@mui/material/Divider";
-
+import InfoIcon from "@mui/icons-material/Info";
+import Card from "@mui/material/Card";
+import CardActions from "@mui/material/CardActions";
+import CardContent from "@mui/material/CardContent";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ContentCopy from "@mui/icons-material/ContentCopy";
@@ -21,10 +24,12 @@ import ButtonGroup from "@mui/material/ButtonGroup";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import LaunchIcon from "@mui/icons-material/Launch";
+import EditIcon from "@mui/icons-material/Edit";
 import TextIcon from "@mui/icons-material/Subject";
 import Badge from "@mui/material/Badge";
 import Avatar from "@mui/material/Avatar";
 import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
 
 import { useLoadingContext } from "../../../contexts/LoadingContext";
 import { useTreeContext } from "../../../contexts/TagTreeContext";
@@ -37,18 +42,18 @@ import StyledTreeItem from "./StyledTreeItem";
 import RenderMultipleTagTreeItems2, {
   TagTreeItem,
 } from "./MultipleTagTreeItems";
-import { SxProps, Tooltip } from "@mui/material";
+import type { SxProps } from "@mui/material";
+import Tooltip from "@mui/material/Tooltip";
 import * as popups from "../../../popups";
 import { Link } from "react-router-dom";
 
 export default function RenderSingleTagTreeItem() {
   const { loading, setLoading } = useLoadingContext();
   const { enqueueSnackbar: sbqr, closeSnackbar } = useSnackbar();
-  const { createTagFieldRef, setCreateTagValue, selectedItems } =
-    useTreeContext();
+  const { selectedItems } = useTreeContext();
   const { handleContextMenu, item } = useTagTreeItemContext();
   const ref = useRef<HTMLDivElement>(null);
-  const [hovering, hoverProps] = useHover();
+  // const [hovering, hoverProps] = useHover();
 
   const ttText = item.isTag ? item.path : `category '${item.path}'`;
   const ancestors = item.familyTags.filter((tag) => tag.path !== item.path);
@@ -67,7 +72,7 @@ export default function RenderSingleTagTreeItem() {
   ];
   return (
     <StyledTreeItem
-      {...hoverProps}
+      // {...hoverProps}
       // sx={{ color: "text.primary", opacity: 0.8 }}
       slots={{
         expandIcon: Icon,
@@ -86,7 +91,8 @@ export default function RenderSingleTagTreeItem() {
           onContextMenu={handleContextMenu}
         >
           <TagChip
-            tag={item[hovering ? "path" : "label"]}
+            // tag={item[hovering ? "path" : "label"]}
+            tag={item.label}
             specialColor={!item.isTag}
           />
           <Stack
@@ -111,6 +117,7 @@ export default function RenderSingleTagTreeItem() {
               </Typography>
             </Typography>
           </Stack>
+          <Preview />
           <ButtonGroup aria-label="tag tree item action button group">
             {actions.map((action) => (
               // <Tooltip title={action.label} placement="bottom">
@@ -129,6 +136,7 @@ export default function RenderSingleTagTreeItem() {
               // </Tooltip>
             ))}
           </ButtonGroup>
+
           <ContextMenu />
         </Stack>
         // </Tooltip>
@@ -140,6 +148,56 @@ export default function RenderSingleTagTreeItem() {
         <RenderMultipleTagTreeItems2 tags={ancestors} level={item.level} />
       )}
     </StyledTreeItem>
+  );
+}
+
+function Preview() {
+  function InfoPopover() {
+    return <TagCard />;
+  }
+  const m0p0Sx = { sx: { m: 0, p: 0 } };
+  return (
+    <Stack direction="row" sx={{ pl: 0.5, alignItems: "center" }}>
+      <Tooltip
+        title={<InfoPopover />}
+        slotProps={{ popper: m0p0Sx, tooltip: m0p0Sx }}
+        placement="right-start"
+      >
+        <InfoIcon fontSize="small" />
+      </Tooltip>
+    </Stack>
+  );
+}
+
+function TagCard() {
+  const { item } = useTagTreeItemContext();
+  const tag: any = item.tag;
+  const path = item.path;
+  const description = tag ? tag.description : "This is a category only.";
+  return (
+    <Card variant="outlined">
+      <CardContent>
+        <Typography color="text.secondary">Full Path</Typography>
+        <Typography fontSize={"1.5rem"}>{path}</Typography>
+        <Typography color="text.secondary" gutterBottom>
+          Description
+        </Typography>
+        <Typography>{description}</Typography>
+      </CardContent>
+      {/* <CardActions>
+        <Button
+          onClick={save}
+          disabled={loading}
+          variant="outlined"
+          sx={{
+            marginBottom: 1,
+            marginLeft: 1,
+          }}
+        >
+          Save
+        </Button>
+      </CardActions> */}
+    </Card>
   );
 }
 function useHover() {

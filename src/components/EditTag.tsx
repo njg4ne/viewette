@@ -71,33 +71,7 @@ function EditTag() {
   );
 }
 
-function TagCard({ tag }: { tag: Taguette.Tag }) {
-  return (
-    <Card>
-      <CardContent>
-        <Typography color="text.secondary">Tag Path</Typography>
-        <Typography fontSize={"1.5rem"}>{tag.path}</Typography>
-        <Typography color="text.secondary" gutterBottom>
-          Description
-        </Typography>
-        <Typography>{tag.description}</Typography>
-      </CardContent>
-      {/* <CardActions>
-        <Button
-          onClick={save}
-          disabled={loading}
-          variant="outlined"
-          sx={{
-            marginBottom: 1,
-            marginLeft: 1,
-          }}
-        >
-          Save
-        </Button>
-      </CardActions> */}
-    </Card>
-  );
-}
+
 
 function EditTagCard({ tag }: { tag: Taguette.Tag }) {
   const formRef = useRef<HTMLFormElement>(null);
