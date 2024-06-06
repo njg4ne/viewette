@@ -21,7 +21,8 @@ import AcUnitIcon from "@mui/icons-material/AcUnit";
 import TextField from "@mui/material/TextField";
 import { useSearchParams } from "react-router-dom";
 import { HighlightsProvider } from "../../contexts/HighlightsContext";
-
+// import { AutoSizer } from "react-virtualized";
+import AutoSizer from "react-virtualized-auto-sizer";
 function TagPathFilter() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tagLikeFilter = searchParams.get("tagLike") || "";
@@ -119,56 +120,37 @@ export default function TagTree({}) {
       // minHeight="100vh"
     >
       <CreateTagForm />
-      {/* <Typography variant="body2">
-        {numTagsSelected > 0
-          ? `${numTagsSelected} tag${numTagsSelected > 1 ? "s" : ""} selected`
-          : "No tags selected"}
-      </Typography> */}
-      <Stack
-        direction="row"
-        alignSelf="stretch"
-        // height="100%"
-        // maxHeight="100%"
-        sx={{
-          overflow: "auto",
-        }}
-      >
-        <Stack
-          direction="row"
-          spacing={0}
-          justifyContent="space-between"
-          sx={{
-            // backgroundColor: "white",
-            // maxHeight: "100%",
-            overflow: "auto",
-            resize: "both",
-            // resize: "horizontal",
-            width: "fit-content",
-          }}
-        >
-          {/* <Box maxHeight="100%" sx={{ overflow: "auto" }}> */}
-          <SimpleTreeView
-            sx={{
-              flexGrow: 1,
-              overflow: "auto",
-              paddingRight: 1,
-              // maxHeight: "50vh",
-            }}
-            selectedItems={selectedItems}
-            apiRef={apiRef}
-            onSelectedItemsChange={handleSelectedItemsChange}
-            onItemSelectionToggle={selectChildrenToo}
-            multiSelect
-            expandedItems={allItemIds(allTags)}
-            onExpandedItemsChange={handleExpandedItemsChange}
-          >
-            <TagPathFilter />
-            <MultipleTagTreeItems tags={allTags} level={-1} />
-          </SimpleTreeView>
-          {/* </div> */}
-          {/* </Box> */}
-          <Divider orientation="vertical" flexItem />
-        </Stack>
+      <Stack direction="row" flexGrow={1}>
+        {/* <Box bgcolor="green"> */}
+        <AutoSizer disableWidth>
+          {({ height }) => (
+            // <Box sx={{ width, height, bgcolor: "yellow" }} />
+            // <Stack direction="row" height={height} width={width}>
+            <SimpleTreeView
+              sx={{
+                width: "fit-content",
+                // width,
+                height,
+                flexGrow: 1,
+                overflow: "auto",
+                paddingRight: 1,
+                // maxHeight: "50vh",
+              }}
+              selectedItems={selectedItems}
+              apiRef={apiRef}
+              onSelectedItemsChange={handleSelectedItemsChange}
+              onItemSelectionToggle={selectChildrenToo}
+              multiSelect
+              expandedItems={allItemIds(allTags)}
+              onExpandedItemsChange={handleExpandedItemsChange}
+            >
+              <TagPathFilter />
+              <MultipleTagTreeItems tags={allTags} level={-1} />
+            </SimpleTreeView>
+            // </Stack>
+          )}
+        </AutoSizer>
+        {/* </Box> */}
         <Box flexGrow={1}>
           <HighlightsProvider>
             <HighlightList />

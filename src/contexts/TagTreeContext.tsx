@@ -1,4 +1,4 @@
-import { StateUpdater } from "preact/hooks";
+import { Dispatch, StateUpdater } from "preact/hooks";
 import {
   useState,
   createContext,
@@ -26,14 +26,12 @@ type TagMap = Record<string | number, string>;
 
 const defaults = {
   expandedItems: [] as string[],
-  setExpandedItems: {} as StateUpdater<string[]>,
+  setExpandedItems: {} as Dispatch<StateUpdater<string[]>>,
   selectedItems: [] as string[],
-  setSelectedItems: {} as StateUpdater<string[]>,
+  setSelectedItems: {} as Dispatch<StateUpdater<string[]>>,
   createTagValue: "" as string,
-  // setCreateTagValue: {} as StateUpdater<string>,
-  // createTagFieldRef: {} as React.RefObject<HTMLElement>,
   tags: {} as TagMap,
-  setTags: {} as StateUpdater<TagMap>,
+  setTags: {} as Dispatch<StateUpdater<TagMap>>,
   numTagsSelected: 0 as number,
   apiRef: {} as MutableRefObject<
     | (UseTreeViewItemsPublicAPI<any> &
@@ -70,36 +68,8 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
     db.transactAll([{ sql, bindings }]).then(([newTags]) => {
       setAllTags(newTags as Taguette.Tag[]);
     });
-    // db.read.tags().then(setAllTags);
-  }, [loading, dbs.value, searchParams.get("tagLike")]);
+  }, [loading, dbs.value, tagLikeFilter]);
 
-  // let [searchParams, setSearchParams] = useSearchParams();
-  // useEffect(() => {
-  //   const key = "selected";
-  //   let selectedParam = searchParams.get(key);
-  //   if (!selectedParam) {
-  //     const keepOldAndNullSelected = (prev: URLSearchParams) => {
-  //       prev.delete(key);
-  //       return prev;
-  //     };
-  //     setSearchParams(keepOldAndNullSelected);
-  //   }
-  //   // filter whitespaces of any kind
-  //   selectedParam = (selectedParam ?? "").replace(/\s/g, "");
-  //   // regular expression for [] with maybe some number of comma-separated numbers inside
-  //   const re = /(\d+(?:∪\d+)*)/;
-  //   const satisfies = re.test(selectedParam || "");
-  //   console.log("satisfies", satisfies, selectedParam);
-  //   if (!satisfies) return;
-  //   let nums = selectedParam.split("∪").map((s) => parseInt(s));
-  //   nums = [...new Set(nums)];
-  //   setSearchParams((prev: URLSearchParams) => {
-  //     prev.set(key, nums.join("∪"));
-  //     return prev;
-  //   });
-  // }, [searchParams]);
-
-  // const createTagFieldRef = useRef<HTMLElement>(null);
   const apiRef = useTreeViewApiRef();
   const selectedTags = selectedItems.filter((path) =>
     allTags.map((tag) => tag.path).includes(path)
@@ -109,21 +79,11 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
     if (numTagsSelected === 0) return;
     deleteTags(selectedTags);
   });
-  // useEffect(() => {
-  //   if (loading || !signalReady(opfsDb)) return;
-  //   // console.log("opfsDb", opfsDb.value);
-  //   const dbv: TaguetteDb = opfsDb.value;
-  //   dbv.read.tags().then(setAllTags);
-
-  // }, [opfsDb.value, loading]);
 
   useEffect(() => {
     if (loading || !signalReady(dbs) || allTags.length === 0) return;
-    // // console.log("opfsDb", opfsDb.value);
-    // const dbv: TaguetteDb = opfsDb.value;
     const db: TaguetteDb = dbs.value;
     db.read.taggingsByPath(allItemPaths(allTags)).then((taggings) => {
-      // console.log("taggings", taggings);
       setTaggings(taggings);
     });
   }, [allTags, loading, dbs.value]);
@@ -150,8 +110,6 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
         selectedItems,
         setSelectedItems,
         createTagValue,
-        // setCreateTagValue,
-        // createTagFieldRef,
         tags,
         setTags,
         numTagsSelected,
@@ -180,8 +138,6 @@ function allItemPaths(tags: Taguette.Tag[]): string[] {
     acc.push(...morePaths);
     return acc;
   }, []);
-  // console.log(res);
   res.sort();
-  // console.log(res);
   return [...new Set(res)];
 }
