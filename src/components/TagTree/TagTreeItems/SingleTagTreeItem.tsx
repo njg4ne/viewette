@@ -46,12 +46,14 @@ import type { SxProps } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import * as popups from "../../../popups";
 import { Link } from "react-router-dom";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export default function RenderSingleTagTreeItem() {
   const { loading, setLoading } = useLoadingContext();
   const { enqueueSnackbar: sbqr, closeSnackbar } = useSnackbar();
   const { selectedItems } = useTreeContext();
   const { handleContextMenu, item } = useTagTreeItemContext();
+  const { setExpandedItems } = useTreeContext();
   const ref = useRef<HTMLDivElement>(null);
   // const [hovering, hoverProps] = useHover();
 
@@ -68,6 +70,19 @@ export default function RenderSingleTagTreeItem() {
       // },
       // link: `/`,
       link: item.tag ? `/tags/${item.tag.id}` : `/category/${item.path}`,
+    },
+    {
+      label: "expand",
+      icon: ExpandMoreIcon,
+      action: () => {
+        setExpandedItems((prev) => {
+          const wasExpanded = prev.includes(item.path);
+          return wasExpanded
+            ? prev.filter((path) => path !== item.path)
+            : [...prev, item.path];
+        });
+        // popups.info(sbqr, `expand ${item.path}`);
+      },
     },
   ];
   return (
@@ -121,11 +136,12 @@ export default function RenderSingleTagTreeItem() {
           <ButtonGroup aria-label="tag tree item action button group">
             {actions.map((action) => (
               // <Tooltip title={action.label} placement="bottom">
+
               <IconButton
                 aria-label={action.label}
                 // onClick={() => action?.action()}
-                component={Link}
-                to={action.link}
+                {...(action.link ? { component: Link, to: action.link } : {})}
+                {...(!action.link ? { onClick: action.action } : {})}
                 disabled={!item.isTag}
               >
                 {action.icon({

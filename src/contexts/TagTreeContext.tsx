@@ -67,6 +67,7 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
     };`;
     db.transactAll([{ sql, bindings }]).then(([newTags]) => {
       setAllTags(newTags as Taguette.Tag[]);
+      setExpandedItems(allItemPathsUnsorted(newTags));
     });
   }, [loading, dbs.value, tagLikeFilter]);
 
@@ -140,4 +141,11 @@ function allItemPaths(tags: Taguette.Tag[]): string[] {
   }, []);
   res.sort();
   return [...new Set(res)];
+}
+function allItemPathsUnsorted(tags: Taguette.Tag[]): string[] {
+  return tags.reduce((acc: string[], tag: Taguette.Tag) => {
+    const morePaths = getAllPartialPaths(tag.path);
+    acc.push(...morePaths);
+    return acc;
+  }, []);
 }

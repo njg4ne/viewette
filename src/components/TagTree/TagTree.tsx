@@ -141,8 +141,9 @@ export default function TagTree({}) {
               onSelectedItemsChange={handleSelectedItemsChange}
               onItemSelectionToggle={selectChildrenToo}
               multiSelect
-              expandedItems={allItemIds(allTags)}
-              onExpandedItemsChange={handleExpandedItemsChange}
+              expandedItems={expandedItems}
+              // expandedItems={allItemIds(allTags)}
+              // onExpandedItemsChange={handleExpandedItemsChange}
             >
               <TagPathFilter />
               <MultipleTagTreeItems tags={allTags} level={-1} />
@@ -161,10 +162,3 @@ export default function TagTree({}) {
   );
 }
 
-function allItemIds(tags: Taguette.Tag[]): string[] {
-  return tags.reduce((acc: string[], tag: Taguette.Tag) => {
-    const morePaths = getAllPartialPaths(tag.path);
-    acc.push(...morePaths);
-    return acc;
-  }, []);
-}
