@@ -33,16 +33,18 @@ import Tooltip from "@mui/material/Tooltip";
 import Stack from "@mui/material/Stack";
 import RightArrowKeyIcon from "@mui/icons-material/Forward";
 
-export default () => (
-  // <LoadingProvider>
-  <EditHighlight />
-);
+// export default () => (
+//   // <LoadingProvider>
+//   <EditHighlight />
+// );
 
-function EditHighlight() {
+// make id an optional parameter
+export default function EditHighlight({ id }: { id?: number }) {
   // const [searchParams, _] = useSearchParams();
   const { loading, setLoading } = useLoadingContext();
   const { enqueueSnackbar: sbqr } = useSnackbar();
-  const { id } = useParams();
+  const { id: idParam } = useParams();
+  id = id || Number(idParam);
   const [hl, setHl] = useState<Taguette.Highlight | null>(null);
   useEffect(() => {
     if (loading || !signalReady(dbs)) return;
@@ -57,9 +59,9 @@ function EditHighlight() {
       setHl(newHl);
     });
   }, [loading, dbs.value, id]);
-  function save() {
-    console.log("save");
-  }
+  // function save() {
+  //   console.log("save");
+  // }
   // const tagParams = searchParams.get("tags");
   // const queryStr = tagParams ? `?tags=${tagParams}` : "";
   return !hl ? null : (
@@ -72,9 +74,9 @@ function EditHighlight() {
 export function entrify(tags: Taguette.Tag[]): [number, string][] {
   return tags.map(({ id, path }: Taguette.Tag) => [id, path]);
 }
-const newTags = signal([]);
+// const newTags = signal([]);
 function HlCard({ hl }: { hl: Taguette.Highlight }) {
-  const { id } = useParams();
+  const id = hl.id;
   const { loading, setLoading } = useLoadingContext();
   const { enqueueSnackbar: sbqr } = useSnackbar();
   const bindings = { $hid: id };
@@ -94,18 +96,25 @@ function HlCard({ hl }: { hl: Taguette.Highlight }) {
 
   const currentTags = useDb<Taguette.Tag[]>([], [id], sql, bindings);
   const allTags = useModel<Taguette.Tag[]>([], (db) => db.read.tags, [id]);
-  console.log("currentTags", ...currentTags, id, bindings);
+  // console.log("currentTags", ...currentTags, id, bindings);
   const tagEntries = [] as const;
   const [toRemove, setToRemove] = useState<Set<number>>(new Set());
+  const [toAddInputValue, setToAddInputValue] = useState<[number, string][]>(
+    []
+  );
   const [toAdd, setToAdd] = useState<Set<number>>(new Set());
+  useEffect(() => {
+    setToAdd(new Set(toAddInputValue.map(([id]) => id)));
+  }, [toAddInputValue]);
 
   const unusedTagEntries = entrify(
     allTags.filter(({ id }) => !currentTags.some((t) => t.id === id))
   );
   useEffect(() => {
     // if (loading) return;
-    newTags.value = [];
-    setToAdd(new Set());
+    // newTags.value = [];
+    // setToAdd(new Set());
+    setToAddInputValue([]);
     setToRemove(new Set());
   }, [id]);
 
@@ -120,10 +129,11 @@ function HlCard({ hl }: { hl: Taguette.Highlight }) {
     });
   }
   const onChange = (event: Event, newValue: [number, string][]) => {
-    console.log("onChange", newValue);
+    // console.log("onChange", newValue);
     //@ts-ignore
-    newTags.value = newValue;
-    setToAdd(new Set(newValue.map(([id]) => id)));
+    // newTags.value = newValue;
+    // setToAdd(new Set(newValue.map(([id]) => id)));
+    setToAddInputValue(newValue);
   };
   const numChanges = toRemove.size + toAdd.size;
   const submitDisabled = loading || numChanges === 0;
@@ -133,8 +143,9 @@ function HlCard({ hl }: { hl: Taguette.Highlight }) {
     const db: TaguetteDb = dbs.value;
     setLoading(true);
     await db.update.tags.forHighlight(hl.id, [...toRemove], [...toAdd]);
-    newTags.value = [];
-    setToAdd(new Set());
+    // newTags.value = [];
+    // setToAdd(new Set());
+    setToAddInputValue([]);
     setToRemove(new Set());
     sbqr("Tags updated", { variant: "success" });
     setLoading(false);
@@ -165,13 +176,15 @@ function HlCard({ hl }: { hl: Taguette.Highlight }) {
             defaultValue={[]}
             onChange={onChange}
             // value={[...toAdd].map((num) => num.toString())}
-            value={newTags.value}
+            // value={newTags.value}
+            value={toAddInputValue}
             disabled={loading}
           />
           <Typography color="text.secondary">Remove Existing Tags</Typography>
           <ExistingTagsEditor
             options={entrify(currentTags)}
             onCheck={onCheck}
+            toRemove={toRemove}
             disabled={loading}
           />
           <Button

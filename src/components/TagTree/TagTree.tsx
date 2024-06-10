@@ -132,36 +132,38 @@ export default function TagTree({}) {
       <CreateTagForm />
       <Stack direction="row" flexGrow={1}>
         {/* <Box bgcolor="green"> */}
-        <AutoSizer disableWidth>
-          {({ height }) => (
-            // <Box sx={{ width, height, bgcolor: "yellow" }} />
-            // <Stack direction="row" height={height} width={width}>
-            <SimpleTreeView
-              sx={{
-                resize: "horizontal",
-                width: "min-content",
-                // width,
-                height,
-                flexGrow: 1,
-                overflow: "auto",
-                paddingRight: 1,
-                // maxHeight: "50vh",
-              }}
-              selectedItems={selectedItems}
-              apiRef={apiRef}
-              onSelectedItemsChange={handleSelectedItemsChange}
-              onItemSelectionToggle={selectChildrenToo}
-              multiSelect
-              expandedItems={Array.from(expandedItems.keys())}
-              // expandedItems={allItemIds(allTags)}
-              // onExpandedItemsChange={handleExpandedItemsChange}
-            >
-              <TagPathFilter />
-              <MultipleTagTreeItems tags={allTags} level={-1} />
-            </SimpleTreeView>
-            // </Stack>
-          )}
-        </AutoSizer>
+        <Box maxWidth="50%">
+          <AutoSizer disableWidth>
+            {({ height }) => (
+              // <Box sx={{ width, height, bgcolor: "yellow" }} />
+              // <Stack direction="row" height={height} width={width}>
+              <SimpleTreeView
+                sx={{
+                  resize: "horizontal",
+                  maxWidth: "100%",
+                  // width,
+                  height,
+                  flexGrow: 1,
+                  overflow: "auto",
+                  paddingRight: 1,
+                  // maxHeight: "50vh",
+                }}
+                selectedItems={selectedItems}
+                apiRef={apiRef}
+                onSelectedItemsChange={handleSelectedItemsChange}
+                onItemSelectionToggle={selectChildrenToo}
+                multiSelect
+                expandedItems={Array.from(expandedItems.keys())}
+                // expandedItems={allItemIds(allTags)}
+                // onExpandedItemsChange={handleExpandedItemsChange}
+              >
+                <TagPathFilter />
+                <MultipleTagTreeItems tags={allTags} level={-1} />
+              </SimpleTreeView>
+              // </Stack>
+            )}
+          </AutoSizer>
+        </Box>
         {/* </Box> */}
         <Box flexGrow={1}>
           <HighlightsProvider>

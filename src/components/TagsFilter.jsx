@@ -1,8 +1,10 @@
 import * as React from "preact/compat";
 import Chip from "@mui/material/Chip";
+import Paper from "@mui/material/Paper";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
+import ClearIcon from "@mui/icons-material/Clear";
 // import {
 //   tags,
 //   tagIncludeFilter,
@@ -11,7 +13,8 @@ import Stack from "@mui/material/Stack";
 // } from "../signals";
 import Switch from "@mui/material/Switch";
 import Box from "@mui/material/Box";
-import { Typography } from "@mui/material";
+import { IconButton, Typography } from "@mui/material";
+import { TagChip } from "./TagTree/TagTreeItems/SingleTagTreeItem";
 
 function Filter(props) {
   const { onChange, label } = props;
@@ -47,6 +50,37 @@ function Filter(props) {
 
 export function ManagedTagChooser(props) {
   const { onChange, label, options, value, disabled, ...rest } = props;
+  const renderOption = (props, option, state, ownerState) => {
+    const label = option[1];
+    return (
+      <li {...props}>
+        <TagChip tag={label} sx={{ my: undefined, width: "max-content" }} />
+      </li>
+    );
+  };
+  const renderTags = (tagValue, getTagProps) =>
+    tagValue.map((option, index) => {
+      // console.log("props", getTagProps({ index }))
+      const { onDelete, ...rest } = getTagProps({ index });
+      return (
+        <Stack
+          {...getTagProps({ index })}
+          direction="row"
+          flexWrap="nowrap"
+          alignItems="center"
+          spacing={0.5}
+          // component={Paper}
+          // elevation={0}
+          // variant="outlined"
+          sx={{ p: 0.75, borderRadius: "0.5rem" }}
+        >
+          <TagChip tag={option[1]} />
+          <IconButton aria-label="remove" onClick={onDelete}>
+            <ClearIcon sx={{ fontSize: "1rem" }}></ClearIcon>
+          </IconButton>
+        </Stack>
+      );
+    });
   return (
     <Autocomplete
       multiple
@@ -56,9 +90,13 @@ export function ManagedTagChooser(props) {
       value={value}
       onChange={onChange}
       getOptionLabel={(option) => option[1]}
-      isOptionEqualToValue={(option, value) => options.length === 0 || option[0] === value[0]}
+      isOptionEqualToValue={(option, value) =>
+        options.length === 0 || option[0] === value[0]
+      }
       filterSelectedOptions
       renderInput={(params) => <TextField {...params} label={label} />}
+      renderOption={renderOption}
+      renderTags={renderTags}
       disabled={disabled}
     />
   );

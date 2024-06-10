@@ -6,7 +6,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import Skeleton from "@mui/material/Skeleton";
-import type { ListRange } from "react-virtuoso";
+import type { ListRange, VirtuosoHandle } from "react-virtuoso";
 import { Virtuoso } from "react-virtuoso";
 import Chip from "@mui/material/Chip";
 import { TagChip } from "./TagTree/TagTreeItems/SingleTagTreeItem";
@@ -34,6 +34,7 @@ import { useHighlightsContext } from "../contexts/HighlightsContext";
 import { Link, useSearchParams } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
+import EditHighlight from "./EditHighlight/EditHighlight";
 
 export default Parent;
 const SEARCH_KEY = "hlOffset";
@@ -44,7 +45,10 @@ function Parent() {
     useDebouncedSearchParam({
       key: SEARCH_KEY,
     });
-  const setOffset = (offset: number) => setHlOffsetDebounced(offset.toString());
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const setOffset = (offset: number) => {
+    setHlOffsetDebounced(offset.toString());
+  };
 
   const onRange = ({ startIndex: i }: ListRange) => setOffset(i);
 
@@ -54,12 +58,17 @@ function Parent() {
     }
   }, [selectedItems]);
 
+  // useEffect(() => {
+  //   virtuosoRef.current?.scrollToIndex(Number(hlOffset));
+  // }, [hlOffset]);
+
   const childContent = (_i: number, hid: number) => <HighlightCard id={hid} />;
   return (
     <>
       <Stack direction="column" sx={{ height: "100%" }} spacing={0}>
         <Typography children={infoText} sx={{ px: 2, py: 1 }} />
         <Virtuoso
+          ref={virtuosoRef}
           data={hlIds}
           totalCount={numHlts}
           itemContent={childContent}
@@ -117,6 +126,25 @@ function HighlightCard({ id }: { id: number }) {
         <Skeleton variant="rounded" height={"7rem"} />
       )}
     </Box>
+  );
+}
+function HighlightListItem2({ highlight }: { highlight: Taguette.Highlight }) {
+  return (
+    <ListItem
+      component={Paper}
+      elevation={4}
+      sx={{
+        minWidth: "fit-content",
+        pr: 0,
+        py: 0.25,
+        display: "flex",
+        flexWrap: "nowrap",
+        alignItems: "stretch",
+        justifyContent: "space-between",
+      }}
+    >
+      <EditHighlight id={highlight.id} />
+    </ListItem>
   );
 }
 function HighlightListItem({ highlight }: { highlight: Taguette.Highlight }) {

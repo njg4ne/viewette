@@ -1,4 +1,4 @@
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useRef } from "preact/hooks";
 import { FC } from "preact/compat";
 
 import List from "@mui/material/List";
@@ -8,39 +8,33 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import Card from "@mui/material/Card";
+import { TagChip } from "../TagTree/TagTreeItems/SingleTagTreeItem";
 type PropTypes = {
   options: (string | number)[][]; // tag entry?
   onCheck: (checked: boolean, id: number) => void;
   disabled: boolean;
+  toRemove: Set<number>;
 };
 export const ExistingTagsEditor: FC<PropTypes> = ({
   options,
   onCheck,
   disabled,
+  toRemove,
 }) => {
-  const [checked, setChecked] = useState<number[]>([0]);
-  //   useEffect(() => {
-  //     console.log("options", options);
-  //   }, [options]);
-
   return (
     <List component={Card} sx={{ width: "75%" }}>
       {options.map(([tid, tagName]) => {
         const labelId = `checkbox-list-label-${tid}`;
-
+        const checked = !toRemove.has(Number(tid));
+        const toggle = () => onCheck(!checked, Number(tid));
         return (
           <ListItem key={tid} disablePadding>
-            <ListItemButton
-              role={undefined}
-              onClick={(e: any) =>
-                onCheck(e?.target?.checked || false, Number(tid))
-              }
-              dense
-            >
+            <ListItemButton role={undefined} onClick={toggle} dense>
               <ListItemIcon>
                 <Checkbox
+                  color="secondary"
+                  checked={checked}
                   edge="start"
-                  // checked={checked.indexOf(value) !== -1}
                   tabIndex={-1}
                   disableRipple
                   inputProps={{ "aria-labelledby": labelId }}
@@ -48,7 +42,11 @@ export const ExistingTagsEditor: FC<PropTypes> = ({
                   disabled={disabled}
                 />
               </ListItemIcon>
-              <ListItemText id={labelId} primary={`${tagName}`} />
+              <TagChip
+                tag={tagName.toString()}
+                sx={{ textDecoration: !checked ? "line-through" : "none" }}
+              />
+              {/* <ListItemText id={labelId} primary={`${tagName}`} /> */}
             </ListItemButton>
           </ListItem>
         );
