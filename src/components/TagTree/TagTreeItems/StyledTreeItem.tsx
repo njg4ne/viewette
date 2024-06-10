@@ -1,7 +1,9 @@
 import { TreeItem, treeItemClasses } from "@mui/x-tree-view/TreeItem";
+import { TreeItem2 } from "@mui/x-tree-view/TreeItem2";
+
 import { styled, alpha } from "@mui/material/styles";
 
-export const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
+export const StyledTreeItem = styled(TreeItem2)(({ theme }) => ({
   [`& .${treeItemClasses.content}`]: {
     padding: theme.spacing(0.5, 1),
     margin: theme.spacing(0.2, 0),

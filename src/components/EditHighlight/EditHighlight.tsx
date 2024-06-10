@@ -39,7 +39,7 @@ export default () => (
 );
 
 function EditHighlight() {
-  const [searchParams, _] = useSearchParams();
+  // const [searchParams, _] = useSearchParams();
   const { loading, setLoading } = useLoadingContext();
   const { enqueueSnackbar: sbqr } = useSnackbar();
   const { id } = useParams();
@@ -60,8 +60,8 @@ function EditHighlight() {
   function save() {
     console.log("save");
   }
-  const tagParams = searchParams.get("tags");
-  const queryStr = tagParams ? `?tags=${tagParams}` : "";
+  // const tagParams = searchParams.get("tags");
+  // const queryStr = tagParams ? `?tags=${tagParams}` : "";
   return !hl ? null : (
     <Container maxWidth="md" sx={{ alignSelf: "center" }}>
       <HlCard hl={hl} />

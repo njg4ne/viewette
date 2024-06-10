@@ -2,7 +2,7 @@ import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
-import { useEffect, useState } from "preact/compat";
+import { useEffect, useRef, useState } from "preact/compat";
 // import { opfsDb } from "../../signals";
 // import { Box, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -23,12 +23,29 @@ import { useSearchParams } from "react-router-dom";
 import { HighlightsProvider } from "../../contexts/HighlightsContext";
 // import { AutoSizer } from "react-virtualized";
 import AutoSizer from "react-virtualized-auto-sizer";
+// import { useDebounce } from "use-debounce";
+import { useDebouncedCallback } from "use-debounce";
+import useDebouncedSearchParam from "../../hooks/useDebouncedSearchParam";
+import {
+  SearchParamProvider,
+  useSearchParamContext,
+} from "../../contexts/SearchParamContext";
+const SEARCH_KEY = "tagLike";
 function TagPathFilter() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tagLikeFilter = searchParams.get("tagLike") || "";
+  // const [inputValue, setInputValue] = useDebouncedSearchParam({
+  //   key: SEARCH_KEY,
+  // });
+
+  const [param, onChangeDebounced] = useSearchParamContext(SEARCH_KEY);
+  const [inputValue, setInputValue] = useState(param);
+  useEffect(() => {
+    setInputValue(param);
+  }, [param]);
+
   return (
     <TextField
       fullWidth
+      // inputRef={inputRef}
       id="tag-filter"
       name="tag-filter"
       label="Filter Tags"
@@ -36,21 +53,13 @@ function TagPathFilter() {
       inputProps={{
         "aria-label": "tag filter",
       }}
+      // disabled={loading}
       width="100%"
-      value={tagLikeFilter}
-      onChange={(e: InputEvent) => {
+      value={inputValue}
+      onChange={(e: Event) => {
         const newValue = (e.target as HTMLInputElement).value.trimStart();
-        setSearchParams(
-          (sp) => {
-            if (newValue === "") {
-              sp.delete("tagLike");
-            } else {
-              sp.set("tagLike", newValue);
-            }
-            return sp;
-          },
-          { replace: true }
-        );
+        setInputValue(newValue);
+        onChangeDebounced(newValue);
       }}
     />
   );
@@ -86,7 +95,7 @@ export default function TagTree({}) {
   ): void => {
     const family = getGenealogy([itemId], allTags);
     if (isSelected) {
-      setExpandedItems((prev) => [...new Set(prev.concat(family))]);
+      // setExpandedItems((prev) => [...new Set(prev.concat(family))]);
       setSelectedItems((prev) => [...new Set(prev.concat(family))]);
       // apiRef.current?.focusItem(event, itemId);
     } else {
@@ -97,19 +106,20 @@ export default function TagTree({}) {
     // console.log("setting")
   };
   const handleExpandedItemsChange = (event: Event, itemIds: string[]) => {
-    setExpandedItems(itemIds);
+    // setExpandedItems(itemIds);
   };
   const handleExpandClick = () => {
-    const allNodeIds = allTags.reduce((acc: string[], tag: Taguette.Tag) => {
-      const morePaths = getAllPartialPaths(tag.path);
-      acc.push(...morePaths);
-      return acc;
-    }, []);
-    setExpandedItems((oldExpanded) =>
-      oldExpanded.length === 0 ? allNodeIds : []
-    );
+    // const allNodeIds = allTags.reduce((acc: string[], tag: Taguette.Tag) => {
+    //   const morePaths = getAllPartialPaths(tag.path);
+    //   acc.push(...morePaths);
+    //   return acc;
+    // }, []);
+    // setExpandedItems((oldExpanded) =>
+    //   oldExpanded.length === 0 ? allNodeIds : []
+    // );
   };
   return (
+    // <SearchParamProvider keys={["newTag"]}>
     <Paper
       elevation={1}
       component={Stack}
@@ -128,7 +138,8 @@ export default function TagTree({}) {
             // <Stack direction="row" height={height} width={width}>
             <SimpleTreeView
               sx={{
-                width: "fit-content",
+                resize: "horizontal",
+                width: "min-content",
                 // width,
                 height,
                 flexGrow: 1,
@@ -141,7 +152,7 @@ export default function TagTree({}) {
               onSelectedItemsChange={handleSelectedItemsChange}
               onItemSelectionToggle={selectChildrenToo}
               multiSelect
-              expandedItems={expandedItems}
+              expandedItems={Array.from(expandedItems.keys())}
               // expandedItems={allItemIds(allTags)}
               // onExpandedItemsChange={handleExpandedItemsChange}
             >
@@ -159,6 +170,6 @@ export default function TagTree({}) {
         </Box>
       </Stack>
     </Paper>
+    // </SearchParamProvider>
   );
 }
-

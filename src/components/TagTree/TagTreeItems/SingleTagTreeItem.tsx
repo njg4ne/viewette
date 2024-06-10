@@ -3,22 +3,31 @@ import Stack from "@mui/material/Stack";
 import { useSnackbar } from "notistack";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { useState, useRef } from "preact/compat";
+import { useState, useRef, useMemo, useEffect } from "preact/compat";
 import { signalReady, dbs } from "../../../signals";
 import Divider from "@mui/material/Divider";
-import InfoIcon from "@mui/icons-material/Info";
+import InfoIcon from "@mui/icons-material/InfoOutlined";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
+
 import CardContent from "@mui/material/CardContent";
 import ListItemIcon from "@mui/material/ListItemIcon";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ChevronDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ListItemText from "@mui/material/ListItemText";
 import ContentCopy from "@mui/icons-material/ContentCopy";
 import Typography from "@mui/material/Typography";
 import ChildIcon from "@mui/icons-material/SubdirectoryArrowRight";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import FolderIcon from "@mui/icons-material/Folder";
+// import FolderIcon from "@mui/icons-material/Folder";
+import FolderIcon from "@mui/icons-material/FolderOutlined";
 import StarFolderIcon from "@mui/icons-material/FolderSpecial";
 import TagIcon from "@mui/icons-material/Sell";
+// import TagIcon from "@mui/icons-material/SellOutlined";
+import DashIcon from "@mui/icons-material/Remove";
+import BulletIcon from "@mui/icons-material/Circle";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import StarIcon from "@mui/icons-material/Star";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Button from "@mui/material/Button";
@@ -53,7 +62,7 @@ export default function RenderSingleTagTreeItem() {
   const { enqueueSnackbar: sbqr, closeSnackbar } = useSnackbar();
   const { selectedItems } = useTreeContext();
   const { handleContextMenu, item } = useTagTreeItemContext();
-  const { setExpandedItems } = useTreeContext();
+  const { setExpandedItems, expandedItems } = useTreeContext();
   const ref = useRef<HTMLDivElement>(null);
   // const [hovering, hoverProps] = useHover();
 
@@ -61,6 +70,16 @@ export default function RenderSingleTagTreeItem() {
   const ancestors = item.familyTags.filter((tag) => tag.path !== item.path);
 
   const Icon = item.isTag ? StarFolderIcon : FolderIcon;
+  // const Icon = () => (
+  //   <CountSticker iconComponent={TextIcon} value={item.useCount} />
+  // );
+  // const Icon = useMemo(
+  //   () => (item.isTag ? StarFolderIcon : FolderIcon),
+  //   [item.isTag]
+  // );
+  // useEffect(() => {
+  //   console.log("rendering a single tag tree item", item.path);
+  // }, []);
   const actions = [
     {
       label: `view ${item.isTag ? "tag" : "category"}`,
@@ -71,27 +90,40 @@ export default function RenderSingleTagTreeItem() {
       // link: `/`,
       link: item.tag ? `/tags/${item.tag.id}` : `/category/${item.path}`,
     },
-    {
-      label: "expand",
-      icon: ExpandMoreIcon,
-      action: () => {
-        setExpandedItems((prev) => {
-          const wasExpanded = prev.includes(item.path);
-          return wasExpanded
-            ? prev.filter((path) => path !== item.path)
-            : [...prev, item.path];
-        });
-        // popups.info(sbqr, `expand ${item.path}`);
-      },
-    },
   ];
+  function ExpnansionControl({ icon: Icon }: { icon: typeof ExpandMoreIcon }) {
+    return (
+      <IconButton
+        sx={{
+          borderRadius: 1,
+          // mx: 1,
+          p: 0.25,
+        }}
+        aria-label="change expansion"
+        onClick={(e) => {
+          e.stopPropagation();
+          setExpandedItems((prev) => {
+            if (prev?.has(item.path)) {
+              prev.delete(item.path);
+            } else {
+              prev.set(item.path, item.tag);
+            }
+            return new Map(prev);
+          });
+        }}
+      >
+        <Icon />
+      </IconButton>
+    );
+  }
+
   return (
     <StyledTreeItem
       // {...hoverProps}
       // sx={{ color: "text.primary", opacity: 0.8 }}
       slots={{
-        expandIcon: Icon,
-        collapseIcon: Icon,
+        expandIcon: () => <ExpnansionControl icon={ExpandMoreIcon} />,
+        collapseIcon: () => <ExpnansionControl icon={ChevronRightIcon} />,
         endIcon: TagIcon,
       }}
       key={item.path} // sx={{ cursor: 'context-menu' }}
@@ -110,28 +142,7 @@ export default function RenderSingleTagTreeItem() {
             tag={item.label}
             specialColor={!item.isTag}
           />
-          <Stack
-            direction="row"
-            component={Paper}
-            // elevation={1}
-            variant="outlined"
-            spacing={0.25}
-            sx={{
-              backgroundColor: "primary.200",
-              backgroundImage: "primary.200",
-              color: "black",
-              alignItems: "center",
-              px: 0.25,
-            }}
-          >
-            <TextIcon fontSize="small" />
-            <Divider orientation="vertical" flexItem />
-            <Typography>
-              <Typography fontSize="small" sx={{ px: 0.25 }}>
-                {item.useCount}
-              </Typography>
-            </Typography>
-          </Stack>
+          <CountSticker iconComponent={TextIcon} value={item.useCount} />
           <Preview />
           <ButtonGroup aria-label="tag tree item action button group">
             {actions.map((action) => (
@@ -139,10 +150,10 @@ export default function RenderSingleTagTreeItem() {
 
               <IconButton
                 aria-label={action.label}
-                // onClick={() => action?.action()}
-                {...(action.link ? { component: Link, to: action.link } : {})}
-                {...(!action.link ? { onClick: action.action } : {})}
-                disabled={!item.isTag}
+                {...(action.link
+                  ? { component: Link, to: action.link, disabled: !item.isTag }
+                  : {})}
+                // {...(!action.link ? { onClick: action.action } : {})}
               >
                 {action.icon({
                   // fontSize: ".25rem",
@@ -152,7 +163,6 @@ export default function RenderSingleTagTreeItem() {
               // </Tooltip>
             ))}
           </ButtonGroup>
-
           <ContextMenu />
         </Stack>
         // </Tooltip>
@@ -164,6 +174,39 @@ export default function RenderSingleTagTreeItem() {
         <RenderMultipleTagTreeItems2 tags={ancestors} level={item.level} />
       )}
     </StyledTreeItem>
+  );
+}
+
+function CountSticker({
+  value,
+  iconComponent: IconComponent,
+}: {
+  value: number;
+  iconComponent: typeof TextIcon;
+}) {
+  return (
+    <Stack
+      direction="row"
+      component={Paper}
+      // elevation={1}
+      variant="outlined"
+      spacing={0.25}
+      sx={{
+        backgroundColor: "primary.200",
+        backgroundImage: "primary.200",
+        color: "black",
+        alignItems: "center",
+        px: 0.25,
+      }}
+    >
+      <IconComponent fontSize="small" />
+      <Divider orientation="vertical" flexItem />
+      <Typography>
+        <Typography fontSize="small" sx={{ px: 0.25 }}>
+          {value}
+        </Typography>
+      </Typography>
+    </Stack>
   );
 }
 
@@ -264,3 +307,31 @@ export function TagChip({
     </Typography>
   );
 }
+
+// function FolderCollapsed() {
+//   const bxSx = {
+//     position: "relative",
+//   };
+//   const centerSx = {
+//     position: "absolute",
+//     // top: "-50%",
+//     left: "-50%",
+//   };
+//   const fgSx = {
+//     ...centerSx,
+//     zIndex: 1,
+//   };
+//   const bgSx = {
+//     zIndex: 0,
+//     fontSize: "1.5rem",
+//     color: "primary.main",
+//     pl: 0.5,
+//     // textStroke: "3px black",
+//   };
+//   return (
+//     <Stack direction="row" alignItems="center" sx={bxSx}>
+//       <FolderIcon sx={bgSx} />
+//       <ChevronRightIcon sx={fgSx} />
+//     </Stack>
+//   );
+// }

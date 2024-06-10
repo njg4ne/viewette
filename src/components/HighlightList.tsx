@@ -33,28 +33,26 @@ import { useHighlightsContext } from "../contexts/HighlightsContext";
 // import { useNavigate } from "react-router-dom";
 import { Link, useSearchParams } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
+import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
 
 export default Parent;
 const SEARCH_KEY = "hlOffset";
 function Parent() {
   const { hlIds, infoText, numHlts } = useHighlightsContext();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const hlOffset = Number(searchParams.get(SEARCH_KEY)) || 0;
-  const setOffset = (offset: number, replace: boolean = true) =>
-    setSearchParams(
-      (sp) => {
-        sp.set(SEARCH_KEY, offset.toString());
-        return sp;
-      },
-      { replace }
-    );
+  const { selectedItems } = useTreeContext();
+  const [hlOffset, setHlOffsetDebounced, setHlOffsetImmediate] =
+    useDebouncedSearchParam({
+      key: SEARCH_KEY,
+    });
+  const setOffset = (offset: number) => setHlOffsetDebounced(offset.toString());
 
   const onRange = ({ startIndex: i }: ListRange) => setOffset(i);
 
   useEffect(() => {
-    setOffset(0, false);
-    // console.log("first highlight id", hlIds[0]);
-  }, [hlIds]);
+    if (selectedItems.length > 0) {
+      setHlOffsetImmediate((0).toString());
+    }
+  }, [selectedItems]);
 
   const childContent = (_i: number, hid: number) => <HighlightCard id={hid} />;
   return (
@@ -66,7 +64,7 @@ function Parent() {
           totalCount={numHlts}
           itemContent={childContent}
           rangeChanged={onRange}
-          initialTopMostItemIndex={hlOffset}
+          initialTopMostItemIndex={Number(hlOffset)}
         />
       </Stack>
     </>

@@ -21,12 +21,16 @@ import * as popups from "../popups";
 import { getAllPartialPaths } from "../components/TagTree/utils";
 import { useSearchParams } from "react-router-dom";
 import { useDb } from "../hooks";
+import { TagTreeItem } from "../components/TagTree/TagTreeItems/MultipleTagTreeItems";
+import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
+import { useSearchParamContext } from "./SearchParamContext";
 // import { db } from "../db/models/TaguetteDb.ts";
 type TagMap = Record<string | number, string>;
+type ItemTagMap = Map<string, Taguette.Tag | undefined>;
 
 const defaults = {
-  expandedItems: [] as string[],
-  setExpandedItems: {} as Dispatch<StateUpdater<string[]>>,
+  expandedItems: new Map<string, Taguette.Tag | undefined>(),
+  setExpandedItems: {} as Dispatch<StateUpdater<ItemTagMap>>,
   selectedItems: [] as string[],
   setSelectedItems: {} as Dispatch<StateUpdater<string[]>>,
   createTagValue: "" as string,
@@ -42,18 +46,33 @@ const defaults = {
   allTags: [] as Taguette.Tag[],
   taggings: [] as Taguette.ParentTaggingCount[],
   selectedTags: [] as string[],
+  // newTagInputValue: "" as string,
+  // setNewTagInputValueDebounced: {} as (value: string) => void,
+  // setNewTagInputValueImmediate: {} as (value: string) => void,
 };
 export const TreeContext = createContext(defaults);
-
 export function TreeProvider({ children }: { children: React.ReactNode }) {
   const { enqueueSnackbar: sbqr } = useSnackbar();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tagLikeFilter = searchParams.get("tagLike") || "";
+  // const [searchParams, setSearchParams] = useSearchParams();
+  const [, , , tagLikeFilter] = useSearchParamContext("tagLike");
+  // console.log("tagLikeFilter", tagLikeFilter);
+  // const tagLikeFilter = "";
+
+  // const tagLikeFilter = useSearchParamContext("tagLike") || "";
+  // const [
+  //   newTagInputValue,
+  //   setNewTagInputValueDebounced,
+  //   setNewTagInputValueImmediate,
+  // ] = useDebouncedSearchParam({
+  //   key: "newTag",
+  // });
 
   const { loading, setLoading } = useLoadingContext();
   const [allTags, setAllTags] = useState<Taguette.Tag[]>([]);
   const [taggings, setTaggings] = useState<Taguette.ParentTaggingCount[]>([]);
-  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [expandedItems, setExpandedItems] = useState<ItemTagMap>(
+    new Map<string, Taguette.Tag | undefined>()
+  );
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [createTagValue, setCreateTagValue] = useState<string>("");
   const [tags, setTags] = useState<TagMap>({});
@@ -67,7 +86,8 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
     };`;
     db.transactAll([{ sql, bindings }]).then(([newTags]) => {
       setAllTags(newTags as Taguette.Tag[]);
-      setExpandedItems(allItemPathsUnsorted(newTags));
+      // console.log("setAllTags", newTags);
+      setExpandedItems((prev) => getItemTagMapForTags(newTags, prev));
     });
   }, [loading, dbs.value, tagLikeFilter]);
 
@@ -118,6 +138,9 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
         allTags,
         taggings,
         selectedTags,
+        // newTagInputValue,
+        // setNewTagInputValueDebounced,
+        // setNewTagInputValueImmediate,
       }}
     >
       {children}
@@ -142,10 +165,28 @@ function allItemPaths(tags: Taguette.Tag[]): string[] {
   res.sort();
   return [...new Set(res)];
 }
+
 function allItemPathsUnsorted(tags: Taguette.Tag[]): string[] {
   return tags.reduce((acc: string[], tag: Taguette.Tag) => {
     const morePaths = getAllPartialPaths(tag.path);
     acc.push(...morePaths);
     return acc;
   }, []);
+}
+
+function getItemTagMapForTags(
+  tags: Taguette.Tag[],
+  iTMap: ItemTagMap
+): ItemTagMap {
+  return tags.reduce((iTMap: ItemTagMap, tag: Taguette.Tag) => {
+    const familyPaths = getAllPartialPaths(tag.path);
+    familyPaths.forEach((path) => {
+      if (tag.path === path) {
+        iTMap.set(path, tag);
+      } else if (!iTMap.has(path)) {
+        iTMap.set(path, undefined);
+      }
+    });
+    return iTMap;
+  }, iTMap);
 }

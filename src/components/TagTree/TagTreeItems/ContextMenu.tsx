@@ -30,15 +30,18 @@ import DeleteMenuItems from "./DeleteMenuItems";
 import RenameMenuItem from "./RenameMenuItem";
 import { useSearchParams } from "react-router-dom";
 import MergeMenuItem from "./MergeMenuItem";
+import { useSearchParamContext } from "../../../contexts/SearchParamContext";
 
 export { ContextMenu };
 export default ContextMenu;
 function ContextMenu() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  // const [searchParams, setSearchParams] = useSearchParams();\
+  // const { setNewTagInputValueImmediate } = useTreeContext();
+  const [, , setNewTagInputValueImmediate] = useSearchParamContext("newTag");
+
   const { item, closeContextMenu, handleContextMenu, contextMenuPosition } =
     useTagTreeItemContext();
-  const { createTagFieldRef, setCreateTagValue, selectedItems } =
-    useTreeContext();
+  const { selectedItems } = useTreeContext();
   const { enqueueSnackbar: sbqr } = useSnackbar();
   const Icon = item.isTag ? TagIcon : FolderIcon;
   return (
@@ -101,13 +104,14 @@ function ContextMenu() {
       </MenuItem> */}
       <MenuItem
         onClick={() => {
-          setSearchParams(
-            (sp: URLSearchParams) => {
-              sp.set("newTag", item.path + SEPARATOR);
-              return sp;
-            },
-            { replace: true }
-          );
+          setNewTagInputValueImmediate(item.path + SEPARATOR);
+          // setSearchParams(
+          //   (sp: URLSearchParams) => {
+          //     sp.set("newTag", item.path + SEPARATOR);
+          //     return sp;
+          //   },
+          //   { replace: true }
+          // );
           closeContextMenu();
         }}
       >
