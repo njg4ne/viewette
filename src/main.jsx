@@ -52,12 +52,13 @@ import Home from "./components/Home";
 import DatabaseManager from "./components/DatabaseManager";
 import EditHighlight from "./components/EditHighlight";
 
-import SQL from "./components/SQL";
-import Tags from "./components/Tags";
+// import SQL from "./components/SQL";
+// import Tags from "./components/Tags";
 // import { tags } from "./signals";
 import { TagAutocomplete, TagFilters } from "./components/Filters";
 import TagTree from "./components/TagTree";
 import { LoadingProvider } from "./contexts/LoadingContext";
+import TagExporter from "./components/TagExporter";
 
 function Highlights() {
   const [dbHandle, setDbHandle] = useState(null);
@@ -105,16 +106,16 @@ const AppContainer = ({ Contents }) => {
   const maxWidth = /* options are: xs, sm, md, lg, xl */ "md";
   return (
     <ColorThemeProvider>
-    
       <CssBaseline enableColorScheme />
       {/* <WorkerProvider> */}
       <FilesystemProvider>
-        <SnackbarProvider><LoadingProvider>
-          {/* 
+        <SnackbarProvider>
+          <LoadingProvider>
+            {/* 
             
               > */}
-          <Drawer>
-            {/* <Stack
+            <Drawer>
+              {/* <Stack
               sx={{
                 justifyContent: "space-between",
                 // minHeight: "100vh",
@@ -122,19 +123,20 @@ const AppContainer = ({ Contents }) => {
               }}
               spacing={2}
             > */}
-            <Box sx={{ m: 2, flexGrow:1 }}>
-              <Contents />
-            </Box>
-            {/* </Stack> */}
-          </Drawer>
-          {/* <ColorModeToggler /> */}
+              <Box sx={{ m: 2, flexGrow: 1 }}>
+                <Contents />
+              </Box>
+              {/* </Stack> */}
+            </Drawer>
+            {/* <ColorModeToggler /> */}
 
-          {/* 
+            {/* 
               
-          */}</LoadingProvider>
+          */}
+          </LoadingProvider>
         </SnackbarProvider>
       </FilesystemProvider>
-      
+
       {/* </ WorkerProvider> */}
     </ColorThemeProvider>
   );
@@ -160,6 +162,10 @@ const router = createHashRouter([
   {
     path: "/db",
     element: AppContainer({ Contents: DatabaseManager }),
+  },
+  {
+    path: "/export/tags/svg",
+    element: AppContainer({ Contents: TagExporter }),
   },
   // {
   //   path: "/tree",

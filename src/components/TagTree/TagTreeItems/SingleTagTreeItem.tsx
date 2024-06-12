@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import { useSnackbar } from "notistack";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { useState, useRef, useMemo, useEffect } from "preact/compat";
+import { useState, useRef, useMemo, useEffect, Ref } from "preact/compat";
 import { signalReady, dbs } from "../../../signals";
 import Divider from "@mui/material/Divider";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
@@ -269,16 +269,20 @@ function useHover() {
 }
 
 export function TagChip({
+  id,
+  ref,
   tag,
   specialColor = false,
   sx,
 }: {
+  id?: string;
   tag: string;
   specialColor?: boolean;
   sx?: SxProps;
+  ref?: Ref<HTMLParagraphElement>;
 }) {
   const typeSx = {
-    // wordWrap: "break-word",
+    overflowWrap: "break-word",
     whiteSpace: "normal",
     py: 0.5,
     px: 1,
@@ -295,6 +299,8 @@ export function TagChip({
   // const tagSpecial = tag;
   return (
     <Typography
+      ref={ref}
+      id={id}
       sx={{
         bgcolor: `primary.${!specialColor ? "main" : "200"}`,
         color: "primary.contrastText",

@@ -23,7 +23,8 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import HomeIcon from "@mui/icons-material/Home";
 import StorageIcon from "@mui/icons-material/Storage";
 import TextIcon from "@mui/icons-material/Subject";
-
+import ImportExportIcon from "@mui/icons-material/ImportExport";
+import ExportIcon from "@mui/icons-material/SystemUpdateAlt";
 import { Link } from "react-router-dom";
 import MuiLink from "@mui/material/Link";
 
@@ -36,6 +37,11 @@ const sections = [
   { text: "Home", icon: <HomeIcon />, path: "/" },
   // { text: "Highlights", icon: <TextIcon />, path: "/highlights" },
   { text: "Database", icon: <StorageIcon />, path: "/db" },
+  {
+    text: "Export Tags to SVG",
+    icon: <ExportIcon />,
+    path: "/export/tags/svg",
+  },
   { text: "Help", icon: <HelpIcon />, path: "/help" },
 ];
 
