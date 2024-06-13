@@ -44,6 +44,7 @@ const defaults = {
     | undefined
   >,
   allTags: [] as Taguette.Tag[],
+  allTagsUnfiltered: [] as Taguette.Tag[],
   taggings: [] as Taguette.ParentTaggingCount[],
   selectedTags: [] as string[],
   // newTagInputValue: "" as string,
@@ -68,7 +69,13 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   // });
 
   const { loading, setLoading } = useLoadingContext();
+  const [allTagsUnfiltered, setAllTagsUnfiltered] = useState<Taguette.Tag[]>(
+    []
+  );
   const [allTags, setAllTags] = useState<Taguette.Tag[]>([]);
+  // const allTags = allTagsUnfiltered.filter((tag) =>
+  //   tag.path.toLowerCase().includes(tagLikeFilter.toLowerCase())
+  // );
   const [taggings, setTaggings] = useState<Taguette.ParentTaggingCount[]>([]);
   const [expandedItems, setExpandedItems] = useState<ItemTagMap>(
     new Map<string, Taguette.Tag | undefined>()
@@ -80,16 +87,25 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading || !signalReady(dbs)) return;
     const db = dbs.value;
-    const bindings = { $tagLike: `%${tagLikeFilter}%` };
+    const backendTagLikeFilter = ""; //tagLikeFilter;
+    const bindings = { $tagLike: `%${backendTagLikeFilter}%` };
     const sql = `SELECT * FROM tags${
-      tagLikeFilter.length > 0 ? ` WHERE path LIKE $tagLike` : ""
+      backendTagLikeFilter.length > 0 ? ` WHERE path LIKE $tagLike` : ""
     };`;
     db.transactAll([{ sql, bindings }]).then(([newTags]) => {
-      setAllTags(newTags as Taguette.Tag[]);
-      // console.log("setAllTags", newTags);
+      setAllTagsUnfiltered(newTags as Taguette.Tag[]);
+
+      // console.log("setAllTags", ...newTags);
       setExpandedItems((prev) => getItemTagMapForTags(newTags, prev));
     });
-  }, [loading, dbs.value, tagLikeFilter]);
+  }, [loading, dbs.value /*tagLikeFilter*/]);
+
+  useEffect(() => {
+    const newTagsFiltered = allTagsUnfiltered.filter((tag) =>
+      tag.path.toLowerCase().includes(tagLikeFilter.toLowerCase())
+    );
+    setAllTags(newTagsFiltered);
+  }, [tagLikeFilter, allTagsUnfiltered]);
 
   const apiRef = useTreeViewApiRef();
   const selectedTags = selectedItems.filter((path) =>
@@ -136,6 +152,7 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
         numTagsSelected,
         apiRef,
         allTags,
+        allTagsUnfiltered,
         taggings,
         selectedTags,
         // newTagInputValue,

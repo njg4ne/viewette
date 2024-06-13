@@ -1,3 +1,4 @@
+// import { DndContext } from "@dnd-kit/core";
 import { LoadingProvider } from "../../contexts/LoadingContext";
 import { SearchParamProvider } from "../../contexts/SearchParamContext";
 import { TreeProvider } from "../../contexts/TagTreeContext";
@@ -8,7 +9,8 @@ export default function TagTreeWithContext() {
     // <LoadingProvider>
     <SearchParamProvider keys={["tagLike", "newTag"]}>
       <TreeProvider>
-        <TagTree />
+        
+          <TagTree />
       </TreeProvider>
     </SearchParamProvider>
     // </LoadingProvider>

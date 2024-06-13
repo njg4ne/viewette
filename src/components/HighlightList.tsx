@@ -9,7 +9,7 @@ import Skeleton from "@mui/material/Skeleton";
 import type { ListRange, VirtuosoHandle } from "react-virtuoso";
 import { Virtuoso } from "react-virtuoso";
 import Chip from "@mui/material/Chip";
-import { TagChip } from "./TagTree/TagTreeItems/SingleTagTreeItem";
+import { TagChip } from "./TagChip";
 import {
   useEffect,
   useCallback,

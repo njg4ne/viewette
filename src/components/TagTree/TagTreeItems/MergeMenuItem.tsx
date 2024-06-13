@@ -21,21 +21,21 @@ import { useLoadingContext } from "../../../contexts/LoadingContext";
 import * as popups from "../../../popups";
 import { dbs, signalReady } from "../../../signals";
 import { useSnackbar } from "notistack";
-import { SEPARATOR } from "../utils";
+import { SEPARATOR, getTagParts } from "../utils";
 import { useTreeContext } from "../../../contexts/TagTreeContext";
 import { ManagedTagChooser } from "../../TagsFilter";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
-import { TagChip } from "./SingleTagTreeItem";
+import { TagChip } from "../../TagChip";
 import { Typography } from "@mui/material";
 import { TaguetteDb } from "../../../db";
 // const
 
 export default function MergeMenuItem() {
   const { closeContextMenu, item } = useTagTreeItemContext();
-  const { allTags } = useTreeContext();
+  const { allTagsUnfiltered } = useTreeContext();
   const anchorRef = useRef<HTMLDivElement>(null);
   const renameFieldRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -43,7 +43,7 @@ export default function MergeMenuItem() {
   const { enqueueSnackbar: sbqr } = useSnackbar();
   const initialTagEntry = [-1, ""] as [number, string];
   const otherTags = [[-1, ""]].concat(
-    entrify(allTags.filter((tag) => tag.id !== item?.tag?.id))
+    entrify(allTagsUnfiltered.filter((tag) => tag.id !== item?.tag?.id))
   );
   // const otherTags = entrify(allTags);
   // const initialTagEntry =
@@ -83,6 +83,7 @@ export default function MergeMenuItem() {
     }
     const [id, path] = newValue;
     setMergeTarget(newValue);
+    setConfirm(false);
   };
   function catchReset(event: Event, value: string, reason: string): void {
     if (reason === "clear") {
@@ -91,32 +92,37 @@ export default function MergeMenuItem() {
   }
   const defaultOptionInUse = ((mergeTarget?.at(0) || -1) as number) < 0;
   const disableMerge = defaultOptionInUse || !confirm;
-
   const doMerge = async (e: SubmitEvent) => {
     e.preventDefault();
-    if (loading || !signalReady(dbs) || disableMerge || !item.tag) return;
+    if (loading || !signalReady(dbs) || disableMerge) return;
     try {
       setLoading(true);
+      // console.log("loading set true");
+      // const wait500 = new Promise((resolve) => setTimeout(resolve, 500));
+      // await wait500;
       const db: TaguetteDb = dbs.value;
-
-      const num = await merge(
-        dbs.value,
-        item.tag.id,
-        mergeTarget!.at(0)! as number
-      );
-      let msg: string;
-      if (num > 0) {
-        msg = `Merge caused ${num} changes`;
-        popups.success(sbqr, msg);
-      } else {
-        msg = `Merge caused no changes`;
-        popups.info(sbqr, msg);
-      }
+      const [, targetPath] = mergeTarget;
+      const fam = item.familyTags;
+      const updateEntries = fam.map((t) => {
+        const parts = getTagParts(t.path);
+        const tail = parts.slice(item.level + 1);
+        const newPath = [targetPath, ...tail].join(SEPARATOR);
+        const res = {
+          id: t.id,
+          oldPath: t.path,
+          newPath,
+        };
+        return res;
+      });
+      const numChanges = await mergeMany(db, updateEntries);
+      let msg: string = `Merge caused ${numChanges} changes`;
+      popups.success(sbqr, msg);
     } catch (e) {
       console.error(e);
-      popups.error(sbqr, `Failed to rename tags`);
+      popups.error(sbqr, `Failed to merge tags`);
     } finally {
       setLoading(false);
+      // console.log("loading set false");
       closeContextMenu();
     }
   };
@@ -163,8 +169,8 @@ export default function MergeMenuItem() {
           // sx={{ px: 1 }}
           // spacing={2}
         >
-          <Typography>Merge</Typography>
-          <TagChip tag={item.tag?.path || ""} />
+          <Typography>Merge {item.familyTags.length} x</Typography>
+          <TagChip tag={item.path} specialColor={!item.isTag} />
           <RightArrowIcon />
           {defaultOptionInUse ? (
             <Typography>(No target chosen)</Typography>
@@ -213,7 +219,7 @@ export default function MergeMenuItem() {
   );
 }
 
-async function merge(db: TaguetteDb, $otid: number, $ntid: number) {
+async function _mergeOne(db: TaguetteDb, $otid: number, $ntid: number) {
   let bindings: any = { $ntid, $otid };
   // highlight_tags might contain a row with tag_id = $otid, a row with tag_id = $ntid,
   // neither, or both. If it contains both, we should delete the row with tag_id = $otid.
@@ -237,4 +243,112 @@ async function merge(db: TaguetteDb, $otid: number, $ntid: number) {
   numChanges += (changes3?.result?.resultRows?.at(0) as number) | 0;
 
   return numChanges;
+}
+
+export type UpdatePacket = {
+  id: number;
+  oldPath: string;
+  newPath: string;
+};
+export async function mergeMany(db: TaguetteDb, updatePackets: UpdatePacket[]) {
+  // step 1: delete any highlight_tags rows where the hl already has a tag with the new path... we dont actually need to do this, because when we delete the old tag, the delete will cascade as long as the PRAGMA foreign_keys = ON is set
+  // step 2: we need to create any of the new tags that don't already exist
+  let totalChanges = 0;
+  let sql = `INSERT OR IGNORE INTO tags (path, description, project_id) VALUES `;
+  function insertOne(
+    packet: UpdatePacket,
+    bindings: Record<string, any>,
+    index: number
+  ): [string, Record<string, any>] {
+    const { id, newPath } = packet;
+    const pathKey = `$path${index}`;
+    bindings = Object.assign(bindings, {
+      [pathKey]: newPath,
+    });
+    return [
+      `(${pathKey},'', (SELECT projects.id FROM projects LIMIT 1))`,
+      bindings,
+    ];
+  }
+  let bindings: Record<string, any> = {};
+  const pathKeys = updatePackets.map((packet, i) => {
+    let pathKey;
+    [pathKey, bindings] = insertOne(packet, bindings, i);
+    return pathKey;
+  });
+  const valuesSql = pathKeys.join(",");
+  sql += `${valuesSql};`;
+  // console.log("sql", sql);
+  // console.log("bindings", bindings);
+  let [rows, [changesRow]] = await db.transactAll([
+    { sql, bindings },
+    { sql: "SELECT changes() as changes;" },
+  ]);
+
+  // console.log("num changes:", changesRow?.changes);
+  totalChanges += (changesRow?.changes as number) | 0;
+
+  function createWhenThen(
+    packet: UpdatePacket,
+    bindings: Record<string, any>,
+    index: number
+  ): [string, Record<string, any>] {
+    const { id, oldPath, newPath } = packet;
+    const otidKey = `$otid${index}`;
+    const newPathKey = `$newPath${index}`;
+    bindings = Object.assign(bindings, {
+      [otidKey]: id,
+      [newPathKey]: newPath,
+    });
+    const whenThen = `WHEN tag_id = ${otidKey} THEN ${newPathKey}`;
+    return [whenThen, bindings];
+  }
+  sql = `UPDATE OR IGNORE highlight_tags SET tag_id = (SELECT id FROM tags WHERE path = CASE `;
+  bindings = {};
+  const whenThens = updatePackets.map((packet, i) => {
+    let whenThen;
+    [whenThen, bindings] = createWhenThen(packet, bindings, i);
+    return whenThen;
+  });
+  const whenThenSql = whenThens.join(" ");
+  sql += `${whenThenSql} END) WHERE tag_id IN (`;
+  function createValue(
+    updatePackets: UpdatePacket[],
+    bindings: Record<string, any>
+  ): [string, Record<string, any>] {
+    const tagIds = updatePackets.map((packet, index) => {
+      const tagIdKey = `$oldTagId${index}`;
+      bindings[tagIdKey] = packet.id;
+      return tagIdKey;
+    });
+    const inClause = tagIds.join(", ");
+    return [inClause, bindings];
+  }
+  let values;
+  [values, bindings] = createValue(updatePackets, bindings);
+  sql += `${values});`;
+  //console.log("sql", sql);
+  //console.log("bindings", bindings);
+  const [rows2, [changesRow2]] = await db.transactAll([
+    { sql, bindings },
+    { sql: "SELECT changes() as changes;" },
+  ]);
+  //console.log("num changes:", changesRow2?.changes);
+  totalChanges += (changesRow2?.changes as number) | 0;
+  // { sql: "PRAGMA foreign_keys = ON;" },
+  // finally, delete the old tags
+  bindings = {};
+  [values, bindings] = createValue(updatePackets, bindings);
+  const deleteSql = `DELETE FROM tags WHERE id IN (${values});`;
+  const [, rows3, [changesRow3], rows4] = await db.transactAll([
+    { sql: "PRAGMA foreign_keys = ON;" },
+    { sql: deleteSql, bindings },
+    { sql: "SELECT changes() as changes;" },
+    { sql: "SELECT path FROM tags;" },
+  ]);
+  //console.log("num changes:", changesRow3?.changes);
+  totalChanges += (changesRow3?.changes as number) | 0;
+  //console.log("total changes:", totalChanges);
+  //console.log("tags left:", ...rows4);
+  return totalChanges;
 }

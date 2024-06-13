@@ -14,7 +14,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import Switch from "@mui/material/Switch";
 import Box from "@mui/material/Box";
 import { IconButton, Typography } from "@mui/material";
-import { TagChip } from "./TagTree/TagTreeItems/SingleTagTreeItem";
+import { TagChip } from "./TagChip";
 
 function Filter(props) {
   const { onChange, label } = props;

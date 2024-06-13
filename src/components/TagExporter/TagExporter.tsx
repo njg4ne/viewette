@@ -3,7 +3,7 @@ import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
-import { TagChip } from "../TagTree/TagTreeItems/SingleTagTreeItem";
+import { TagChip } from "../TagChip";
 import { useRef, useState } from "preact/hooks";
 import Grid from "@mui/material/Grid";
 import Slider from "@mui/material/Slider";

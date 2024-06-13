@@ -30,6 +30,7 @@ import {
   SearchParamProvider,
   useSearchParamContext,
 } from "../../contexts/SearchParamContext";
+import { DndContext, closestCorners, rectIntersection } from "@dnd-kit/core";
 const SEARCH_KEY = "tagLike";
 function TagPathFilter() {
   // const [inputValue, setInputValue] = useDebouncedSearchParam({
@@ -118,60 +119,94 @@ export default function TagTree({}) {
     //   oldExpanded.length === 0 ? allNodeIds : []
     // );
   };
+  function handleDragEnd(event: Event & any) {
+    console.log(event.over);
+  }
+  function customCollisionDetectionAlgorithm({
+    droppableContainers,
+    ...args
+  }: any) {
+    // First, let's see if the `trash` droppable rect is intersecting
+    const rectIntersectionCollisions = rectIntersection({
+      ...args,
+      droppableContainers: droppableContainers.filter(
+        ({ id }: any) => id === "trash"
+      ),
+    });
+
+    // Collision detection algorithms return an array of collisions
+    if (rectIntersectionCollisions.length > 0) {
+      // The trash is intersecting, return early
+      return rectIntersectionCollisions;
+    }
+
+    // Compute other collisions
+    return closestCorners({
+      ...args,
+      droppableContainers: droppableContainers.filter(
+        ({ id }: any) => id !== "trash"
+      ),
+    });
+  }
   return (
     // <SearchParamProvider keys={["newTag"]}>
-    <Paper
-      elevation={1}
-      component={Stack}
-      sx={{ p: 2, height: "100%", overflow: "auto" }}
-      spacing={2}
-      direction="column"
-      // alignItems="flex-start"
-      // minHeight="100vh"
+    <DndContext
+      onDragEnd={handleDragEnd}
+      collisionDetection={customCollisionDetectionAlgorithm}
     >
-      <CreateTagForm />
-      <Stack direction="row" flexGrow={1}>
-        {/* <Box bgcolor="green"> */}
-        <Box maxWidth="50%">
-          <AutoSizer disableWidth>
-            {({ height }) => (
-              // <Box sx={{ width, height, bgcolor: "yellow" }} />
-              // <Stack direction="row" height={height} width={width}>
-              <SimpleTreeView
-                sx={{
-                  resize: "horizontal",
-                  maxWidth: "100%",
-                  // width,
-                  height,
-                  flexGrow: 1,
-                  overflow: "auto",
-                  paddingRight: 1,
-                  // maxHeight: "50vh",
-                }}
-                selectedItems={selectedItems}
-                apiRef={apiRef}
-                onSelectedItemsChange={handleSelectedItemsChange}
-                onItemSelectionToggle={selectChildrenToo}
-                multiSelect
-                expandedItems={Array.from(expandedItems.keys())}
-                // expandedItems={allItemIds(allTags)}
-                // onExpandedItemsChange={handleExpandedItemsChange}
-              >
-                <TagPathFilter />
-                <MultipleTagTreeItems tags={allTags} level={-1} />
-              </SimpleTreeView>
-              // </Stack>
-            )}
-          </AutoSizer>
-        </Box>
-        {/* </Box> */}
-        <Box flexGrow={1}>
-          <HighlightsProvider>
-            <HighlightList />
-          </HighlightsProvider>
-        </Box>
-      </Stack>
-    </Paper>
+      <Paper
+        elevation={1}
+        component={Stack}
+        sx={{ p: 2, height: "100%", overflow: "auto" }}
+        spacing={2}
+        direction="column"
+        // alignItems="flex-start"
+        // minHeight="100vh"
+      >
+        <CreateTagForm />
+        <Stack direction="row" flexGrow={1}>
+          {/* <Box bgcolor="green"> */}
+          <Box maxWidth="50%">
+            <AutoSizer disableWidth>
+              {({ height }) => (
+                // <Box sx={{ width, height, bgcolor: "yellow" }} />
+                // <Stack direction="row" height={height} width={width}>
+                <SimpleTreeView
+                  sx={{
+                    resize: "horizontal",
+                    maxWidth: "100%",
+                    // width,
+                    height,
+                    flexGrow: 1,
+                    overflow: "auto",
+                    paddingRight: 1,
+                    // maxHeight: "50vh",
+                  }}
+                  selectedItems={selectedItems}
+                  apiRef={apiRef}
+                  onSelectedItemsChange={handleSelectedItemsChange}
+                  onItemSelectionToggle={selectChildrenToo}
+                  multiSelect
+                  expandedItems={Array.from(expandedItems.keys())}
+                  // expandedItems={allItemIds(allTags)}
+                  // onExpandedItemsChange={handleExpandedItemsChange}
+                >
+                  <TagPathFilter />
+                  <MultipleTagTreeItems tags={allTags} level={-1} />
+                </SimpleTreeView>
+                // </Stack>
+              )}
+            </AutoSizer>
+          </Box>
+          {/* </Box> */}
+          <Box flexGrow={1}>
+            <HighlightsProvider>
+              <HighlightList />
+            </HighlightsProvider>
+          </Box>
+        </Stack>
+      </Paper>
+    </DndContext>
     // </SearchParamProvider>
   );
 }

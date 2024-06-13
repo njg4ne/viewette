@@ -18,12 +18,17 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener("storage", onStorageEvent);
     return () => window.removeEventListener("storage", onStorageEvent);
   }, []);
+  // useEffect(() => {
+  //   // console.log("loading state changed to", loading);
+  // }, [loading]);
 
   // This event fires only when another tab changes local storage unless we dispatch it
   function onStorageEvent(e: StorageEvent | OwnStorageEvent) {
     const loadingStorageValue: boolean = e.newValue === "true";
     // console.log("storage event", loadingStorageValue);
     if (e.key === "loading") {
+      // console.log("storage Event", loadingStorageValue);
+      // setTimeout(() => setLoadingState(loadingStorageValue), 0);
       setLoadingState(loadingStorageValue);
       if (!loadingStorageValue && e.constructor.name !== OwnStorageEvent.name) {
         const msg = "Syncing changes from other tabs.";
@@ -47,7 +52,7 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
   function setLoading(newValue: boolean) {
     // console.log("setLoading", newValue);
     const oldValue = window.localStorage.getItem("loading") === "true";
-    if (newValue === oldValue) return;
+    if (newValue === oldValue) return; // race condition
     window.localStorage.setItem("loading", newValue.toString());
     window.dispatchEvent(new OwnStorageEvent(newValue));
   }

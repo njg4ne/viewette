@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import { useSnackbar } from "notistack";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { useState, useRef, useMemo, useEffect, Ref } from "preact/compat";
+import { useState, useRef, useMemo, useEffect } from "preact/compat";
 import { signalReady, dbs } from "../../../signals";
 import Divider from "@mui/material/Divider";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
@@ -46,24 +46,44 @@ import {
   TagTreeItemProvider,
   useTagTreeItemContext,
 } from "./TagTreeItemContext";
-import { SEPARATOR, getTagParts } from "../utils";
 import StyledTreeItem from "./StyledTreeItem";
 import RenderMultipleTagTreeItems2, {
   TagTreeItem,
 } from "./MultipleTagTreeItems";
-import type { SxProps } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import * as popups from "../../../popups";
 import { Link } from "react-router-dom";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { TagChip } from "../../TagChip";
+import { useDroppable } from "@dnd-kit/core";
+import { useDraggable } from "@dnd-kit/core";
 
+const Draggable = Box;
+const Droppable = Box;
 export default function RenderSingleTagTreeItem() {
   const { loading, setLoading } = useLoadingContext();
   const { enqueueSnackbar: sbqr, closeSnackbar } = useSnackbar();
   const { selectedItems } = useTreeContext();
   const { handleContextMenu, item } = useTagTreeItemContext();
   const { setExpandedItems, expandedItems } = useTreeContext();
-  const ref = useRef<HTMLDivElement>(null);
+  // const ref = useRef<HTMLDivElement>(null);
+  const { isOver, setNodeRef: dropRef } = useDroppable({
+    id: `droppables.${item.path}`,
+  });
+  const {
+    attributes,
+    listeners,
+    setNodeRef: dragRef,
+    transform,
+    isDragging,
+  } = useDraggable({
+    id: `draggables.${item.path}`,
+  });
+  const dragSx = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      }
+    : undefined;
   // const [hovering, hoverProps] = useHover();
 
   const ttText = item.isTag ? item.path : `category '${item.path}'`;
@@ -118,6 +138,14 @@ export default function RenderSingleTagTreeItem() {
   }
 
   return (
+    // <div
+    //   className="draggable-dndkit"
+    //   ref={dragRef}
+    //   style={dragSx}
+    //   {...listeners}
+    //   {...attributes}
+    // >
+    //   <div ref={dropRef} className="droppable-dndkit">
     <StyledTreeItem
       // {...hoverProps}
       // sx={{ color: "text.primary", opacity: 0.8 }}
@@ -129,8 +157,6 @@ export default function RenderSingleTagTreeItem() {
       key={item.path} // sx={{ cursor: 'context-menu' }}
       itemId={item.path}
       label={
-        // <>
-        // <Tooltip title={ttText} placement="right">
         <Stack
           direction="row"
           spacing={1}
@@ -139,7 +165,7 @@ export default function RenderSingleTagTreeItem() {
         >
           <TagChip
             // tag={item[hovering ? "path" : "label"]}
-            tag={item.label}
+            tag={isDragging ? item.path : item.label}
             specialColor={!item.isTag}
           />
           <CountSticker iconComponent={TextIcon} value={item.useCount} />
@@ -151,7 +177,11 @@ export default function RenderSingleTagTreeItem() {
               <IconButton
                 aria-label={action.label}
                 {...(action.link
-                  ? { component: Link, to: action.link, disabled: !item.isTag }
+                  ? {
+                      component: Link,
+                      to: action.link,
+                      disabled: !item.isTag,
+                    }
                   : {})}
                 // {...(!action.link ? { onClick: action.action } : {})}
               >
@@ -165,9 +195,6 @@ export default function RenderSingleTagTreeItem() {
           </ButtonGroup>
           <ContextMenu />
         </Stack>
-        // </Tooltip>
-        //
-        // </>
       }
     >
       {ancestors.length > 0 && (
@@ -267,77 +294,3 @@ function useHover() {
   };
   return [hovering, onHoverProps] as const;
 }
-
-export function TagChip({
-  id,
-  ref,
-  tag,
-  specialColor = false,
-  sx,
-}: {
-  id?: string;
-  tag: string;
-  specialColor?: boolean;
-  sx?: SxProps;
-  ref?: Ref<HTMLParagraphElement>;
-}) {
-  const typeSx = {
-    overflowWrap: "break-word",
-    whiteSpace: "normal",
-    py: 0.5,
-    px: 1,
-    borderRadius: 1,
-  };
-  // replace all SEPARATOR with SEPAR+ nowidthspace, keeping what is between
-  const parts = getTagParts(tag);
-  const wrapInParenIfContainsWhitespace = (str: string) => {
-    return str.includes(" ") ? `(${str})` : str;
-  };
-  const tagSpecial = parts
-    .map(wrapInParenIfContainsWhitespace)
-    .join(SEPARATOR + "\u200B");
-  // const tagSpecial = tag;
-  return (
-    <Typography
-      ref={ref}
-      id={id}
-      sx={{
-        bgcolor: `primary.${!specialColor ? "main" : "200"}`,
-        color: "primary.contrastText",
-        maxWidth: "100%",
-        ...typeSx,
-        ...sx,
-      }}
-    >
-      {tagSpecial}
-    </Typography>
-  );
-}
-
-// function FolderCollapsed() {
-//   const bxSx = {
-//     position: "relative",
-//   };
-//   const centerSx = {
-//     position: "absolute",
-//     // top: "-50%",
-//     left: "-50%",
-//   };
-//   const fgSx = {
-//     ...centerSx,
-//     zIndex: 1,
-//   };
-//   const bgSx = {
-//     zIndex: 0,
-//     fontSize: "1.5rem",
-//     color: "primary.main",
-//     pl: 0.5,
-//     // textStroke: "3px black",
-//   };
-//   return (
-//     <Stack direction="row" alignItems="center" sx={bxSx}>
-//       <FolderIcon sx={bgSx} />
-//       <ChevronRightIcon sx={fgSx} />
-//     </Stack>
-//   );
-// }

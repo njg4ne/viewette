@@ -8,7 +8,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import Card from "@mui/material/Card";
-import { TagChip } from "../TagTree/TagTreeItems/SingleTagTreeItem";
+import { TagChip } from "../TagChip";
 type PropTypes = {
   options: (string | number)[][]; // tag entry?
   onCheck: (checked: boolean, id: number) => void;

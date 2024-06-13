@@ -31,6 +31,7 @@ import RenameMenuItem from "./RenameMenuItem";
 import { useSearchParams } from "react-router-dom";
 import MergeMenuItem from "./MergeMenuItem";
 import { useSearchParamContext } from "../../../contexts/SearchParamContext";
+import RedefineMenuItem from "./RedefineMenuItem";
 
 export { ContextMenu };
 export default ContextMenu;
@@ -122,6 +123,7 @@ function ContextMenu() {
       </MenuItem>
       <DeleteMenuItems />
       <RenameMenuItem />
+      <RedefineMenuItem />
       <MergeMenuItem />
     </Menu>
   );
