@@ -32,8 +32,9 @@ import {
   ColorThemeProvider,
   ColorModeToggler,
 } from "./components/ColorModeTheme";
-import { Paper } from "@mui/material";
-import { FilesystemProvider } from "./contexts/FilesystemContext";
+import { Modal, Paper } from "@mui/material";
+// import { FilesystemProvider } from "./contexts/FilesystemContext";
+import { ModalProvider } from "./contexts/ModalContext";
 import DataViewer from "./components/DataViewer";
 import {
   ForceExcludeTags,
@@ -107,8 +108,9 @@ const AppContainer = ({ Contents }) => {
   return (
     <ColorThemeProvider>
       <CssBaseline enableColorScheme />
-      {/* <WorkerProvider> */}
-      <FilesystemProvider>
+      <ModalProvider>
+        {/* <WorkerProvider> */}
+        {/* <FilesystemProvider> */}
         <SnackbarProvider>
           <LoadingProvider>
             {/* 
@@ -135,7 +137,8 @@ const AppContainer = ({ Contents }) => {
           */}
           </LoadingProvider>
         </SnackbarProvider>
-      </FilesystemProvider>
+      </ModalProvider>
+      {/* </FilesystemProvider> */}
 
       {/* </ WorkerProvider> */}
     </ColorThemeProvider>

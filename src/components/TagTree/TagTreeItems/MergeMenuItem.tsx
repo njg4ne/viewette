@@ -31,6 +31,7 @@ import Box from "@mui/material/Box";
 import { TagChip } from "../../TagChip";
 import { Typography } from "@mui/material";
 import { TaguetteDb } from "../../../db";
+import { TagTreeItem } from "./MultipleTagTreeItems";
 // const
 
 export default function MergeMenuItem() {
@@ -351,4 +352,44 @@ export async function mergeMany(db: TaguetteDb, updatePackets: UpdatePacket[]) {
   //console.log("total changes:", totalChanges);
   //console.log("tags left:", ...rows4);
   return totalChanges;
+}
+
+export async function persistMerge(
+  db: TaguetteDb,
+  srcItem: TagTreeItem,
+  targetPath: string
+) {
+  const updateEntries = srcItem.familyTags.map((t) => {
+    const parts = getTagParts(t.path);
+    const tail = parts.slice(srcItem.level + 1);
+    const newPath = [targetPath, ...tail].join(SEPARATOR);
+    const res = {
+      id: t.id,
+      oldPath: t.path,
+      newPath,
+    };
+    return res;
+  });
+  const numChanges = await mergeMany(db, updateEntries);
+  return numChanges;
+}
+
+export async function persistNest(
+  db: TaguetteDb,
+  srcItem: TagTreeItem,
+  targetPath: string
+) {
+  const updateEntries = srcItem.familyTags.map((t) => {
+    const parts = getTagParts(t.path);
+    const tail = parts.slice(srcItem.level);
+    const newPath = [targetPath, ...tail].join(SEPARATOR);
+    const res = {
+      id: t.id,
+      oldPath: t.path,
+      newPath,
+    };
+    return res;
+  });
+  const numChanges = await mergeMany(db, updateEntries);
+  return numChanges;
 }

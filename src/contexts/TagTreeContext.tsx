@@ -24,6 +24,7 @@ import { useDb } from "../hooks";
 import { TagTreeItem } from "../components/TagTree/TagTreeItems/MultipleTagTreeItems";
 import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
 import { useSearchParamContext } from "./SearchParamContext";
+import { useModalContext } from "./ModalContext";
 // import { db } from "../db/models/TaguetteDb.ts";
 type TagMap = Record<string | number, string>;
 type ItemTagMap = Map<string, Taguette.Tag | undefined>;
@@ -54,6 +55,7 @@ const defaults = {
 export const TreeContext = createContext(defaults);
 export function TreeProvider({ children }: { children: React.ReactNode }) {
   const { enqueueSnackbar: sbqr } = useSnackbar();
+  const { setModalActions } = useModalContext();
   // const [searchParams, setSearchParams] = useSearchParams();
   const [, , , tagLikeFilter] = useSearchParamContext("tagLike");
   // console.log("tagLikeFilter", tagLikeFilter);
@@ -114,7 +116,13 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   const numTagsSelected = selectedTags.length;
   useHotkeys("delete", () => {
     if (numTagsSelected === 0) return;
-    deleteTags(selectedTags);
+    const msg = `Delete ${numTagsSelected} tag${
+      numTagsSelected > 1 ? "s" : ""
+    }`;
+    const actions = {
+      delete: [msg, () => deleteTags(selectedTags)],
+    };
+    setModalActions(actions);
   });
 
   useEffect(() => {

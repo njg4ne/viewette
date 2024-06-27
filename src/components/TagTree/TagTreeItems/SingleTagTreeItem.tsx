@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import { useSnackbar } from "notistack";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { useState, useRef, useMemo, useEffect } from "preact/compat";
+import { useRef, useMemo, useEffect } from "preact/compat";
 import { signalReady, dbs } from "../../../signals";
 import Divider from "@mui/material/Divider";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
@@ -39,6 +39,8 @@ import Badge from "@mui/material/Badge";
 import Avatar from "@mui/material/Avatar";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import { TreeItem2GroupTransition } from "@mui/x-tree-view";
 
 import { useLoadingContext } from "../../../contexts/LoadingContext";
 import { useTreeContext } from "../../../contexts/TagTreeContext";
@@ -57,6 +59,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TagChip } from "../../TagChip";
 import { useDroppable } from "@dnd-kit/core";
 import { useDraggable } from "@dnd-kit/core";
+import { useTheme } from "@mui/styles";
 
 const Draggable = Box;
 const Droppable = Box;
@@ -69,6 +72,7 @@ export default function RenderSingleTagTreeItem() {
   // const ref = useRef<HTMLDivElement>(null);
   const { isOver, setNodeRef: dropRef } = useDroppable({
     id: `droppables.${item.path}`,
+    data: { item },
   });
   const {
     attributes,
@@ -78,6 +82,7 @@ export default function RenderSingleTagTreeItem() {
     isDragging,
   } = useDraggable({
     id: `draggables.${item.path}`,
+    data: { item },
   });
   const dragSx = transform
     ? {
@@ -136,7 +141,7 @@ export default function RenderSingleTagTreeItem() {
       </IconButton>
     );
   }
-
+  const textPrimary = useTheme().palette?.text?.primary || "green";
   return (
     // <div
     //   className="draggable-dndkit"
@@ -145,24 +150,44 @@ export default function RenderSingleTagTreeItem() {
     //   {...listeners}
     //   {...attributes}
     // >
-    //   <div ref={dropRef} className="droppable-dndkit">
+    //   <div  className="droppable-dndkit">
     <StyledTreeItem
+      sx={{
+        border: isOver ? `.125rem solid ${textPrimary}` : "",
+      }}
       // {...hoverProps}
       // sx={{ color: "text.primary", opacity: 0.8 }}
+
       slots={{
         expandIcon: () => <ExpnansionControl icon={ExpandMoreIcon} />,
         collapseIcon: () => <ExpnansionControl icon={ChevronRightIcon} />,
         endIcon: TagIcon,
+        // groupTransition: (props: any) => (
+        //   <div >
+        //     <TreeItem2GroupTransition {...props} />
+        //   </div>
+        // ),
       }}
       key={item.path} // sx={{ cursor: 'context-menu' }}
       itemId={item.path}
       label={
         <Stack
+          ref={dropRef}
           direction="row"
           spacing={1}
           alignItems="center"
           onContextMenu={handleContextMenu}
         >
+          <Stack
+            direction="row"
+            sx={{ pl: 0.5, alignItems: "center" }}
+            ref={dragRef}
+            // style={dragSx}
+            {...listeners}
+            {...attributes}
+          >
+            <DragIndicatorIcon fontSize="small" />
+          </Stack>
           <TagChip
             // tag={item[hovering ? "path" : "label"]}
             tag={isDragging ? item.path : item.label}
@@ -201,6 +226,8 @@ export default function RenderSingleTagTreeItem() {
         <RenderMultipleTagTreeItems2 tags={ancestors} level={item.level} />
       )}
     </StyledTreeItem>
+    //   </div>
+    // </div>
   );
 }
 
@@ -285,12 +312,4 @@ function TagCard() {
       </CardActions> */}
     </Card>
   );
-}
-function useHover() {
-  const [hovering, setHovering] = useState<boolean>(false);
-  const onHoverProps = {
-    onMouseEnter: () => setHovering(true),
-    onMouseLeave: () => setHovering(false),
-  };
-  return [hovering, onHoverProps] as const;
 }

@@ -13,6 +13,7 @@ import { TaguetteDb } from "../../db";
 import { useRef, useEffect } from "preact/compat";
 import useDebouncedSearchParam from "../../hooks/useDebouncedSearchParam";
 import { useSearchParamContext } from "../../contexts/SearchParamContext";
+import { SEPARATOR } from "./utils";
 // import { db } from "../../db/models/TaguetteDb";
 const SEARCH_KEY = "newTag";
 export default function CreateTagForm() {
@@ -31,6 +32,10 @@ export default function CreateTagForm() {
     setNewTagInputValueImmediate,
   ] = useSearchParamContext(SEARCH_KEY);
   const [inputValue, setInputValue] = useState(newTagInputValue);
+  const inputInvalid = inputValue
+    .split(SEPARATOR)
+    .some((s: string) => s.trim().length === 0);
+
   useEffect(() => {
     setInputValue(newTagInputValue);
   }, [newTagInputValue]);
@@ -70,7 +75,7 @@ export default function CreateTagForm() {
       onReset={onReset}
       onSubmit={async (e: Event) => {
         e.preventDefault();
-        if (loading || !signalReady(dbs)) return;
+        if (loading || !signalReady(dbs) || inputInvalid) return;
         setLoading(true);
 
         const formData = new FormData(e.target as HTMLFormElement);
@@ -129,7 +134,12 @@ export default function CreateTagForm() {
         <ClearIcon />
       </IconButton>
 
-      <IconButton sx={{ p: "10px" }} aria-label="menu" type="submit">
+      <IconButton
+        sx={{ p: "10px" }}
+        aria-label="menu"
+        type="submit"
+        disabled={inputInvalid}
+      >
         <AddIcon />
       </IconButton>
     </Paper>

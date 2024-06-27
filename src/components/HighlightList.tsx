@@ -35,6 +35,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
 import EditHighlight from "./EditHighlight/EditHighlight";
+import { useTheme } from "@mui/material";
+import { useDroppable } from "@dnd-kit/core";
 
 export default Parent;
 const SEARCH_KEY = "hlOffset";
@@ -159,11 +161,19 @@ function HighlightListItem({ highlight }: { highlight: Taguette.Highlight }) {
     link: `/highlights/${highlight.id}`,
     state: { hlIds },
   };
+  const { isOver, setNodeRef: dropRef } = useDroppable({
+    id: `droppables.hls.${highlight.id}`,
+    data: { highlight },
+  });
+  const textPrimary = useTheme().palette?.text?.primary || "green";
+
   return (
     <ListItem
+      ref={dropRef}
       component={Paper}
       elevation={4}
       sx={{
+        border: isOver ? `.125rem solid ${textPrimary}` : "",
         minWidth: "fit-content",
         pr: 0,
         py: 0.25,
