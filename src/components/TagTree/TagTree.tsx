@@ -122,11 +122,11 @@ export default function TagTree({}) {
   const {
     allTags,
     expandedItems,
-    setExpandedItems,
+    // setExpandedItems,
     selectedItems,
     setSelectedItems,
     apiRef,
-    numTagsSelected,
+    // numTagsSelected,
   } = useTreeContext();
   // const numTagsSelected = selectedItems.length || 0;
   const handleSelectedItemsChange = (event: Event, itemIds: string[]) => {

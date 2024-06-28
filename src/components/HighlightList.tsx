@@ -35,7 +35,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
 import EditHighlight from "./EditHighlight/EditHighlight";
-import { useTheme } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useDroppable } from "@dnd-kit/core";
 
 export default Parent;

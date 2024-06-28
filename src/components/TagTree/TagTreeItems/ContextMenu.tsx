@@ -42,8 +42,8 @@ function ContextMenu() {
 
   const { item, closeContextMenu, handleContextMenu, contextMenuPosition } =
     useTagTreeItemContext();
-  const { selectedItems } = useTreeContext();
-  const { enqueueSnackbar: sbqr } = useSnackbar();
+  // const { selectedItems } = useTreeContext();
+  // const { enqueueSnackbar: sbqr } = useSnackbar();
   const Icon = item.isTag ? TagIcon : FolderIcon;
   return (
     <Menu

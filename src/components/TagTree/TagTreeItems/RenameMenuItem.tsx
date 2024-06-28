@@ -32,7 +32,7 @@ function pathReplace(path: string, level: number, replacement: string): string {
 
 export default function RenameMenuItem() {
   const { closeContextMenu, item } = useTagTreeItemContext();
-  const {} = useTreeContext();
+  // const {} = useTreeContext();
   const anchorRef = useRef<HTMLDivElement>(null);
   const renameFieldRef = useRef<HTMLInputElement>(null);
   const [renamePrefix, setRenamePrefix] = useState<string>(item.label);

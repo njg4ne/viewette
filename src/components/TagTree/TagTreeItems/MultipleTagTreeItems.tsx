@@ -2,6 +2,7 @@ import RenderSingleTagTreeItem from "./SingleTagTreeItem";
 import { getTagParts, pathUpToLevel, SEPARATOR } from "../utils";
 import { useTreeContext } from "../../../contexts/TagTreeContext";
 import { TagTreeItemProvider } from "./TagTreeItemContext";
+import { useEffect } from "preact/hooks";
 export type TagTreeItem = {
   path: string;
   familyTags: Taguette.Tag[];
@@ -20,7 +21,10 @@ export default function RenderMultipleTagTreeNodes({
   tags,
   level: lastLevel,
 }: TagTreeNodeSetProps) {
-  const { allTags } = useTreeContext();
+  // const { allTags } = useTreeContext();
+  // useEffect(() => {
+  //   console.log("rendering category of", tags.length, "tags");
+  // });
   const level = lastLevel + 1;
 
   let tagFamilies: TagGroups = new Map<string, Taguette.Tag[]>();

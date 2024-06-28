@@ -1,3 +1,37 @@
+import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
+import type {} from "@redux-devtools/extension"; // required for devtools typing
+
+// const [allTagsUnfiltered, setAllTagsUnfiltered] = useState<Taguette.Tag[]>([]);
+// const [allTags, setAllTags] = useState<Taguette.Tag[]>([]);
+// const [taggings, setTaggings] = useState<Taguette.ParentTaggingCount[]>([]);
+// const [expandedItems, setExpandedItems] = useState<ItemTagMap>(
+//   new Map<string, Taguette.Tag | undefined>()
+// );
+// const [selectedItems, setSelectedItems] = useState<string[]>([]);
+// const [createTagValue, setCreateTagValue] = useState<string>("");
+// const [tags, setTags] = useState<TagMap>({});
+
+interface TagTreeState {
+  tagsUnfiltered: Taguette.Tag[];
+  tags: Taguette.Tag[];
+  taggings: Taguette.ParentTaggingCount[];
+  expandedItems: ItemTagMap;
+  selectedItems: string[];
+}
+
+type Setter = (partial: TagTreeState | Partial<TagTreeState> | ((state: TagTreeState) => TagTreeState | Partial<TagTreeState>), replace?: boolean | undefined) => void;
+
+const setSelectedItems = set: Setter => 
+
+const useTreeStore = create<TagTreeState>((set) => ({
+  tagsUnfiltered: [],
+  tags: [],
+  taggings: [],
+  expandedItems: new Map<string, Taguette.Tag | undefined>() as ItemTagMap,
+  selectedItems: [],
+}));
+
 import { Dispatch, StateUpdater } from "preact/hooks";
 import {
   useState,
@@ -12,7 +46,7 @@ import { UseTreeViewItemsPublicAPI } from "@mui/x-tree-view/internals/plugins/us
 import { UseTreeViewExpansionPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewExpansion/useTreeViewExpansion.types";
 import { UseTreeViewFocusPublicAPI } from "@mui/x-tree-view/internals/plugins/useTreeViewFocus/useTreeViewFocus.types";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useLoadingContext } from "./LoadingContext";
+import { useLoadingContext } from "../contexts/LoadingContext";
 import { dbs, signalReady } from "../signals";
 // import { db } from "../db/models/TaguetteDb";
 import { TaguetteDb } from "../db";
@@ -23,8 +57,8 @@ import { useSearchParams } from "react-router-dom";
 import { useDb } from "../hooks";
 import { TagTreeItem } from "../components/TagTree/TagTreeItems/MultipleTagTreeItems";
 import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
-import { useSearchParamContext } from "./SearchParamContext";
-import { useModalContext } from "./ModalContext";
+import { useSearchParamContext } from "../contexts/SearchParamContext";
+import { useModalContext } from "../contexts/ModalContext";
 // import { db } from "../db/models/TaguetteDb.ts";
 type TagMap = Record<string | number, string>;
 export type ItemTagMap = Map<string, Taguette.Tag | undefined>;
@@ -34,7 +68,7 @@ const defaults = {
   setExpandedItems: {} as Dispatch<StateUpdater<ItemTagMap>>,
   selectedItems: [] as string[],
   setSelectedItems: {} as Dispatch<StateUpdater<string[]>>,
-  // createTagValue: "" as string,
+  createTagValue: "" as string,
   tags: {} as TagMap,
   setTags: {} as Dispatch<StateUpdater<TagMap>>,
   numTagsSelected: 0 as number,
@@ -53,38 +87,11 @@ const defaults = {
   // setNewTagInputValueImmediate: {} as (value: string) => void,
 };
 export const TreeContext = createContext(defaults);
-export function TreeProvider({ children }: { children: React.ReactNode }) {
+export function TreeProvider() {
   const { enqueueSnackbar: sbqr } = useSnackbar();
   const { setModalActions } = useModalContext();
-  // const [searchParams, setSearchParams] = useSearchParams();
   const [, , , tagLikeFilter] = useSearchParamContext("tagLike");
-  // console.log("tagLikeFilter", tagLikeFilter);
-  // const tagLikeFilter = "";
-
-  // const tagLikeFilter = useSearchParamContext("tagLike") || "";
-  // const [
-  //   newTagInputValue,
-  //   setNewTagInputValueDebounced,
-  //   setNewTagInputValueImmediate,
-  // ] = useDebouncedSearchParam({
-  //   key: "newTag",
-  // });
-
   const { loading, setLoading } = useLoadingContext();
-  const [allTagsUnfiltered, setAllTagsUnfiltered] = useState<Taguette.Tag[]>(
-    []
-  );
-  const [allTags, setAllTags] = useState<Taguette.Tag[]>([]);
-  // const allTags = allTagsUnfiltered.filter((tag) =>
-  //   tag.path.toLowerCase().includes(tagLikeFilter.toLowerCase())
-  // );
-  const [taggings, setTaggings] = useState<Taguette.ParentTaggingCount[]>([]);
-  const [expandedItems, setExpandedItems] = useState<ItemTagMap>(
-    new Map<string, Taguette.Tag | undefined>()
-  );
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  // const [createTagValue, setCreateTagValue] = useState<string>("");
-  const [tags, setTags] = useState<TagMap>({});
 
   useEffect(() => {
     if (loading || !signalReady(dbs)) return;
@@ -147,31 +154,22 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
   }
-
-  return (
-    <TreeContext.Provider
-      value={{
-        expandedItems,
-        setExpandedItems,
-        selectedItems,
-        setSelectedItems,
-        // createTagValue,
-        tags,
-        setTags,
-        numTagsSelected,
-        apiRef,
-        allTags,
-        allTagsUnfiltered,
-        taggings,
-        selectedTags,
-        // newTagInputValue,
-        // setNewTagInputValueDebounced,
-        // setNewTagInputValueImmediate,
-      }}
-    >
-      {children}
-    </TreeContext.Provider>
-  );
+  const value = {
+    expandedItems,
+    setExpandedItems,
+    selectedItems,
+    setSelectedItems,
+    createTagValue,
+    tags,
+    setTags,
+    numTagsSelected,
+    apiRef,
+    allTags,
+    allTagsUnfiltered,
+    taggings,
+    selectedTags,
+  };
+  return value;
 }
 
 export function useTreeContext() {
@@ -190,14 +188,6 @@ function allItemPaths(tags: Taguette.Tag[]): string[] {
   }, []);
   res.sort();
   return [...new Set(res)];
-}
-
-function allItemPathsUnsorted(tags: Taguette.Tag[]): string[] {
-  return tags.reduce((acc: string[], tag: Taguette.Tag) => {
-    const morePaths = getAllPartialPaths(tag.path);
-    acc.push(...morePaths);
-    return acc;
-  }, []);
 }
 
 function getItemTagMapForTags(

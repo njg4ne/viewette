@@ -23,7 +23,7 @@ import * as popups from "../../../popups";
 // const options = ["...", "Squash and merge", "Rebase and merge"];
 
 export default function DeleteMenuItems() {
-  const { numTagsSelected, tags, selectedItems } = useTreeContext();
+  const { numTagsSelected, selectedItems } = useTreeContext();
   const { item, closeContextMenu } = useTagTreeItemContext();
   // const numInFamily = item.familyTags.length;
   const [open, setOpen] = React.useState(false);

@@ -34,7 +34,7 @@ type PropTypes = {
   children: JSX.Element;
 };
 export function TagTreeItemProvider({ item, children }: PropTypes) {
-  const { tags, allTags, taggings } = useTreeContext();
+  const { allTags, taggings } = useTreeContext();
   const [contextMenu, setContextMenu] = useState<Position>(null);
   const handleContextMenu = (e: MouseEvent) =>
     contextMenuHandlerFactory(contextMenu, setContextMenu, apiRef, e)(e);

@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import { useSnackbar } from "notistack";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { useRef, useMemo, useEffect } from "preact/compat";
+import { useRef, useMemo, useEffect, Dispatch } from "preact/compat";
 import { signalReady, dbs } from "../../../signals";
 import Divider from "@mui/material/Divider";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
@@ -42,14 +42,10 @@ import Box from "@mui/material/Box";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { TreeItem2GroupTransition } from "@mui/x-tree-view";
 
-import { useLoadingContext } from "../../../contexts/LoadingContext";
-import { useTreeContext } from "../../../contexts/TagTreeContext";
-import {
-  TagTreeItemProvider,
-  useTagTreeItemContext,
-} from "./TagTreeItemContext";
+import { ItemTagMap, useTreeContext } from "../../../contexts/TagTreeContext";
+import { useTagTreeItemContext } from "./TagTreeItemContext";
 import StyledTreeItem from "./StyledTreeItem";
-import RenderMultipleTagTreeItems2, {
+import RenderMultipleTagTreeItems, {
   TagTreeItem,
 } from "./MultipleTagTreeItems";
 import Tooltip from "@mui/material/Tooltip";
@@ -59,17 +55,18 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TagChip } from "../../TagChip";
 import { useDroppable } from "@dnd-kit/core";
 import { useDraggable } from "@dnd-kit/core";
-import { useTheme } from "@mui/styles";
+import { useTheme } from "@mui/material/styles";
+import { StateUpdater } from "preact/hooks";
+import { memo } from "preact/compat";
 
-const Draggable = Box;
-const Droppable = Box;
 export default function RenderSingleTagTreeItem() {
-  const { loading, setLoading } = useLoadingContext();
-  const { enqueueSnackbar: sbqr, closeSnackbar } = useSnackbar();
-  const { selectedItems } = useTreeContext();
   const { handleContextMenu, item } = useTagTreeItemContext();
-  const { setExpandedItems, expandedItems } = useTreeContext();
-  // const ref = useRef<HTMLDivElement>(null);
+  const { setExpandedItems } = useTreeContext();
+
+  useEffect(() => {
+    console.log("tree item context changed");
+  }, [useTagTreeItemContext()]);
+
   const { isOver, setNodeRef: dropRef } = useDroppable({
     id: `droppables.${item.path}`,
     data: { item },
@@ -95,80 +92,42 @@ export default function RenderSingleTagTreeItem() {
   const ancestors = item.familyTags.filter((tag) => tag.path !== item.path);
 
   const Icon = item.isTag ? StarFolderIcon : FolderIcon;
-  // const Icon = () => (
-  //   <CountSticker iconComponent={TextIcon} value={item.useCount} />
-  // );
-  // const Icon = useMemo(
-  //   () => (item.isTag ? StarFolderIcon : FolderIcon),
-  //   [item.isTag]
-  // );
-  // useEffect(() => {
-  //   console.log("rendering a single tag tree item", item.path);
-  // }, []);
   const actions = [
     {
       label: `view ${item.isTag ? "tag" : "category"}`,
       icon: LaunchIcon,
-      // action: () => {
-      //   popups.info(sbqr, `view ${item.isTag ? "tag" : "category"}`);
-      // },
-      // link: `/`,
       link: item.tag ? `/tags/${item.tag.id}` : `/category/${item.path}`,
     },
   ];
-  function ExpnansionControl({ icon: Icon }: { icon: typeof ExpandMoreIcon }) {
-    return (
-      <IconButton
-        sx={{
-          borderRadius: 1,
-          // mx: 1,
-          p: 0.25,
-        }}
-        aria-label="change expansion"
-        onClick={(e) => {
-          e.stopPropagation();
-          setExpandedItems((prev) => {
-            if (prev?.has(item.path)) {
-              prev.delete(item.path);
-            } else {
-              prev.set(item.path, item.tag);
-            }
-            return new Map(prev);
-          });
-        }}
-      >
-        <Icon />
-      </IconButton>
-    );
-  }
+
   const textPrimary = useTheme().palette?.text?.primary || "green";
+  // const children = memo(() => (
+  //   <RenderMultipleTagTreeItems tags={ancestors} level={item.level} />
+  // ));
   return (
-    // <div
-    //   className="draggable-dndkit"
-    //   ref={dragRef}
-    //   style={dragSx}
-    //   {...listeners}
-    //   {...attributes}
-    // >
-    //   <div  className="droppable-dndkit">
     <StyledTreeItem
       sx={{
         border: isOver ? `.125rem solid ${textPrimary}` : "",
       }}
-      // {...hoverProps}
-      // sx={{ color: "text.primary", opacity: 0.8 }}
-
       slots={{
-        expandIcon: () => <ExpnansionControl icon={ExpandMoreIcon} />,
-        collapseIcon: () => <ExpnansionControl icon={ChevronRightIcon} />,
+        expandIcon: () => (
+          <ExpansionControl
+            icon={ExpandMoreIcon}
+            item={item}
+            setExpandedItems={setExpandedItems}
+          />
+        ),
+
+        collapseIcon: () => (
+          <ExpansionControl
+            icon={ChevronRightIcon}
+            item={item}
+            setExpandedItems={setExpandedItems}
+          />
+        ),
         endIcon: TagIcon,
-        // groupTransition: (props: any) => (
-        //   <div >
-        //     <TreeItem2GroupTransition {...props} />
-        //   </div>
-        // ),
       }}
-      key={item.path} // sx={{ cursor: 'context-menu' }}
+      key={item.path}
       itemId={item.path}
       label={
         <Stack
@@ -189,16 +148,13 @@ export default function RenderSingleTagTreeItem() {
             <DragIndicatorIcon fontSize="small" />
           </Stack>
           <TagChip
-            // tag={item[hovering ? "path" : "label"]}
             tag={isDragging ? item.path : item.label}
             specialColor={!item.isTag}
           />
           <CountSticker iconComponent={TextIcon} value={item.useCount} />
-          <Preview />
+          <TagInfoPreview item={item} />
           <ButtonGroup aria-label="tag tree item action button group">
             {actions.map((action) => (
-              // <Tooltip title={action.label} placement="bottom">
-
               <IconButton
                 aria-label={action.label}
                 {...(action.link
@@ -208,14 +164,11 @@ export default function RenderSingleTagTreeItem() {
                       disabled: !item.isTag,
                     }
                   : {})}
-                // {...(!action.link ? { onClick: action.action } : {})}
               >
                 {action.icon({
-                  // fontSize: ".25rem",
                   sx: { fontSize: "1rem" },
                 })}
               </IconButton>
-              // </Tooltip>
             ))}
           </ButtonGroup>
           <ContextMenu />
@@ -223,11 +176,9 @@ export default function RenderSingleTagTreeItem() {
       }
     >
       {ancestors.length > 0 && (
-        <RenderMultipleTagTreeItems2 tags={ancestors} level={item.level} />
+        <RenderMultipleTagTreeItems tags={ancestors} level={item.level} />
       )}
     </StyledTreeItem>
-    //   </div>
-    // </div>
   );
 }
 
@@ -242,7 +193,6 @@ function CountSticker({
     <Stack
       direction="row"
       component={Paper}
-      // elevation={1}
       variant="outlined"
       spacing={0.25}
       sx={{
@@ -264,9 +214,9 @@ function CountSticker({
   );
 }
 
-function Preview() {
+function TagInfoPreview({ item }: { item: TagTreeItem }) {
   function InfoPopover() {
-    return <TagCard />;
+    return <TagCard item={item} />;
   }
   const m0p0Sx = { sx: { m: 0, p: 0 } };
   return (
@@ -282,8 +232,8 @@ function Preview() {
   );
 }
 
-function TagCard() {
-  const { item } = useTagTreeItemContext();
+function TagCard({ item }: { item: TagTreeItem }) {
+  // const { item } = useTagTreeItemContext();
   const tag: any = item.tag;
   const path = item.path;
   const description = tag ? tag.description : "This is a category only.";
@@ -297,19 +247,39 @@ function TagCard() {
         </Typography>
         <Typography>{description}</Typography>
       </CardContent>
-      {/* <CardActions>
-        <Button
-          onClick={save}
-          disabled={loading}
-          variant="outlined"
-          sx={{
-            marginBottom: 1,
-            marginLeft: 1,
-          }}
-        >
-          Save
-        </Button>
-      </CardActions> */}
     </Card>
+  );
+}
+function ExpansionControl({
+  icon: Icon,
+  setExpandedItems,
+  item,
+}: {
+  icon: typeof ExpandMoreIcon;
+  setExpandedItems: Dispatch<StateUpdater<ItemTagMap>>;
+  item: TagTreeItem;
+}) {
+  return (
+    <IconButton
+      sx={{
+        borderRadius: 1,
+        // mx: 1,
+        p: 0.25,
+      }}
+      aria-label="change expansion"
+      onClick={(e) => {
+        e.stopPropagation();
+        setExpandedItems((prev) => {
+          if (prev?.has(item.path)) {
+            prev.delete(item.path);
+          } else {
+            prev.set(item.path, item.tag);
+          }
+          return new Map(prev);
+        });
+      }}
+    >
+      <Icon />
+    </IconButton>
   );
 }
