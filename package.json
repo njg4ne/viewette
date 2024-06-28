@@ -22,6 +22,7 @@
     "@mui/x-data-grid": "^6.17.0",
     "@mui/x-tree-view": "^7.3.0",
     "@preact/signals": "^1.2.2",
+    "@react-spring/web": "^9.7.3",
     "@sqlite.org/sqlite-wasm": "^3.45.3-build1",
     "@tanstack/react-virtual": "^3.5.0",
     "@tinymce/tinymce-react": "^4.3.2",
