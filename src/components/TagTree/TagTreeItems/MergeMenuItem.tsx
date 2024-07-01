@@ -370,6 +370,7 @@ export async function persistMerge(
     };
     return res;
   });
+  // console.log("updateEntries", updateEntries);
   const numChanges = await mergeMany(db, updateEntries);
   return numChanges;
 }

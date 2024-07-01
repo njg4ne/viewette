@@ -17,7 +17,7 @@ import { TreeItem2Icon } from "@mui/x-tree-view";
 import { TagChip } from "../../TagChip";
 
 // const p : TreeItem2IconProps;
-const _CustomTreeItem = forwardRef(
+export const _CustomTreeItem = forwardRef(
   (props: UseTreeItem2Parameters, ref: Ref<HTMLLIElement>) => {
     const { id, itemId, label, disabled, children, ...other } = props;
 
@@ -53,7 +53,9 @@ const _CustomTreeItem = forwardRef(
             </TreeItem2IconContainer>
             {/* <Checkbox {...getCheckboxProps()} /> */}
             <TreeItem2Label sx={{ maxWidth: "max-content" }}>
-              <TagChip tag={label as string} />
+              {/* <TagChip tag={label as string} />
+               */}
+              {label}
             </TreeItem2Label>
           </TreeItem2Content>
           {/* {children && <TransitionComponent {...getGroupTransitionProps()} />}

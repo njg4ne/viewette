@@ -42,8 +42,6 @@ function ContextMenu() {
 
   const { item, closeContextMenu, handleContextMenu, contextMenuPosition } =
     useTagTreeItemContext();
-  // const { selectedItems } = useTreeContext();
-  // const { enqueueSnackbar: sbqr } = useSnackbar();
   const Icon = item.isTag ? TagIcon : FolderIcon;
   return (
     <Menu
@@ -97,22 +95,9 @@ function ContextMenu() {
         </ListItemIcon>
         <ListItemText>Copy ID</ListItemText>
       </MenuItem>
-      {/* <MenuItem onClick={deleteTag}>
-       <ListItemIcon>
-         <TrashXIcon fontSize="small" />
-       </ListItemIcon>
-       <ListItemText>Delete All</ListItemText>
-      </MenuItem> */}
       <MenuItem
         onClick={() => {
           setNewTagInputValueImmediate(item.path + SEPARATOR);
-          // setSearchParams(
-          //   (sp: URLSearchParams) => {
-          //     sp.set("newTag", item.path + SEPARATOR);
-          //     return sp;
-          //   },
-          //   { replace: true }
-          // );
           closeContextMenu();
         }}
       >

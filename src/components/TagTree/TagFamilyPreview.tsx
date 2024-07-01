@@ -21,9 +21,9 @@ export default function TagFamilyPreview({
       sx={{ py: 0.75, px: 1, width: "max-content" }}
     >
       <DragIndicatorIcon fontSize="small" />
-      {size > 1 && <Typography>{size} x</Typography>}
+      {/* {size > 1 && <Typography>{size} x</Typography>} */}
       <TagChip tag={label} />
-      {size > 1 && <Typography> tags</Typography>}
+      {size > 1 && <Typography> & {size - 1} more</Typography>}
     </Paper>
   );
 }

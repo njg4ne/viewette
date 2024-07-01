@@ -1,6 +1,7 @@
 const SEPARATOR = ".";
 
 function getTagParts(path: string) {
+  // console.log("getTagParts", path);
   return path.split(SEPARATOR);
 }
 function getPartialPath(path: string, level: number) {

@@ -5,7 +5,7 @@ import { TreeProvider } from "../../contexts/TagTreeContext";
 import TagTree from "./TagTree";
 import TagTree2 from "./TagTree2";
 
-function TagTreeWithContext() {
+export default function TagTreeWithContext() {
   return (
     // <LoadingProvider>
     <SearchParamProvider keys={["tagLike", "newTag"]}>
@@ -17,4 +17,4 @@ function TagTreeWithContext() {
   );
 }
 
-export default TagTree2;
+// export default TagTree2;

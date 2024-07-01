@@ -5,7 +5,7 @@ import type { SxProps } from "@mui/material";
 
 export function TagChip({
   id,
-  ref,
+  // ref,
   tag,
   specialColor = false,
   sx,
@@ -24,6 +24,8 @@ export function TagChip({
     borderRadius: 1,
   };
   // replace all SEPARATOR with SEPAR+ nowidthspace, keeping what is between
+  // "".split(SEPARATOR);
+  // tag = tag || "";
   const parts = getTagParts(tag);
   const wrapInParenIfContainsWhitespace = (str: string) => {
     return str.includes(" ") ? `(${str})` : str;
@@ -34,7 +36,7 @@ export function TagChip({
   // const tagSpecial = tag;
   return (
     <Typography
-      ref={ref}
+      // ref={ref}
       id={id}
       sx={{
         bgcolor: `primary.${!specialColor ? "main" : "200"}`,

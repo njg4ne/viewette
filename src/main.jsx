@@ -35,7 +35,7 @@ import {
 import { Modal, Paper } from "@mui/material";
 // import { FilesystemProvider } from "./contexts/FilesystemContext";
 import { ModalProvider } from "./contexts/ModalContext";
-import DataViewer from "./components/DataViewer";
+// import DataViewer from "./components/DataViewer";
 import {
   ForceExcludeTags,
   ForceIncludeTags,
@@ -95,9 +95,7 @@ function Highlights() {
           <TagFilters />
         </AccordionDetails>
       </Accordion>
-      <Paper elevation={3}>
-        <DataViewer />
-      </Paper>
+      <Paper elevation={3}>{/* <DataViewer /> */}</Paper>
     </Stack>
   );
 }
@@ -108,39 +106,17 @@ const AppContainer = ({ Contents }) => {
   return (
     <ColorThemeProvider>
       <CssBaseline enableColorScheme />
-      <ModalProvider>
-        {/* <WorkerProvider> */}
-        {/* <FilesystemProvider> */}
-        <SnackbarProvider>
+      <SnackbarProvider>
+        <ModalProvider>
           <LoadingProvider>
-            {/* 
-            
-              > */}
             <Drawer>
-              {/* <Stack
-              sx={{
-                justifyContent: "space-between",
-                // minHeight: "100vh",
-                p: 2,
-              }}
-              spacing={2}
-            > */}
               <Box sx={{ m: 2, flexGrow: 1 }}>
                 <Contents />
               </Box>
-              {/* </Stack> */}
             </Drawer>
-            {/* <ColorModeToggler /> */}
-
-            {/* 
-              
-          */}
           </LoadingProvider>
-        </SnackbarProvider>
-      </ModalProvider>
-      {/* </FilesystemProvider> */}
-
-      {/* </ WorkerProvider> */}
+        </ModalProvider>
+      </SnackbarProvider>
     </ColorThemeProvider>
   );
 };

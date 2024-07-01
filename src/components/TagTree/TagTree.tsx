@@ -51,6 +51,7 @@ import { persistMerge, persistNest } from "./TagTreeItems/MergeMenuItem";
 import { dbs, signalReady } from "../../signals";
 import { useSnackbar } from "notistack";
 import * as popups from "../../popups";
+import Dnd from "./TagTree2/Dnd";
 function customCollisionDetectionAlgorithm(args: {
   active: Active;
   collisionRect: Rect;
@@ -262,11 +263,12 @@ export default function TagTree({}) {
 
   return (
     // <SearchParamProvider keys={["newTag"]}>
-    <DndContext
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      collisionDetection={customCollisionDetectionAlgorithm}
-    >
+    // <DndContext
+    //   onDragStart={handleDragStart}
+    //   onDragEnd={handleDragEnd}
+    //   collisionDetection={customCollisionDetectionAlgorithm}
+    // >
+    <Dnd>
       <Paper
         elevation={1}
         component={Stack}
@@ -330,7 +332,8 @@ export default function TagTree({}) {
           </Box>
         </Stack>
       </Paper>
-      <DragOverlay style={{ opacity: 1 }}>
+    </Dnd>
+    /* <DragOverlay style={{ opacity: 1 }}>
         {itemBeingDragged !== null ? (
           <TagFamilyPreview
             label={itemBeingDragged.path}
@@ -338,7 +341,7 @@ export default function TagTree({}) {
           />
         ) : null}
       </DragOverlay>
-    </DndContext>
+    </DndContext> */
     // </SearchParamProvider>
   );
 }
