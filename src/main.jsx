@@ -60,6 +60,7 @@ import { TagAutocomplete, TagFilters } from "./components/Filters";
 import TagTree from "./components/TagTree";
 import { LoadingProvider } from "./contexts/LoadingContext";
 import TagExporter from "./components/TagExporter";
+import { FilterActiveProvider } from "./components/FilterToggler";
 
 function Highlights() {
   const [dbHandle, setDbHandle] = useState(null);
@@ -109,11 +110,13 @@ const AppContainer = ({ Contents }) => {
       <SnackbarProvider>
         <ModalProvider>
           <LoadingProvider>
-            <Drawer>
-              <Box sx={{ m: 2, flexGrow: 1 }}>
-                <Contents />
-              </Box>
-            </Drawer>
+            <FilterActiveProvider>
+              <Drawer>
+                <Box sx={{ m: 2, flexGrow: 1 }}>
+                  <Contents />
+                </Box>
+              </Drawer>
+            </FilterActiveProvider>
           </LoadingProvider>
         </ModalProvider>
       </SnackbarProvider>

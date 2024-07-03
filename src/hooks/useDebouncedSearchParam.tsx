@@ -20,7 +20,8 @@ export default function useDebouncedSearchParam({
   }
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const param = searchParams.get(key) || "";
+  // const param = searchParams.get(key) || "";
+  const param = useMemo(() => searchParams.get(key) || "", [searchParams, key]);
 
   const ssp = (value: string) => {
     // setLoading(true);
@@ -45,7 +46,7 @@ export default function useDebouncedSearchParam({
     param,
     onChangeFn("debounced"),
     onChangeFn("immediate"),
-    searchParams.get(key) || "",
+    param
     // loading,
   ] as const;
 }

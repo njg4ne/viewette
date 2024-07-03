@@ -52,6 +52,7 @@ import { dbs, signalReady } from "../../signals";
 import { useSnackbar } from "notistack";
 import * as popups from "../../popups";
 import Dnd from "./TagTree2/Dnd";
+import QueryBuilder from "../QueryBuilder";
 function customCollisionDetectionAlgorithm(args: {
   active: Active;
   collisionRect: Rect;
@@ -107,7 +108,7 @@ function TagPathFilter() {
   );
 }
 
-export default function TagTree({}) {
+export default function TagTree({ }) {
   // useEffect(() => {}, [searchParams.get("tagLike")]);
   // useEffect(() => {
   //   console.log("App Container");
@@ -275,10 +276,11 @@ export default function TagTree({}) {
         sx={{ p: 2, height: "100%", overflow: "auto" }}
         spacing={2}
         direction="column"
-        // alignItems="flex-start"
-        // minHeight="100vh"
+      // alignItems="flex-start"
+      // minHeight="100vh"
       >
-        <CreateTagForm />
+
+
         {/* <Stack
           width="max-content"
           direction="row"
@@ -314,10 +316,11 @@ export default function TagTree({}) {
                   onItemSelectionToggle={selectChildrenToo}
                   multiSelect
                   expandedItems={Array.from(expandedItems.keys())}
-                  // expandedItems={allItemIds(allTags)}
-                  // onExpandedItemsChange={handleExpandedItemsChange}
+                // expandedItems={allItemIds(allTags)}
+                // onExpandedItemsChange={handleExpandedItemsChange}
                 >
-                  <TagPathFilter />
+                  {/* <TagPathFilter /> */}
+                  <CreateTagForm />
                   <MultipleTagTreeItems tags={allTags} level={-1} />
                 </SimpleTreeView>
                 // </Stack>

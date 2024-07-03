@@ -15,7 +15,7 @@ import { SearchParamProvider } from "../../contexts/SearchParamContext";
 import AutoSizer from "react-virtualized-auto-sizer";
 
 export default () => (
-  <SearchParamProvider keys={["tagLike", "newTag"]}>
+  <SearchParamProvider keys={["tagLike", "newTag", "tagQuery"]}>
     <TreeProvider>
       <TagExporter />
     </TreeProvider>

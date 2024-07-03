@@ -29,6 +29,7 @@ import { Link } from "react-router-dom";
 import MuiLink from "@mui/material/Link";
 
 import { ColorModeToggler } from "./ColorModeTheme";
+import { FilterToggler } from "./FilterToggler";
 
 import TagIcon from "@mui/icons-material/Sell";
 import ShortTextIcon from "@mui/icons-material/ShortText";
@@ -237,7 +238,9 @@ export default function MiniDrawer({
         </List>
         <Divider />
         <List>
+          <FilterToggler open={open} />
           <ColorModeToggler open={open} />
+
         </List>
       </Drawer>
       <Main disableGutters open={open}>

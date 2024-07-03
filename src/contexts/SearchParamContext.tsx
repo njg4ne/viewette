@@ -28,5 +28,6 @@ export function useSearchParamContext(key: string) {
   if (context === undefined) {
     throw new Error("useSearchParam must be used within a SearchParamProvider");
   }
+  // console.log("context value has changed for key", key);
   return context[key];
 }

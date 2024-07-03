@@ -1,4 +1,4 @@
-import { Dispatch, StateUpdater } from "preact/hooks";
+import { Dispatch, StateUpdater, useMemo } from "preact/hooks";
 import {
   useState,
   createContext,
@@ -25,6 +25,7 @@ import { TagTreeItem } from "../components/TagTree/TagTreeItems/MultipleTagTreeI
 import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
 import { useSearchParamContext } from "./SearchParamContext";
 import { useModalContext } from "./ModalContext";
+import { useFetchTags, useQueryBuilderSql, } from "../components/QueryBuilder";
 // import { db } from "../db/models/TaguetteDb.ts";
 type TagMap = Record<string | number, string>;
 export type ItemTagMap = Map<string, Taguette.Tag | undefined>;
@@ -40,8 +41,8 @@ const defaults = {
   numTagsSelected: 0 as number,
   apiRef: {} as MutableRefObject<
     | (UseTreeViewItemsPublicAPI<any> &
-        UseTreeViewExpansionPublicAPI &
-        UseTreeViewFocusPublicAPI)
+      UseTreeViewExpansionPublicAPI &
+      UseTreeViewFocusPublicAPI)
     | undefined
   >,
   allTags: [] as Taguette.Tag[],
@@ -71,10 +72,10 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   // });
 
   const { loading, setLoading } = useLoadingContext();
-  const [allTagsUnfiltered, setAllTagsUnfiltered] = useState<Taguette.Tag[]>(
-    []
-  );
-  const [allTags, setAllTags] = useState<Taguette.Tag[]>([]);
+  // const [allTagsUnfiltered, setAllTagsUnfiltered] = useState<Taguette.Tag[]>(
+  //   []
+  // );
+  // const [allTags, setAllTags] = useState<Taguette.Tag[]>([]);
   // const allTags = allTagsUnfiltered.filter((tag) =>
   //   tag.path.toLowerCase().includes(tagLikeFilter.toLowerCase())
   // );
@@ -86,28 +87,40 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   // const [createTagValue, setCreateTagValue] = useState<string>("");
   const [tags, setTags] = useState<TagMap>({});
 
-  useEffect(() => {
-    if (loading || !signalReady(dbs)) return;
-    const db = dbs.value;
-    const backendTagLikeFilter = ""; //tagLikeFilter;
-    const bindings = { $tagLike: `%${backendTagLikeFilter}%` };
-    const sql = `SELECT * FROM tags${
-      backendTagLikeFilter.length > 0 ? ` WHERE path LIKE $tagLike` : ""
-    };`;
-    db.transactAll([{ sql, bindings }]).then(([newTags]) => {
-      setAllTagsUnfiltered(newTags as Taguette.Tag[]);
+  // const qb = useQueryBuilder();
+  // useEffect(() => {
+  //   console.log("qb", qb);
+  // }, [qb]);
+  // const querySql = "1 = 1";
 
-      // console.log("setAllTags", ...newTags);
-      setExpandedItems((prev) => getItemTagMapForTags(newTags, prev));
-    });
-  }, [loading, dbs.value /*tagLikeFilter*/]);
-
+  const allTagsUnfiltered = useFetchTags(false);
+  const allTags = useFetchTags(true);
   useEffect(() => {
-    const newTagsFiltered = allTagsUnfiltered.filter((tag) =>
-      tag.path.toLowerCase().includes(tagLikeFilter.toLowerCase())
-    );
-    setAllTags(newTagsFiltered);
-  }, [tagLikeFilter, allTagsUnfiltered]);
+    // console.log("allTagsUnfiltered SET");
+    setExpandedItems((prev) => getItemTagMapForTags(allTags, prev));
+  }, [allTags]);
+
+  // const allTags = useFetchTags(true);
+
+  // useEffect(() => {
+  //   if (loading || !signalReady(dbs)) return;
+  //   const db = dbs.value;
+  //   const whereClause = `WHERE ${querySql}`;
+  //   const filterSql = `SELECT * FROM tags ${whereClause};`;
+  //   db.transactAll([{ sql: filterSql, }]).then(([newTags]) => {
+  //     setAllTagsUnfiltered(newTags as Taguette.Tag[]);
+
+  //     // console.log("setAllTags", ...newTags);
+  //     setExpandedItems((prev) => getItemTagMapForTags(newTags, prev));
+  //   });
+  // }, [loading, dbs.value /*tagLikeFilter*/, querySql]);
+
+  // useEffect(() => {
+  //   const newTagsFiltered = allTagsUnfiltered.filter((tag) =>
+  //     tag.path.toLowerCase().includes(tagLikeFilter.toLowerCase())
+  //   );
+  //   setAllTags(newTagsFiltered);
+  // }, [tagLikeFilter, allTagsUnfiltered]);
 
   const apiRef = useTreeViewApiRef();
   const selectedTags = selectedItems.filter((path) =>
@@ -116,9 +129,8 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   const numTagsSelected = selectedTags.length;
   useHotkeys("delete", () => {
     if (numTagsSelected === 0) return;
-    const msg = `Delete ${numTagsSelected} tag${
-      numTagsSelected > 1 ? "s" : ""
-    }`;
+    const msg = `Delete ${numTagsSelected} tag${numTagsSelected > 1 ? "s" : ""
+      }`;
     const actions = {
       delete: [msg, () => deleteTags(selectedTags)],
     };
