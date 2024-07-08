@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build; touch ./docs/.nojekyll; cp coi.sw.min.js docs/",
+    "build": "vite build; touch ./docs/.nojekyll; cp coi.sw.min.js docs/; echo qdb.n.gardella.cc > docs/CNAME;",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "jest"
