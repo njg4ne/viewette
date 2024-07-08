@@ -1,7 +1,7 @@
 import { signal, effect, computed } from "@preact/signals";
 import OpfsDb, { TaguetteDb } from "../db";
 import { Signal } from "@preact/signals";
-
+import initSql from "../db/models/sql/init.sql?raw";
 export const dbs: Signal<TaguetteDb> = signal(await opfs());
 // export const dbs = { value: await opfs() };
 export const signalReady = <T>(s: Signal<T>): s is Signal & { value: T } =>
@@ -16,28 +16,24 @@ export async function clearOpfsDb() {
   const db = dbs.value;
   if (db === null) return;
   await db.close();
+  await loadOpfsDb();
   // dbs.value = null;
   // await invalidateRam();
 }
 
 async function opfs(): Promise<TaguetteDb> {
   const dbName = "database";
-  // const fileName = `${dbName}.sqlite3`;
-  // async function files() {
-  //   const files = [];
-  //   const opfsRoot = await navigator.storage.getDirectory();
-  //   //@ts-ignore
-  //   for await (const entry of opfsRoot.values()) {
-  //     files.push(entry.name);
-  //   }
-  //   return files;
-  // }
-  // const filesList = await files();
-  // if (!filesList.includes(fileName)) {
-  //   // throw new Error(`File ${fileName} not found in opfs`);
-  // }
+  const root = await navigator.storage.getDirectory();
+  const dbHandle = await root.getFileHandle(`${dbName}.sqlite3`, { create: true })
+  // get size of file
+  const file = await dbHandle.getFile();
+  const size = file.size;
   const db = new TaguetteDb(dbName);
   await db.ready;
+  if (size === 0) {
+    await db.exec(initSql);
+  }
+
   return db;
 }
 

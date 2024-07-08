@@ -9,7 +9,8 @@ export default defineConfig({
     target: "esnext",
     outDir: "docs",
   },
-  base: "/viewette/",
+  // base: "/viewette/",
+  base: "/",
   server: {
     headers: {
       // defaults:

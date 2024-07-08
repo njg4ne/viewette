@@ -27,7 +27,7 @@ export default function DatabaseManager() {
     const name = "database.sqlite3";
     const root = await navigator.storage.getDirectory();
     const exists = await root
-      .getFileHandle(name)
+      .getFileHandle(name, { create: false })
       .then(() => true)
       .catch(() => false);
     let confirm = !exists;

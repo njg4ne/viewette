@@ -8,14 +8,16 @@ import ListItemText from "@mui/material/ListItemText";
 import Tooltip from "@mui/material/Tooltip";
 import FilterListIcon from '@mui/icons-material/FilterList';
 
+const ACTIVE_DEFAULT = true;
+
 const contextValueFormat = {
     toggle: () => { },
-    active: false,
+    active: ACTIVE_DEFAULT,
 }
 const FilterActiveContext = React.createContext(contextValueFormat);
 
 export function FilterActiveProvider({ children }: { children: React.ReactNode }) {
-    const [active, setActive] = React.useState(false);
+    const [active, setActive] = React.useState(ACTIVE_DEFAULT);
     const toggle = () => setActive((prev) => !prev);
     return (
         <FilterActiveContext.Provider value={{ active, toggle }}>

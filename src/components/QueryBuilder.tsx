@@ -94,13 +94,13 @@ export default () => {
   );
 };
 
-
+const DEFAULT_WHERE = '(1 = 1)';
 function useQueryBuilderSql() {
   const [tagQuery] = useSearchParamContext("tagQuery");
   const querySql = useMemo(() => {
-    let sql = '(1 = 1)';
+    let sql = DEFAULT_WHERE;
     try {
-      const parseRes = decodeURIComponent(tagQuery)
+      const parseRes = tagQuery ? decodeURIComponent(tagQuery) : DEFAULT_WHERE;
       sql = parseRes;
     } catch (e) { }
     return sql;
@@ -111,7 +111,7 @@ function useQueryBuilderSql() {
 export function useFetchTags(filter: boolean) {
   const [tags, setTags] = useState<Taguette.Tag[]>([]);
   const { loading } = useLoadingContext();
-  const whereClause = `WHERE ${!filter ? '(1 = 1)' : useQueryBuilderSql()}`;
+  const whereClause = `WHERE ${!filter ? DEFAULT_WHERE : useQueryBuilderSql()}`;
   useEffect(() => {
     fetchTags(loading, whereClause).then(([newTags]) => {
       if (!newTags) return;

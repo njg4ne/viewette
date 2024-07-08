@@ -83,8 +83,8 @@ export default function TreeView2() {
       sx={{ p: 2, height: "100%" }}
       spacing={2}
       direction="column"
-      // alignItems="flex-start"
-      // minHeight="100vh"
+    // alignItems="flex-start"
+    // minHeight="100vh"
     >
       <Box
         sx={{
@@ -134,6 +134,12 @@ export default function TreeView2() {
     </Paper>
   );
   return <Box sx={{ minHeight: 352, minWidth: 250 }}></Box>;
+}
+
+export function useBranchedTags() {
+  const tags = useTags();
+  const branches = useMemo(() => getBranches(tags, 0), [tags]);
+  return branches;
 }
 
 function useTags() {
