@@ -13,6 +13,8 @@ import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import { entrify } from "../../EditHighlight/EditHighlight";
 import RightArrowIcon from "@mui/icons-material/ArrowRightAlt";
+// import DownRightArrowIcon from "@mui/icons-material/SubdirectoryArrowRight";
+import NorthEastIcon from "@mui/icons-material/NorthEast";
 // import type { SyntheticEvent } from "preact/compat";
 
 import { useRef, useState } from "preact/compat";
@@ -25,6 +27,7 @@ import { SEPARATOR, getTagParts } from "../utils";
 import { useTreeContext } from "../../../contexts/TagTreeContext";
 import { ManagedTagChooser } from "../../TagsFilter";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import NorthWestIcon from "@mui/icons-material/NorthWest";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
@@ -34,7 +37,14 @@ import { TaguetteDb } from "../../../db";
 import { TagTreeItem } from "./MultipleTagTreeItems";
 // const
 
-export default function MergeMenuItem() {
+function resolveNest(item: TagTreeItem, targetPath: string) {
+  const parts = getTagParts(item.path);
+  const tail = parts.slice(item.level);
+  const newPath = [targetPath, ...tail].join(SEPARATOR);
+  return newPath;
+}
+
+export default function NestUnderMenuItem() {
   const { closeContextMenu, item } = useTagTreeItemContext();
   const { allTagsUnfiltered } = useTreeContext();
   const anchorRef = useRef<HTMLDivElement>(null);
@@ -52,7 +62,7 @@ export default function MergeMenuItem() {
   //     ? ([item.tag.id, item.tag.path] as [number, string])
   //     : null;
 
-  const [mergeTarget, setMergeTarget] =
+  const [nestTarget, setnestTarget] =
     useState<[number, string]>(initialTagEntry);
   const [confirm, setConfirm] = useState(false);
 
@@ -76,14 +86,14 @@ export default function MergeMenuItem() {
 
   const plural = item.familyTags.length > 1 ? "s" : "";
   // const text = `Merge ${item.familyTags.length} "${item.label}" tag${plural} into...`;
-  const text = "Merge into...";
+  const text = "Nest under...";
   const subWidth = anchorRef.current?.offsetWidth || "auto";
   const onAutocompleteChange = (event: Event, newValue: [number, string]) => {
     if (newValue === null) {
       newValue = initialTagEntry;
     }
     const [id, path] = newValue;
-    setMergeTarget(newValue);
+    setnestTarget(newValue);
     setConfirm(false);
   };
   function catchReset(event: Event, value: string, reason: string): void {
@@ -91,9 +101,9 @@ export default function MergeMenuItem() {
       setConfirm(false);
     }
   }
-  const defaultOptionInUse = ((mergeTarget?.at(0) || -1) as number) < 0;
+  const defaultOptionInUse = ((nestTarget?.at(0) || -1) as number) < 0;
   const disableMerge = defaultOptionInUse || !confirm;
-  const doMerge = async (e: SubmitEvent) => {
+  const doNest = async (e: SubmitEvent) => {
     e.preventDefault();
     if (loading || !signalReady(dbs) || disableMerge) return;
     try {
@@ -102,11 +112,11 @@ export default function MergeMenuItem() {
       // const wait500 = new Promise((resolve) => setTimeout(resolve, 500));
       // await wait500;
       const db: TaguetteDb = dbs.value;
-      const [, targetPath] = mergeTarget;
+      const [, targetPath] = nestTarget;
       const fam = item.familyTags;
       const updateEntries = fam.map((t) => {
         const parts = getTagParts(t.path);
-        const tail = parts.slice(item.level + 1);
+        const tail = parts.slice(item.level);
         const newPath = [targetPath, ...tail].join(SEPARATOR);
         const res = {
           id: t.id,
@@ -132,7 +142,7 @@ export default function MergeMenuItem() {
     <>
       <MenuItem onClick={handleToggle} ref={anchorRef}>
         <ListItemIcon>
-          <MergeIcon fontSize="small" />
+          <NorthWestIcon fontSize="small" />
         </ListItemIcon>
         <ListItemText>{text} </ListItemText>
       </MenuItem>
@@ -157,7 +167,7 @@ export default function MergeMenuItem() {
           direction="row"
           alignItems="center"
           component="form"
-          onSubmit={doMerge}
+          onSubmit={doNest}
           sx={{
             minWidth: subWidth,
             p: 2,
@@ -171,21 +181,33 @@ export default function MergeMenuItem() {
           // sx={{ px: 1 }}
           // spacing={2}
         >
-          <Typography>Merge {item.familyTags.length} x</Typography>
+          <Typography>Nest {item.familyTags.length} x</Typography>
           <TagChip tag={item.path} specialColor={!item.isTag} />
-          <RightArrowIcon />
+          <NorthEastIcon />
+
           {defaultOptionInUse ? (
             <Typography>(No target chosen)</Typography>
           ) : (
-            <TagChip tag={mergeTarget[1]} />
+            <TagChip tag={nestTarget[1]} />
           )}
+          <RightArrowIcon />
+          {defaultOptionInUse ? (
+            <Typography>?</Typography>
+          ) : (
+            <TagChip
+              // tag={`${nestTarget[1]}.${item.path}`}
+              tag={resolveNest(item, nestTarget[1])}
+              specialColor={!item.isTag}
+            />
+          )}
+
           <ManagedTagChooser
             onInputChange={catchReset}
             multiple={false}
             options={otherTags}
             fullWidth
             defaultValue={[]}
-            value={mergeTarget}
+            value={nestTarget}
             onChange={onAutocompleteChange}
             // value={[...toAdd].map((num) => num.toString())}
             // value={newTags.value}
@@ -208,11 +230,11 @@ export default function MergeMenuItem() {
           <Button
             disabled={disableMerge}
             variant="contained"
-            endIcon={<MergeIcon />}
+            endIcon={<NorthWestIcon />}
             type="submit"
             aria-label="merge tags"
           >
-            Merge
+            Nest
           </Button>
           {/* <Divider orientation="vertical" flexItem /> */}
         </Stack>

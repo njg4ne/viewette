@@ -32,6 +32,9 @@ import { useSearchParams } from "react-router-dom";
 import MergeMenuItem from "./MergeMenuItem";
 import { useSearchParamContext } from "../../../contexts/SearchParamContext";
 import RedefineMenuItem from "./RedefineMenuItem";
+import NestUnderMenuItem from "./NestUnderMenuItem";
+import PromoteMenuItem from "./PromoteMenuItem";
+import ConvertCategoryToTagMenuItem from "./ConvertCategoryToTagMenuItem";
 
 export { ContextMenu };
 export default ContextMenu;
@@ -95,6 +98,8 @@ function ContextMenu() {
         </ListItemIcon>
         <ListItemText>Copy ID</ListItemText>
       </MenuItem>
+      {item.isTag ? null : <ConvertCategoryToTagMenuItem />}
+
       <MenuItem
         onClick={() => {
           setNewTagInputValueImmediate(item.path + SEPARATOR);
@@ -110,6 +115,8 @@ function ContextMenu() {
       <RenameMenuItem />
       <RedefineMenuItem />
       <MergeMenuItem />
+      <NestUnderMenuItem />
+      <PromoteMenuItem />
     </Menu>
   );
 }
