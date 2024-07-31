@@ -25,7 +25,7 @@ import { TagTreeItem } from "../components/TagTree/TagTreeItems/MultipleTagTreeI
 import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
 import { useSearchParamContext } from "./SearchParamContext";
 import { useModalContext } from "./ModalContext";
-import { useFetchTags, useQueryBuilderSql, } from "../components/QueryBuilder";
+import { useFetchTags, useQueryBuilderSql } from "../components/QueryBuilder";
 // import { db } from "../db/models/TaguetteDb.ts";
 type TagMap = Record<string | number, string>;
 export type ItemTagMap = Map<string, Taguette.Tag | undefined>;
@@ -41,13 +41,13 @@ const defaults = {
   numTagsSelected: 0 as number,
   apiRef: {} as MutableRefObject<
     | (UseTreeViewItemsPublicAPI<any> &
-      UseTreeViewExpansionPublicAPI &
-      UseTreeViewFocusPublicAPI)
+        UseTreeViewExpansionPublicAPI &
+        UseTreeViewFocusPublicAPI)
     | undefined
   >,
   allTags: [] as Taguette.Tag[],
   allTagsUnfiltered: [] as Taguette.Tag[],
-  taggings: [] as Taguette.ParentTaggingCount[],
+  taggings: [] as Taguette.TaggingSummary[],
   selectedTags: [] as string[],
   // newTagInputValue: "" as string,
   // setNewTagInputValueDebounced: {} as (value: string) => void,
@@ -79,7 +79,7 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   // const allTags = allTagsUnfiltered.filter((tag) =>
   //   tag.path.toLowerCase().includes(tagLikeFilter.toLowerCase())
   // );
-  const [taggings, setTaggings] = useState<Taguette.ParentTaggingCount[]>([]);
+  const [taggings, setTaggings] = useState<Taguette.TaggingSummary[]>([]);
   const [expandedItems, setExpandedItems] = useState<ItemTagMap>(
     new Map<string, Taguette.Tag | undefined>()
   );
@@ -129,8 +129,9 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   const numTagsSelected = selectedTags.length;
   useHotkeys("delete", () => {
     if (numTagsSelected === 0) return;
-    const msg = `Delete ${numTagsSelected} tag${numTagsSelected > 1 ? "s" : ""
-      }`;
+    const msg = `Delete ${numTagsSelected} tag${
+      numTagsSelected > 1 ? "s" : ""
+    }`;
     const actions = {
       delete: [msg, () => deleteTags(selectedTags)],
     };

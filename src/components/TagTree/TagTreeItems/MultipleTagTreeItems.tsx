@@ -9,7 +9,8 @@ export type TagTreeItem = {
   level: number;
   label: string;
   isTag: boolean;
-  useCount: number;
+  hlCount: number;
+  docCount: number;
   tag?: Taguette.Tag;
 };
 type TagGroups = Map<string, Taguette.Tag[]>;
@@ -46,7 +47,8 @@ export default function RenderMultipleTagTreeNodes({
     level,
     label: getTagParts(path).at(level) || "",
     isTag: pathInGroup(path, tags),
-    useCount: 0,
+    hlCount: 0,
+    docCount: 0,
   });
   const tagFamilyEntries = [...tagFamilies.entries()];
   //alphabetical by the part at level

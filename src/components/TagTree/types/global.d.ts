@@ -15,8 +15,14 @@ namespace Taguette {
     path: string;
     description: string;
   };
-  type ParentTaggingCount = {
-    highlights: number;
+  type Tagging = {
+    path: string;
+    hid: number;
+    did: number;
+  };
+  type TaggingSummary = {
     parentPath: string;
+    hlCount: number;
+    docCount: number;
   };
 }

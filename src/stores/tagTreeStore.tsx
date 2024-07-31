@@ -4,7 +4,7 @@ import type {} from "@redux-devtools/extension"; // required for devtools typing
 
 // const [allTagsUnfiltered, setAllTagsUnfiltered] = useState<Taguette.Tag[]>([]);
 // const [allTags, setAllTags] = useState<Taguette.Tag[]>([]);
-// const [taggings, setTaggings] = useState<Taguette.ParentTaggingCount[]>([]);
+// const [taggings, setTaggings] = useState<Taguette.TaggingSummary[]>([]);
 // const [expandedItems, setExpandedItems] = useState<ItemTagMap>(
 //   new Map<string, Taguette.Tag | undefined>()
 // );
@@ -15,7 +15,7 @@ import type {} from "@redux-devtools/extension"; // required for devtools typing
 interface TagTreeState {
   tagsUnfiltered: Taguette.Tag[];
   tags: Taguette.Tag[];
-  taggings: Taguette.ParentTaggingCount[];
+  taggings: Taguette.TaggingSummary[];
   expandedItems: ItemTagMap;
   selectedItems: string[];
 }
@@ -80,7 +80,7 @@ const defaults = {
   >,
   allTags: [] as Taguette.Tag[],
   allTagsUnfiltered: [] as Taguette.Tag[],
-  taggings: [] as Taguette.ParentTaggingCount[],
+  taggings: [] as Taguette.TaggingSummary[],
   selectedTags: [] as string[],
   // newTagInputValue: "" as string,
   // setNewTagInputValueDebounced: {} as (value: string) => void,

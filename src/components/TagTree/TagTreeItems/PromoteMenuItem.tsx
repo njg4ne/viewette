@@ -32,7 +32,7 @@ export default function PromoteMenuItem() {
       popups.error(sbqr, `Failed to find parent tag`);
       return;
     }
-    popups.info(sbqr, `Dropping ${leftOfLabelPart} from ${item.path}`);
+    // popups.info(sbqr, `Dropping ${leftOfLabelPart} from ${item.path}`);
     const head = parts.slice(0, parts.indexOf(leftOfLabelPart));
     const tail = parts.slice(parts.indexOf(leftOfLabelPart) + 1);
     const newItemPath = [...head, ...tail].join(SEPARATOR);
@@ -43,7 +43,6 @@ export default function PromoteMenuItem() {
         oldPath: t.path,
         newPath,
       };
-      console.log(res);
       return res;
     });
     try {

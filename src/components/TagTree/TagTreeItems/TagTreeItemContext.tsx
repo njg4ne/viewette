@@ -40,10 +40,9 @@ export function TagTreeItemProvider({ item, children }: PropTypes) {
     contextMenuHandlerFactory(contextMenu, setContextMenu, apiRef, e)(e);
   const closeContextMenu = () => setContextMenu(null);
   const { apiRef } = useTreeContext();
-  const useCount =
-    taggings.find(({ parentPath }) => {
-      return item.path === parentPath;
-    })?.highlights || 0;
+  let { hlCount, docCount } = taggings.find(({ parentPath }) => {
+    return item.path === parentPath;
+  }) || { hlCount: 0, docCount: 0 };
   const tag: Taguette.Tag | undefined = allTags.find(
     (tag) => tag.path === item.path
   );
@@ -60,7 +59,7 @@ export function TagTreeItemProvider({ item, children }: PropTypes) {
         closeContextMenu,
         handleContextMenu,
         contextMenuPosition: contextMenu,
-        item: { ...item, useCount, tag },
+        item: { ...item, hlCount, docCount, tag },
       }}
     >
       {children}

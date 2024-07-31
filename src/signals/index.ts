@@ -24,12 +24,15 @@ export async function clearOpfsDb() {
 async function opfs(): Promise<TaguetteDb> {
   const dbName = "database";
   const root = await navigator.storage.getDirectory();
-  const dbHandle = await root.getFileHandle(`${dbName}.sqlite3`, { create: true })
+  const dbHandle = await root.getFileHandle(`${dbName}.sqlite3`, {
+    create: true,
+  });
   // get size of file
   const file = await dbHandle.getFile();
   const size = file.size;
   const db = new TaguetteDb(dbName);
   await db.ready;
+  await db.exec("PRAGMA foreign_keys = ON;");
   if (size === 0) {
     await db.exec(initSql);
   }

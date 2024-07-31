@@ -4,6 +4,7 @@ export default async function deleteTagsByExactPaths(
   paths: string[],
   db: TaguetteDb
 ): Promise<number> {
+  // await db.exec("PRAGMA foreign_keys = ON;");
   var bindings = paths.reduce((acc, path, index) => {
     const key = `$pathBinding${index}`;
     acc[key] = path;

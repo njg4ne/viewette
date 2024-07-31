@@ -59,6 +59,13 @@ import { useTheme } from "@mui/material/styles";
 import { memo } from "preact/compat";
 import { ExpansionControl } from "../../ExpansionControl";
 import { DragWrapper, DropWrapper } from "../TagTree2/Dnd";
+// import ArticleIcon from "@mui/icons-material/Article";
+// import ShortTextIcon from "@mui/icons-material/ShortText";
+import DocumentIcon from "@mui/icons-material/ArticleSharp";
+import NoteOutlinedIcon from "@mui/icons-material/NoteOutlined";
+import { ArticleOutlined } from "@mui/icons-material";
+import SourceOutlinedIcon from "@mui/icons-material/SourceOutlined";
+// import DocumentIcon from "@mui/icons-material/DescriptionOutlined";
 
 export default function RenderSingleTagTreeItem() {
   const { handleContextMenu, item } = useTagTreeItemContext();
@@ -151,14 +158,32 @@ export default function RenderSingleTagTreeItem() {
                 <DragIndicatorIcon fontSize="small" />
               </Stack>
             </DragWrapper>
-            <TagChip
-              // tag={isDragging ? item.path : item.label}
-              tag={item.label}
-              specialColor={!item.isTag}
+            <Link
+              to={
+                item.isTag ? `/tags/${item.tag?.id}` : `/category/${item.path}`
+              }
+            >
+              <TagChip
+                // tag={isDragging ? item.path : item.label}
+                tag={item.label}
+                specialColor={!item.isTag}
+                underline
+                tight
+              />
+            </Link>
+            <CountSticker
+              iconComponent={TextIcon}
+              value={item.hlCount}
+              for="highlights"
             />
-            <CountSticker iconComponent={TextIcon} value={item.useCount} />
+
+            <CountSticker
+              for="documents"
+              iconComponent={SourceOutlinedIcon}
+              value={item.docCount}
+            />
             <TagInfoPreview item={item} />
-            <ButtonGroup aria-label="tag tree item action button group">
+            {/* <ButtonGroup aria-label="tag tree item action button group">
               {actions.map((action) => (
                 <IconButton
                   aria-label={action.label}
@@ -175,7 +200,7 @@ export default function RenderSingleTagTreeItem() {
                   })}
                 </IconButton>
               ))}
-            </ButtonGroup>
+            </ButtonGroup> */}
             <ContextMenu />
           </Stack>
         }
@@ -191,32 +216,36 @@ export default function RenderSingleTagTreeItem() {
 function CountSticker({
   value,
   iconComponent: IconComponent,
+  for: purpose,
 }: {
   value: number;
   iconComponent: typeof TextIcon;
+  for: string;
 }) {
   return (
-    <Stack
-      direction="row"
-      component={Paper}
-      variant="outlined"
-      spacing={0.25}
-      sx={{
-        backgroundColor: "primary.200",
-        backgroundImage: "primary.200",
-        color: "black",
-        alignItems: "center",
-        px: 0.25,
-      }}
-    >
-      <IconComponent fontSize="small" />
-      <Divider orientation="vertical" flexItem />
-      <Typography>
-        <Typography fontSize="small" sx={{ px: 0.25 }}>
-          {value}
+    <Tooltip title={`tagged on ${value} ${purpose}`}>
+      <Stack
+        direction="row"
+        component={Paper}
+        variant="outlined"
+        spacing={0.25}
+        sx={{
+          backgroundColor: "primary.200",
+          backgroundImage: "primary.200",
+          color: "black",
+          alignItems: "center",
+          px: 0.25,
+        }}
+      >
+        <IconComponent fontSize="small" />
+        <Divider orientation="vertical" flexItem />
+        <Typography>
+          <Typography fontSize="small" sx={{ px: 0.25 }}>
+            {value}
+          </Typography>
         </Typography>
-      </Typography>
-    </Stack>
+      </Stack>
+    </Tooltip>
   );
 }
 
