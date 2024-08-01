@@ -1,0 +1,26 @@
+/* :root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  color-scheme: dark light;
+  --bg-color: #242424;
+  --text-color: #f9f9f9;
+  --primary: rgb(93, 93, 178);
+
+}
+
+* {
+  /* background-color: var(--bg-color);
+  color: var(--text-color); */
+}
+
+/* button {
+  border-radius: .25rem;
+  margin: .25rem;
+  background-color: var(--primary);
+  border-color: var(--text-color);
+} */
+
+body {
+  margin: 0;
+}
+
+*/

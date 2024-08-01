@@ -1,46 +1,9 @@
 {
-  "compilerOptions": {
-    // "target": "ES6",
-    "target": "ESNext",
-    "useDefineForClassFields": true,
-    "lib": [
-      "es2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "paths": {
-      "react": [
-        "./node_modules/preact/compat/"
-      ],
-      "react-dom": [
-        "./node_modules/preact/compat/"
-      ]
-    },
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact",
-    /* Linting */
-    "strict": true,
-    "allowJs": true,
-    "noUnusedLocals": false, // allow unused variables
-    "noUnusedParameters": false, // allow unused parameters
-    // allow unused global variables
-    "noFallthroughCasesInSwitch": true,
-    "types": [
-      "vite/client"
-    ]
-  },
-  "include": [
-    "src"
-  ],
+  "files": [],
   "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
     {
       "path": "./tsconfig.node.json"
     }

@@ -1,7 +1,6 @@
 import OpfsDb from "./OpfsDb";
-import TaguetteDb from "./models/TaguetteDb";
 export default OpfsDb;
-export { OpfsDb, TaguetteDb };
+export { OpfsDb };
 
 // let sqler = sqlite3Worker1SQLite3.Worker1.Promiser({
 //     // worker: new Worker(sqlite3Worker1Url),

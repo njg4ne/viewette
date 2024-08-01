@@ -1,5 +1,4 @@
 import { sqlite3Worker1Promiser } from "@sqlite.org/sqlite-wasm";
-import queries from "./models/sql";
 
 type TransactionParams = {
   sql: string;
@@ -10,6 +9,14 @@ type TransactionParams = {
 export default class OpfsDb {
   #dbName: string = "opfsDatabase";
   ready: Promise<void> = new Promise(() => {});
+  async readyTimeout(ms: number): Promise<void> {
+    const timePromise: Promise<void> = new Promise((_, rej) => {
+      setTimeout(() => {
+        rej({ message: `OpfsDb opener timed out after ${ms}ms` });
+      }, ms);
+    });
+    return Promise.race([this.ready, timePromise]);
+  }
   constructor(name?: string) {
     console.log("OpfsDb constructor");
     if (name) {
@@ -134,15 +141,15 @@ export default class OpfsDb {
   //   return rows2dArr;
   // }
 
-  async collection(name: string) {
-    const bindings = { $collection: name };
-    const response = await this.transact(
-      queries.validateCollection,
-      "object",
-      bindings
-    );
-    let { existence } = response?.result?.resultRows?.at(0) ?? {};
-    existence = Boolean(existence);
-    if (!existence) throw `Collection ${name} does not exist.`;
-  }
+  // async collection(name: string) {
+  //   const bindings = { $collection: name };
+  //   const response = await this.transact(
+  //     queries.validateCollection,
+  //     "object",
+  //     bindings
+  //   );
+  //   let { existence } = response?.result?.resultRows?.at(0) ?? {};
+  //   existence = Boolean(existence);
+  //   if (!existence) throw `Collection ${name} does not exist.`;
+  // }
 }
