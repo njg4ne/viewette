@@ -4,8 +4,9 @@ import StorageIcon from "@mui/icons-material/Storage";
 import HomeIcon from "@mui/icons-material/Home";
 import { SvgIconTypeMap } from "@mui/material";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
-import DatabaseManager from "../pages/DatabaseManager";
+import DatabaseManager from "../pages/DatabaseManager2";
 import Home from "../pages/Home";
+import TagTree from "../components/TagTree2";
 type MuiIcon = OverridableComponent<SvgIconTypeMap<{}, "svg">> & {
   muiName: string;
 };
@@ -19,9 +20,9 @@ interface RouteInfo {
 export default [
   {
     path: "/",
-    Element: Home,
+    Element: TagTree,
     Icon: HomeIcon,
-    label: "Home",
+    label: "TagTree",
   },
   {
     path: "/db",

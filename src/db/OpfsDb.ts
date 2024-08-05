@@ -5,9 +5,26 @@ type TransactionParams = {
   bindings?: Record<string, any>;
   rowMode?: "array" | "object";
 };
+function isOpfsSupported() {
+  return typeof SharedArrayBuffer !== "undefined";
+}
+function reloadIfNeededForOpfs() {
+  const attemptKey = "reload-count-to-get-opfs-support";
+  let attemptCount = parseInt(localStorage.getItem(attemptKey) || "0", 10);
+
+  if (attemptCount >= 3) {
+    localStorage.removeItem(attemptKey); // Clear the attempt count after max attempts
+    throw new Error("Failed to open the database after 3 attempts");
+  } else if (!isOpfsSupported()) {
+    attemptCount++;
+    localStorage.setItem(attemptKey, attemptCount.toString());
+    window.location.reload();
+  }
+}
 
 export default class OpfsDb {
   #dbName: string = "opfsDatabase";
+  #channel: BroadcastChannel = new BroadcastChannel("api-messages");
   ready: Promise<void> = new Promise(() => {});
   async readyTimeout(ms: number): Promise<void> {
     const timePromise: Promise<void> = new Promise((_, rej) => {
@@ -22,7 +39,29 @@ export default class OpfsDb {
     if (name) {
       this.#dbName = name;
     }
-    this.ready = this.open(this.#dbName).then((res) => void 0);
+    const open = () => this.open(this.#dbName);
+    reloadIfNeededForOpfs();
+
+    // this.#channel.addEventListener("message", async (event) => {
+    //   const endpoint = event.data.endpoint;
+    //   console.log("opfs api event", endpoint);
+    //   if (!endpoint || !endpoint.startsWith("/api/")) {
+    //     this.#channel.postMessage({ error: "Invalid endpoint" });
+    //     return;
+    //   }
+    //   await this.readyTimeout(3000);
+    //   console.log("no timeout");
+    //   //endpoint like /api/tags
+    //   const rgx = /\/api\/(.*)/;
+    //   const match = endpoint.match(rgx);
+    //   console.log("match", match);
+    //   const res = await this.exec(`SELECT * FROM ${match[1]};`);
+    //   const rows = res?.result?.resultRows ?? [];
+    //   console.log("rows", rows);
+    //   this.#channel.postMessage({ data: rows });
+    // });
+
+    this.ready = open().then((res) => void 0);
   }
   #sqlite: SQLite3.Worker1.Promiser | null = null;
   static #Fail = async () =>
