@@ -37,6 +37,7 @@ import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
 import EditHighlight from "./EditHighlight/EditHighlight";
 import { useTheme } from "@mui/material/styles";
 import { useDroppable } from "@dnd-kit/core";
+import TaggingSummaryExporter from "../TaggingSummaryExporter";
 
 export default Parent;
 const SEARCH_KEY = "hlOffset";
@@ -68,7 +69,16 @@ function Parent() {
   return (
     <>
       <Stack direction="column" sx={{ height: "100%" }} spacing={0}>
-        <Typography children={infoText} sx={{ px: 2, py: 1 }} />
+        <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+          <Typography children={infoText} sx={{ px: 2, py: 1 }} />
+          <TaggingSummaryExporter
+            sx={{
+              alignSelf: "flex-start",
+              m: 1,
+              mb: 2,
+            }}
+          />
+        </Stack>
         <Virtuoso
           ref={virtuosoRef}
           data={hlIds}

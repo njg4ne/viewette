@@ -108,7 +108,7 @@ function TagPathFilter() {
   );
 }
 
-export default function TagTree({ }) {
+export default function TagTree({}) {
   // useEffect(() => {}, [searchParams.get("tagLike")]);
   // useEffect(() => {
   //   console.log("App Container");
@@ -263,12 +263,6 @@ export default function TagTree({ }) {
   }
 
   return (
-    // <SearchParamProvider keys={["newTag"]}>
-    // <DndContext
-    //   onDragStart={handleDragStart}
-    //   onDragEnd={handleDragEnd}
-    //   collisionDetection={customCollisionDetectionAlgorithm}
-    // >
     <Dnd>
       <Paper
         elevation={1}
@@ -276,39 +270,19 @@ export default function TagTree({ }) {
         sx={{ p: 2, height: "100%", overflow: "auto" }}
         spacing={2}
         direction="column"
-      // alignItems="flex-start"
-      // minHeight="100vh"
       >
-
-
-        {/* <Stack
-          width="max-content"
-          direction="row"
-          spacing={1}
-          alignItems="center"
-        >
-          <Typography>Merge</Typography> <TagChip tag={"srcPath"} />{" "}
-          <Typography>into</Typography>
-          <TagChip tag={"destPath"} />
-        </Stack> */}
-        {/* <TagFamilyPreview label="test" size={3} /> */}
         <Stack direction="row" flexGrow={1}>
-          {/* <Box bgcolor="green"> */}
           <Box maxWidth="50%">
             <AutoSizer disableWidth>
               {({ height }) => (
-                // <Box sx={{ width, height, bgcolor: "yellow" }} />
-                // <Stack direction="row" height={height} width={width}>
                 <SimpleTreeView
                   sx={{
                     resize: "horizontal",
                     maxWidth: "100%",
-                    // width,
                     height,
                     flexGrow: 1,
                     overflow: "auto",
                     paddingRight: 1,
-                    // maxHeight: "50vh",
                   }}
                   selectedItems={selectedItems}
                   apiRef={apiRef}
@@ -316,18 +290,15 @@ export default function TagTree({ }) {
                   onItemSelectionToggle={selectChildrenToo}
                   multiSelect
                   expandedItems={Array.from(expandedItems.keys())}
-                // expandedItems={allItemIds(allTags)}
-                // onExpandedItemsChange={handleExpandedItemsChange}
+                  // expandedItems={allItemIds(allTags)}
+                  // onExpandedItemsChange={handleExpandedItemsChange}
                 >
-                  {/* <TagPathFilter /> */}
                   <CreateTagForm />
                   <MultipleTagTreeItems tags={allTags} level={-1} />
                 </SimpleTreeView>
-                // </Stack>
               )}
             </AutoSizer>
           </Box>
-          {/* </Box> */}
           <Box flexGrow={1}>
             <HighlightsProvider>
               <HighlightList />
@@ -336,16 +307,6 @@ export default function TagTree({ }) {
         </Stack>
       </Paper>
     </Dnd>
-    /* <DragOverlay style={{ opacity: 1 }}>
-        {itemBeingDragged !== null ? (
-          <TagFamilyPreview
-            label={itemBeingDragged.path}
-            size={itemBeingDragged.familyTags.length}
-          />
-        ) : null}
-      </DragOverlay>
-    </DndContext> */
-    // </SearchParamProvider>
   );
 }
 function CombineTagsMsg({
