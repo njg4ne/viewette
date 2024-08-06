@@ -37,7 +37,7 @@ import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
 import EditHighlight from "./EditHighlight/EditHighlight";
 import { useTheme } from "@mui/material/styles";
 import { useDroppable } from "@dnd-kit/core";
-import TaggingSummaryExporter from "../TaggingSummaryExporter";
+import TaggingSummaryExporter from "../TaggingSummaryExportButton";
 
 export default Parent;
 const SEARCH_KEY = "hlOffset";

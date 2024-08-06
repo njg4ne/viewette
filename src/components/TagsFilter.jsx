@@ -52,6 +52,7 @@ export function ManagedTagChooser(props) {
   const { onChange, label, options, value, disabled, ...rest } = props;
   const renderOption = (props, option, state, ownerState) => {
     const label = option[1];
+    if (!label) return null;
     return (
       <li {...props}>
         <TagChip tag={label} sx={{ my: undefined, width: "max-content" }} />

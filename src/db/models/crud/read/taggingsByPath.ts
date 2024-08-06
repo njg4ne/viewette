@@ -1,7 +1,7 @@
 import OpfsDb from "../../../OpfsDb";
 import queries from "../../sql";
 import { bindArray } from "../../bind";
-import readTaggings from "./taggings";
+import readTaggings, { readTaggingsByContrast } from "./taggings";
 import { getTagParts, SEPARATOR } from "../../../../components/TagTree/utils";
 // export default async function readTaggingsByPath(paths: string[], db: OpfsDb) {
 //   const briefTaggings = await readTaggings(db);
@@ -70,26 +70,60 @@ import { getTagParts, SEPARATOR } from "../../../../components/TagTree/utils";
 //   });
 // }
 
+export async function readTaggingsByPathWithContrast(
+  paths: string[],
+  db: OpfsDb,
+  whereClause: string = "WHERE 1 = 1"
+) {
+  const [trueTaggings, falseTaggings] = await readTaggingsByContrast(
+    db,
+    whereClause
+  );
+  return [trueTaggings, falseTaggings].map((taggings) =>
+    paths.map((path) => collectSummary(taggings, path))
+  );
+}
+
 export default async function readTaggingsByPath(paths: string[], db: OpfsDb) {
   const taggings = await readTaggings(db);
-  return paths.map((path) => {
-    const containedTaggings = taggings.filter((tagging) =>
-      tagging.path.startsWith(path)
-    );
-    const hlCount = new Set(
-      containedTaggings.map(({ hid }: Taguette.Tagging) => hid)
-    ).size;
-    const docCount = new Set(
-      containedTaggings.map(({ did }: Taguette.Tagging) => did)
-    ).size;
-    return {
-      // highlights: hlCount,
-      parentPath: path,
-      hlCount,
-      docCount,
-    } as Taguette.TaggingSummary;
-  });
+  return paths.map((path) => collectSummary(taggings, path));
+  // return paths.map((path) => {
+  //   const containedTaggings = taggings.filter((tagging) =>
+  //     tagging.path.startsWith(path)
+  //   );
+  //   const hlCount = new Set(
+  //     containedTaggings.map(({ hid }: Taguette.Tagging) => hid)
+  //   ).size;
+  //   const docCount = new Set(
+  //     containedTaggings.map(({ did }: Taguette.Tagging) => did)
+  //   ).size;
+  //   return {
+  //     // highlights: hlCount,
+  //     parentPath: path,
+  //     hlCount,
+  //     docCount,
+  //   } as Taguette.TaggingSummary;
+  // });
 }
+
+function collectSummary(taggings: Taguette.Tagging[], path: string) {
+  const containedTaggings = taggings.filter((tagging) =>
+    tagging.path.startsWith(path)
+  );
+  const hlCount = new Set(
+    containedTaggings.map(({ hid }: Taguette.Tagging) => hid)
+  ).size;
+  const docCount = new Set(
+    containedTaggings.map(({ did }: Taguette.Tagging) => did)
+  ).size;
+  return {
+    // highlights: hlCount,
+    parentPath: path,
+    hlCount,
+    docCount,
+  } as Taguette.TaggingSummary;
+}
+
 async function readTaggingsByPath0(paths: string[], db: OpfsDb) {
   const pathBindings = paths.flatMap((path, i) => [path, `${path}%`]);
   let { bindings, placeholders } = bindArray(pathBindings);

@@ -61,6 +61,7 @@ import TagTree from "./components/TagTree";
 import { LoadingProvider } from "./contexts/LoadingContext";
 import TagExporter from "./components/TagExporter";
 import { FilterActiveProvider } from "./components/FilterToggler";
+import TaggingSummaryExporter from "./components/TaggingSummaryExporter";
 
 function Highlights() {
   const [dbHandle, setDbHandle] = useState(null);
@@ -148,6 +149,10 @@ const router = createHashRouter([
   {
     path: "/export/tags/svg",
     element: AppContainer({ Contents: TagExporter }),
+  },
+  {
+    path: "/export/taggings/xlsx",
+    element: AppContainer({ Contents: TaggingSummaryExporter }),
   },
   // {
   //   path: "/tree",

@@ -144,3 +144,13 @@ function getLeaf(tags: Taguette.Tag[], level: number) {}
 function compareTags(a: Taguette.Tag, b: Taguette.Tag) {
   return a.path.localeCompare(b.path);
 }
+
+export function maxLevels(tags: Taguette.Tag[]) {
+  return tags.reduce((max, tag) => {
+    const parts = getTagParts(tag.path);
+    return Math.max(max, parts.length);
+  }, 0);
+}
+export function entrify(tags: Taguette.Tag[]): [number, string][] {
+  return tags.map(({ id, path }: Taguette.Tag) => [id, path]);
+}

@@ -27,6 +27,7 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import ExportIcon from "@mui/icons-material/SystemUpdateAlt";
 import { Link } from "react-router-dom";
 import MuiLink from "@mui/material/Link";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 
 import { ColorModeToggler } from "./ColorModeTheme";
 import { FilterToggler } from "./FilterToggler";
@@ -39,9 +40,14 @@ const sections = [
   // { text: "Highlights", icon: <TextIcon />, path: "/highlights" },
   { text: "Database", icon: <StorageIcon />, path: "/db" },
   {
-    text: "Export Tags to SVG",
-    icon: <ExportIcon />,
+    text: "Tags SVG",
+    icon: <ImageOutlinedIcon />,
     path: "/export/tags/svg",
+  },
+  {
+    text: "XLSX Summary",
+    icon: <ExportIcon />,
+    path: "/export/taggings/xlsx",
   },
   { text: "Help", icon: <HelpIcon />, path: "/help" },
 ];
@@ -240,7 +246,6 @@ export default function MiniDrawer({
         <List>
           <FilterToggler open={open} />
           <ColorModeToggler open={open} />
-
         </List>
       </Drawer>
       <Main disableGutters open={open}>

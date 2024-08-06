@@ -11,7 +11,7 @@ const headers: Record<string, string> = {
   hlCount: "# Highlights",
   docCount: "# Documents",
 };
-export default function TaggingSummaryExporter(props: IconButtonProps) {
+export default function TaggingSummaryExportButton(props: IconButtonProps) {
   const { taggings } = useTreeContext();
   let { sx, ...rest } = props;
   sx = sx || {};
