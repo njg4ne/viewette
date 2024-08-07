@@ -4,7 +4,7 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import { TagChip } from "../TagChip";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import Grid from "@mui/material/Grid";
 import Slider from "@mui/material/Slider";
 import Switch from "@mui/material/Switch";
@@ -21,17 +21,26 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { maxLevels } from "../../utils/tagTreeUtils";
+import { getAllItemPaths, maxLevels } from "../../utils/tagTreeUtils";
 import { getTagParts, SEPARATOR } from "../TagTree/utils";
-import type { TableCellProps } from "@mui/material/TableCell";
+import type {
+  TableCellProps as MuiTableCellProps,
+  TableCellBaseProps as MuiTableCellBaseProps,
+} from "@mui/material/TableCell";
+type TableCellProps = MuiTableCellProps & MuiTableCellBaseProps;
 import { useTheme } from "@mui/material/styles";
 import DownloadIcon from "@mui/icons-material/Download";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+// import TableRowsIcon from "@mui/icons-material/TableRowsOutlined";
+import HtmlIcon from "@mui/icons-material/Html";
 // import { utils as spreadsheetUtils, writeFileXLSX } from "xlsx";
 import { utils as spreadsheetUtils, writeFile } from "xlsx-js-style";
 import { ManagedTagChooser } from "../TagsFilter";
 import { entrify } from "../EditHighlight/EditHighlight";
 import Tooltip from "@mui/material/Tooltip";
 import ContrastQueryBuilder from "./ContrastQueryBuilder";
+import { useModel } from "../../hooks";
+import { TaguetteDb } from "../../db";
 const headers: Record<string, string> = {
   parentPath: "Tag-Path",
   hlCount: "# Highlights",
@@ -56,14 +65,31 @@ function labelWrapSx(breakpoints: any) {
 }
 
 function TaggingSummaryExporter() {
+  const tableRef = useRef<HTMLTableElement>(null);
+  // function testTableExport(e: Event) {
+  //   if (tableRef.current) {
+  //     const te = new TableExport(tableRef.current, {
+  //       formats: ["xlsx"],
+  //     });
+  //     let data: any = te.getExportData();
+  //     data = data[Object.keys(data)[0]]["xlsx"];
+  //     te.export2file(
+  //       data.data,
+  //       data.mimeType,
+  //       "Tagging-Summary",
+  //       data.fileExtension
+  //     );
+  //   }
+  // }
   const { taggings: allTaggings, allTagsUnfiltered: tags } = useTreeContext();
+
   // const tags = taggings.map(({ parentPath: x }) => x);
   // console.log("Tags", tags);
   const mostLevels = maxLevels(tags);
   // console.log("Most levels", mostLevels);
   const [levels, setLevels] = useState<number>(mostLevels);
   const [colorOn, setColorOn] = useState<boolean>(true);
-  const [doContrast, setDoContrast] = useState<boolean>(false);
+  const [doContrast, setDoContrast] = useState<boolean>(true);
   const [showLeaves, setShowLeaves] = useState<boolean>(true);
   const initialTagEntry = [-1, ""] as [number, string];
   const [contrastEntry, setContrastEntry] =
@@ -76,6 +102,24 @@ function TaggingSummaryExporter() {
     const [id, path] = newValue;
     setContrastEntry(newValue);
   };
+  // console.log("Contrast Entry", contrastEntry);
+  const whereSql =
+    contrastEntry[0] === -1 ? "(1 = 1)" : `(path like '${contrastEntry[1]}%')`;
+  const model = (db: TaguetteDb) => () => {
+    // console.log("requery");
+    return db.read.taggingsByPath(getAllItemPaths(tags), whereSql) as any;
+  };
+  const validContrast = doContrast && contrastEntry[0] !== -1;
+
+  const [contrastTrueTaggings, contrastFalseTaggings] = useModel<
+    [Taguette.TaggingSummary[], Taguette.TaggingSummary[]]
+  >([[], []], model, [tags, whereSql]);
+
+  // useEffect(() => {
+  //   console.log(...contrastTrueTaggings.slice(0));
+  //   console.log(...contrastFalseTaggings.slice(0));
+  // }, [contrastTrueTaggings, contrastFalseTaggings]);
+
   useEffect(() => {
     setLevels(mostLevels);
   }, [mostLevels]);
@@ -165,13 +209,31 @@ function TaggingSummaryExporter() {
         />
         <ToggleControl
           label="Tag Contrast"
-          disabled
+          // disabled
           flexGrow={2}
           checked={doContrast}
           setChecked={setDoContrast}
           ariaLabel="contrast tag off or on"
         />
-        <Tooltip
+        <IconButton
+          variant="contained"
+          sx={{
+            borderRadius: ".25rem",
+            backgroundColor: "secondary.main",
+            color: "secondary.contrastText",
+            px: ".5rem",
+            py: 0,
+            alignSelf: "center",
+            flexGrow: 0,
+            display: "flex",
+            justifyContent: "space-around",
+          }}
+          onClick={() => copyTableContentsToClipboard(tableRef.current!)}
+        >
+          <ContentCopyIcon />
+          <HtmlIcon fontSize="large" sx={{ mx: 0.5 }} />
+        </IconButton>
+        {/* <Tooltip
           title="Download as XLSX"
           aria-label="download as xlsx"
           placement="top"
@@ -187,10 +249,11 @@ function TaggingSummaryExporter() {
               flexGrow: 1,
             }}
             onClick={() => downloadAs("xlsx", taggings, levels, colorOn)}
+            // onClick={testTableExport}
           >
             <DownloadIcon />
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
         {/* <ContrastQueryBuilder
           onSqlChange={(sql: string) => {
             console.log(sql);
@@ -208,39 +271,189 @@ function TaggingSummaryExporter() {
           />
         )}
       </Stack>
-      <Table
-        sx={{ minWidth: 650, borderCollapse: "collapse" }}
-        aria-label="simple table"
-      >
-        <TableHead>
-          <TableRow>
-            {[...getHeaderData(levels), "# Highlights", "# Documents"].map(
-              (header) => (
+      {false ? (
+        <Table
+          sx={{ minWidth: 650, borderCollapse: "collapse" }}
+          aria-label="simple table"
+          ref={tableRef}
+        >
+          <TableHead>
+            <TableRow>
+              {["A", "B", "C"].map((header, i, arr) => (
+                <TableCell sx={{ ...cellSx, whiteSpace: "nowrap" }} rowSpan={2}>
+                  {header}
+                </TableCell>
+              ))}
+              {["D", "E", "F"].map((header, i, arr) => (
+                <TableCell sx={{ ...cellSx, whiteSpace: "nowrap" }} colSpan={2}>
+                  {header}
+                </TableCell>
+              ))}
+            </TableRow>
+            <TableRow>
+              {["G", "H", "G", "H", "G", "H"].map((header, i, arr) => (
                 <TableCell sx={{ ...cellSx, whiteSpace: "nowrap" }}>
                   {header}
                 </TableCell>
-              )
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody></TableBody>
+        </Table>
+      ) : (
+        <Table
+          sx={{ minWidth: 650, borderCollapse: "collapse" }}
+          aria-label="simple table"
+          ref={tableRef}
+        >
+          <TableHead>
+            <TableRow>
+              {getHeaderData(levels).map((header) => (
+                <HeaderCell
+                  data={header}
+                  sx={cellSx}
+                  rowSpan={validContrast ? 2 : 1}
+                />
+              ))}
+              {[
+                ...(validContrast
+                  ? [`With`, "Without", "Total"]
+                  : ["# Highlights", "# Documents"]),
+              ].map((header) => (
+                <HeaderCell
+                  data={header}
+                  sx={cellSx}
+                  colSpan={validContrast ? 2 : 1}
+                />
+              ))}
+            </TableRow>
+            {validContrast && (
+              <TableRow>
+                {Array.from({ length: 3 }, (_, i) =>
+                  ["Hlts", "Docs"].map((header) => (
+                    <HeaderCell data={header} sx={cellSx} />
+                  ))
+                ).flat()}
+              </TableRow>
             )}
+          </TableHead>
+          <TableBody>
+            {taggings.map((row, index) => (
+              <TableRow
+                key={row.parentPath}
+                // sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TagCells
+                  // rowSpan={2}
+                  data={getTagRowData(row.parentPath, levels)}
+                  sx={cellSx}
+                  color={colorOn}
+                />
+                {validContrast ? (
+                  <ContrastCells
+                    row={row}
+                    contrastTag={contrastEntry[1]}
+                    contrastTrueTaggings={contrastTrueTaggings}
+                    contrastFalseTaggings={contrastFalseTaggings}
+                    sx={cellSx}
+                  />
+                ) : (
+                  <>
+                    <TableCell sx={cellSx}>{row.hlCount}</TableCell>
+                    <TableCell sx={cellSx}>{row.docCount}</TableCell>
+                  </>
+                )}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </Paper>
+  );
+}
+
+function HeaderCell(props: TableCellProps & { data: string }) {
+  let { data, sx, ...rest } = props;
+  sx = { ...sx, whiteSpace: "nowrap" };
+  props = { data, sx, ...rest };
+  return <TableCell {...props}>{data}</TableCell>;
+}
+
+function ContrastCells({
+  sx,
+  row,
+  contrastTag,
+  contrastTrueTaggings,
+  contrastFalseTaggings,
+}: {
+  row: Taguette.TaggingSummary;
+  contrastTag: string;
+  contrastTrueTaggings: Taguette.TaggingSummary[];
+  contrastFalseTaggings: Taguette.TaggingSummary[];
+} & TableCellProps) {
+  const trueTagging = contrastTrueTaggings.find(
+    (tagging: Taguette.TaggingSummary) => tagging.parentPath === row.parentPath
+  ) as Taguette.TaggingSummary;
+  const falseTagging = contrastFalseTaggings.find(
+    (tagging: Taguette.TaggingSummary) => tagging.parentPath === row.parentPath
+  ) as Taguette.TaggingSummary;
+  return (
+    <>
+      {/* order is with, hl doc, without hl doc, total hl doc */}
+      <TableCell sx={sx}>{trueTagging.hlCount}</TableCell>
+      <TableCell sx={sx}>{trueTagging.docCount}</TableCell>
+      <TableCell sx={sx}>{falseTagging.hlCount}</TableCell>
+      <TableCell sx={sx}>{falseTagging.docCount}</TableCell>
+      <TableCell sx={sx}>{row.hlCount}</TableCell>
+      <TableCell sx={sx}>{row.docCount}</TableCell>
+    </>
+  );
+}
+
+function ContrastSubTable({
+  contrastTag,
+  withData,
+  withoutData,
+  ...rest
+}: {
+  contrastTag: string;
+  withData: number;
+  withoutData: number;
+} & TableCellProps) {
+  contrastTag = getTagParts(contrastTag).at(-1) || contrastTag;
+  const headers = [`with ${contrastTag}`, `without`];
+  const cellSx = {
+    px: 1,
+    py: 0.25,
+    textAlign: "center",
+  };
+  const borderSx = {
+    border: ".5px solid",
+  };
+  return (
+    <TableCell sx={{ ...cellSx, ...borderSx, p: 0, whiteSpace: "nowrap" }}>
+      <Table sx={{ borderCollapse: "collapse" }}>
+        <TableHead>
+          <TableRow>
+            {headers.map((header) => (
+              <TableCell {...rest} sx={cellSx}>
+                {header}
+              </TableCell>
+            ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {taggings.map((row) => (
-            <TableRow
-              key={row.parentPath}
-              // sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-            >
-              <TagCells
-                data={getTagRowData(row.parentPath, levels)}
-                sx={cellSx}
-                color={colorOn}
-              />
-              <TableCell sx={cellSx}>{row.hlCount}</TableCell>
-              <TableCell sx={cellSx}>{row.docCount}</TableCell>
-            </TableRow>
-          ))}
+          <TableRow>
+            <TableCell {...rest} sx={cellSx}>
+              {withData}
+            </TableCell>
+            <TableCell {...rest} sx={cellSx}>
+              {withoutData}
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
-    </Paper>
+    </TableCell>
   );
 }
 
@@ -323,9 +536,37 @@ function toXLSX(
   aoa.unshift(headerStyled);
   const ws = spreadsheetUtils.aoa_to_sheet(aoa);
   applyAutoWidth(ws, 1.1);
-  // back to json for debugging
-  // const json = spreadsheetUtils.sheet_to_json(ws, { header: headers });
-  // console.log(...json);
+  // test: merge the row 2 and 3 in column 1
+  // const merge = { s: { r: 1, c: 0 }, e: { r: 2, c: 0 } };
+  // ws["!merges"] = [merge];
+  // for real: go through all rows and columns; for all contiguous cells with the same value, merge them
+  // const { s: start, e: end } = spreadsheetUtils.decode_range(
+  //   ws["!ref"] as string
+  // );
+  // for (let colNum = start.c; colNum <= end.c; colNum++) {
+  //   let cellValue;
+  //   for (let rowNum = 1; rowNum <= end.r; rowNum++) {
+  //     const cell = ws[spreadsheetUtils.encode_cell({ r: rowNum, c: colNum })];
+  //     if (!cell) continue;
+  //     if (Number.isNaN(Number.parseInt(cell.v))) {
+  //       cellValue = cell.v;
+  //     }
+  //   }
+  // }
+  // var rows = [];
+  // var row;
+  // var rowNum;
+  // var colNum;
+  // for (rowNum = range.s.r; rowNum <= range.e.r; rowNum++) {
+  //   row = [];
+  //   for (colNum = range.s.c; colNum <= range.e.c; colNum++) {
+  //     const cell = ws[spreadsheetUtils.encode_cell({ r: rowNum, c: colNum })];
+  //     row.push(cell);
+  //   }
+  //   rows.push(row);
+  // }
+  // console.log("Rows", rows);
+
   const workbook = spreadsheetUtils.book_new();
   spreadsheetUtils.book_append_sheet(workbook, ws, "Taggings-Summary");
   return workbook;
@@ -485,4 +726,30 @@ function applyAutoWidth(XLSXWorkSheet: any, widthMultiplier: number) {
       width: getMaxLengthOfColumn(column) * widthMultiplier,
     });
   });
+}
+
+// async function copyTableContentsToClipboard(table: HTMLTableElement) {
+// want all of the html with styles for pasting to excel
+// const html = table.outerHTML;
+// await navigator.clipboard.writeText(html);
+// }
+// https://stackoverflow.com/questions/26053004/copy-whole-html-table-to-clipboard-javascript
+function copyTableContentsToClipboard(el: HTMLElement) {
+  var body = document.body,
+    range,
+    sel;
+  if (document.createRange && window.getSelection) {
+    range = document.createRange();
+    sel = window.getSelection() as Selection;
+    sel.removeAllRanges();
+    try {
+      range.selectNodeContents(el);
+      sel.addRange(range);
+    } catch (e) {
+      range.selectNode(el);
+      sel.addRange(range);
+    }
+
+    document.execCommand("Copy");
+  }
 }

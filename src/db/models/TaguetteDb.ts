@@ -5,7 +5,9 @@ import deletion from "./crud/delete";
 import updateTagsPaths from "./crud/update/tags/byId";
 import updateTag from "./crud/update/tag";
 import readTags from "./crud/read/tags";
-import readTaggingsByPath from "./crud/read/taggingsByPath";
+import readTaggingsByPath, {
+  readTaggingsByPathWithContrast,
+} from "./crud/read/taggingsByPath";
 import readTagById from "./crud/read/tagById";
 // make a class that extends opfsdb called TaguetteDb that has methods for each of the taguette queries
 export default class TaguetteDb extends OpfsDb {
@@ -123,8 +125,10 @@ export default class TaguetteDb extends OpfsDb {
       byId: async (tagId: number) => readTagById(tagId, this),
     },
     tags: async () => await readTags(this),
-    taggingsByPath: async (paths: string[]) =>
-      await readTaggingsByPath(paths, this),
+    taggingsByPath: async (paths: string[], contrastSql?: string) =>
+      contrastSql === undefined
+        ? await readTaggingsByPath(paths, this)
+        : await readTaggingsByPathWithContrast(paths, this, contrastSql),
   };
   delete = {
     tags: {

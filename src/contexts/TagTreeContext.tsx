@@ -26,6 +26,7 @@ import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
 import { useSearchParamContext } from "./SearchParamContext";
 import { useModalContext } from "./ModalContext";
 import { useFetchTags, useQueryBuilderSql } from "../components/QueryBuilder";
+import { getAllItemPaths } from "../utils/tagTreeUtils";
 // import { db } from "../db/models/TaguetteDb.ts";
 type TagMap = Record<string | number, string>;
 export type ItemTagMap = Map<string, Taguette.Tag | undefined>;
@@ -141,8 +142,8 @@ export function TreeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading || !signalReady(dbs) || allTags.length === 0) return;
     const db: TaguetteDb = dbs.value;
-    db.read.taggingsByPath(allItemPaths(allTags)).then((taggings) => {
-      setTaggings(taggings);
+    db.read.taggingsByPath(getAllItemPaths(allTags)).then((taggings) => {
+      setTaggings(taggings as Taguette.TaggingSummary[]);
     });
   }, [allTags, loading, dbs.value]);
 
@@ -195,15 +196,15 @@ export function useTreeContext() {
   return context;
 }
 
-function allItemPaths(tags: Taguette.Tag[]): string[] {
-  const res = tags.reduce((acc: string[], tag: Taguette.Tag) => {
-    const morePaths = getAllPartialPaths(tag.path);
-    acc.push(...morePaths);
-    return acc;
-  }, []);
-  res.sort();
-  return [...new Set(res)];
-}
+// function allItemPaths(tags: Taguette.Tag[]): string[] {
+//   const res = tags.reduce((acc: string[], tag: Taguette.Tag) => {
+//     const morePaths = getAllPartialPaths(tag.path);
+//     acc.push(...morePaths);
+//     return acc;
+//   }, []);
+//   res.sort();
+//   return [...new Set(res)];
+// }
 
 function allItemPathsUnsorted(tags: Taguette.Tag[]): string[] {
   return tags.reduce((acc: string[], tag: Taguette.Tag) => {

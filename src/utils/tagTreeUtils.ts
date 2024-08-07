@@ -154,3 +154,16 @@ export function maxLevels(tags: Taguette.Tag[]) {
 export function entrify(tags: Taguette.Tag[]): [number, string][] {
   return tags.map(({ id, path }: Taguette.Tag) => [id, path]);
 }
+export function getAllPartialPaths(path: string): string[] {
+  const parts = getTagParts(path);
+  return parts.map((_, i) => parts.slice(0, i + 1).join(SEPARATOR));
+}
+export function getAllItemPaths(tags: Taguette.Tag[]): string[] {
+  const res = tags.reduce((acc: string[], tag: Taguette.Tag) => {
+    const morePaths = getAllPartialPaths(tag.path);
+    acc.push(...morePaths);
+    return acc;
+  }, []);
+  res.sort();
+  return [...new Set(res)];
+}

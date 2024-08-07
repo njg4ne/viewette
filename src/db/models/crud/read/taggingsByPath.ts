@@ -73,7 +73,7 @@ import { getTagParts, SEPARATOR } from "../../../../components/TagTree/utils";
 export async function readTaggingsByPathWithContrast(
   paths: string[],
   db: OpfsDb,
-  whereClause: string = "WHERE 1 = 1"
+  whereClause: string = "(1 = 1)"
 ) {
   const [trueTaggings, falseTaggings] = await readTaggingsByContrast(
     db,
