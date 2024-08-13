@@ -11,7 +11,7 @@ export default class OpfsDb {
   #dbName: string = "opfsDatabase";
   ready: Promise<void> = new Promise(() => {});
   constructor(name?: string) {
-    console.log("OpfsDb constructor");
+    // console.log("OpfsDb constructor");
     if (name) {
       this.#dbName = name;
     }
