@@ -264,11 +264,13 @@ export async function mergeMany(db: TaguetteDb, updatePackets: UpdatePacket[]) {
   ): [string, Record<string, any>] {
     const { id, newPath } = packet;
     const pathKey = `$path${index}`;
+    const descKey = `$descId${index}`;
     bindings = Object.assign(bindings, {
       [pathKey]: newPath,
+      [descKey]: id,
     });
     return [
-      `(${pathKey},'', (SELECT projects.id FROM projects LIMIT 1))`,
+      `(${pathKey}, (SELECT description FROM tags WHERE id = ${descKey}), (SELECT projects.id FROM projects LIMIT 1))`,
       bindings,
     ];
   }
