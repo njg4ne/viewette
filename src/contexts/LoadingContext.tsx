@@ -32,7 +32,7 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
       setLoadingState(loadingStorageValue);
       if (!loadingStorageValue && e.constructor.name !== OwnStorageEvent.name) {
         const msg = "Syncing changes from other tabs.";
-        popups.info(sbqr, msg);
+        // popups.info(sbqr, msg);
       }
     }
   }
