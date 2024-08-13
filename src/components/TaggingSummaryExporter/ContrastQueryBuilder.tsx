@@ -1,4 +1,4 @@
-import { tagQueryOperators } from "../QueryBuilder";
+import { tagQueryOperators } from "../TagQueryBuilder";
 import type {} from "react-querybuilder";
 import { QueryBuilder, formatQuery } from "react-querybuilder";
 import { QueryBuilderMaterial } from "@react-querybuilder/material";

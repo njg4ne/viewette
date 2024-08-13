@@ -9,6 +9,8 @@ import readTaggingsByPath, {
   readTaggingsByPathWithContrast,
 } from "./crud/read/taggingsByPath";
 import readTagById from "./crud/read/tagById";
+import readHighlightsWhere from "./crud/read/highlightIdsWhere";
+import readDocuments from "./crud/read/documents";
 // make a class that extends opfsdb called TaguetteDb that has methods for each of the taguette queries
 export default class TaguetteDb extends OpfsDb {
   #highlightRowConverter = ({
@@ -129,6 +131,9 @@ export default class TaguetteDb extends OpfsDb {
       contrastSql === undefined
         ? await readTaggingsByPath(paths, this)
         : await readTaggingsByPathWithContrast(paths, this, contrastSql),
+    highlightsWhere: async (whereClause: string = "(1 = 1)") =>
+      readHighlightsWhere(whereClause, this),
+    documents: async () => readDocuments(this),
   };
   delete = {
     tags: {

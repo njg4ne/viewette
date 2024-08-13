@@ -37,7 +37,7 @@ import ShortTextIcon from "@mui/icons-material/ShortText";
 import HelpIcon from "@mui/icons-material/Help";
 const sections = [
   { text: "Home", icon: <HomeIcon />, path: "/" },
-  // { text: "Highlights", icon: <TextIcon />, path: "/highlights" },
+  { text: "Highlights", icon: <TextIcon />, path: "/highlights" },
   { text: "Database", icon: <StorageIcon />, path: "/db" },
   {
     text: "Tags SVG",

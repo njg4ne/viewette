@@ -9,6 +9,14 @@ namespace Taguette {
     tagIds: number[];
     source: string;
   };
+  type DetailedHighlight = {
+    hid: number;
+    snippet: string;
+    tags: {
+      id: number;
+      path: string;
+    }[];
+  };
   type Tag = {
     id: number;
     project_id: number;
@@ -24,5 +32,15 @@ namespace Taguette {
     parentPath: string;
     hlCount: number;
     docCount: number;
+  };
+  type Document = {
+    id: number;
+    name: string;
+    description: string;
+    filename: string;
+    created: Date;
+    project_id: number;
+    text_direction: string;
+    contents: string;
   };
 }

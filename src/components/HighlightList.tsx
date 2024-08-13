@@ -37,7 +37,7 @@ import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
 import EditHighlight from "./EditHighlight/EditHighlight";
 import { useTheme } from "@mui/material/styles";
 import { useDroppable } from "@dnd-kit/core";
-import TaggingSummaryExporter from "../TaggingSummaryExportButton";
+// import TaggingSummaryExporter from "../TaggingSummaryExportButton";
 
 export default Parent;
 const SEARCH_KEY = "hlOffset";
@@ -69,16 +69,16 @@ function Parent() {
   return (
     <>
       <Stack direction="column" sx={{ height: "100%" }} spacing={0}>
-        <Stack direction="row" sx={{ justifyContent: "space-between" }}>
-          <Typography children={infoText} sx={{ px: 2, py: 1 }} />
-          <TaggingSummaryExporter
+        {/* <Stack direction="row" sx={{ justifyContent: "space-between" }}> */}
+        <Typography children={infoText} sx={{ px: 2, py: 1 }} />
+        {/* <TaggingSummaryExporter
             sx={{
               alignSelf: "flex-start",
               m: 1,
               mb: 2,
             }}
-          />
-        </Stack>
+          // /> */}
+        {/* </Stack> */}
         <Virtuoso
           ref={virtuosoRef}
           data={hlIds}
@@ -91,7 +91,7 @@ function Parent() {
     </>
   );
 }
-function HighlightCard({ id }: { id: number }) {
+export function HighlightCard({ id }: { id: number }) {
   // const { hlIds } = useHighlightsContext();
   // const id = hlIds[index];
   const [hl, setHl] = useState<Taguette.Highlight | null>(null);

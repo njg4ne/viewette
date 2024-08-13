@@ -121,8 +121,8 @@ export default () => {
 };
 
 const DEFAULT_WHERE = "(1 = 1)";
-function useQueryBuilderSql() {
-  const [tagQuery] = useSearchParamContext("tagQuery");
+export function useQueryBuilderSql(searchKey: string = "tagQuery") {
+  const [tagQuery] = useSearchParamContext(searchKey);
   const querySql = useMemo(() => {
     let sql = DEFAULT_WHERE;
     try {

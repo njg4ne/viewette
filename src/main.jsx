@@ -62,6 +62,7 @@ import { LoadingProvider } from "./contexts/LoadingContext";
 import TagExporter from "./components/TagExporter";
 import { FilterActiveProvider } from "./components/FilterToggler";
 import TaggingSummaryExporter from "./components/TaggingSummaryExporter";
+import HighlightQuerier from "./components/HighlightQuerier";
 
 function Highlights() {
   const [dbHandle, setDbHandle] = useState(null);
@@ -166,6 +167,11 @@ const router = createHashRouter([
   //   path: "/sql",
   //   element: AppContainer({ Contents: SQL }),
   // },
+  {
+    path: "/highlights",
+    element: AppContainer({ Contents: HighlightQuerier }),
+    // element: AppContainer({ Contents: null }),
+  },
   {
     path: "/highlights/:id",
     element: AppContainer({ Contents: EditHighlight }),

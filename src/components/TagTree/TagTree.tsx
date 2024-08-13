@@ -52,7 +52,7 @@ import { dbs, signalReady } from "../../signals";
 import { useSnackbar } from "notistack";
 import * as popups from "../../popups";
 import Dnd from "./TagTree2/Dnd";
-import QueryBuilder from "../QueryBuilder";
+import QueryBuilder from "../TagQueryBuilder";
 function customCollisionDetectionAlgorithm(args: {
   active: Active;
   collisionRect: Rect;

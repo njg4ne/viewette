@@ -25,7 +25,10 @@ import { TagTreeItem } from "../components/TagTree/TagTreeItems/MultipleTagTreeI
 import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
 import { useSearchParamContext } from "./SearchParamContext";
 import { useModalContext } from "./ModalContext";
-import { useFetchTags, useQueryBuilderSql } from "../components/QueryBuilder";
+import {
+  useFetchTags,
+  useQueryBuilderSql,
+} from "../components/TagQueryBuilder";
 import { getAllItemPaths } from "../utils/tagTreeUtils";
 // import { db } from "../db/models/TaguetteDb.ts";
 type TagMap = Record<string | number, string>;

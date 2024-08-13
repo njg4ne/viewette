@@ -2,7 +2,7 @@
 import { LoadingProvider } from "../../contexts/LoadingContext";
 import { SearchParamProvider } from "../../contexts/SearchParamContext";
 import { TreeProvider } from "../../contexts/TagTreeContext";
-import QueryBuilder from "../QueryBuilder";
+import QueryBuilder from "../TagQueryBuilder";
 import TagTree from "./TagTree";
 import TagTree2 from "./TagTree2";
 
@@ -12,7 +12,6 @@ export default function TagTreeWithContext() {
     <SearchParamProvider keys={["tagLike", "newTag", "tagQuery"]}>
       <QueryBuilder />
       <TreeProvider>
-
         <TagTree />
       </TreeProvider>
     </SearchParamProvider>
