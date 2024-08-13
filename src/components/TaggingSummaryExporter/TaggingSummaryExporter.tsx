@@ -4,7 +4,13 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import { TagChip } from "../TagChip";
-import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "preact/hooks";
 import Grid from "@mui/material/Grid";
 import Slider from "@mui/material/Slider";
 import Switch from "@mui/material/Switch";
@@ -41,6 +47,7 @@ import Tooltip from "@mui/material/Tooltip";
 import ContrastQueryBuilder from "./ContrastQueryBuilder";
 import { useModel } from "../../hooks";
 import { TaguetteDb } from "../../db";
+import { useLoadingContext } from "../../contexts/LoadingContext";
 const headers: Record<string, string> = {
   parentPath: "Tag-Path",
   hlCount: "# Highlights",
@@ -82,6 +89,11 @@ function TaggingSummaryExporter() {
   //   }
   // }
   const { taggings: allTaggings, allTagsUnfiltered: tags } = useTreeContext();
+  const initialTagEntry = [-1, ""] as [number, string];
+  const contrastOptions = useMemo(
+    () => [initialTagEntry].concat(entrify(tags)),
+    [tags]
+  );
 
   // const tags = taggings.map(({ parentPath: x }) => x);
   // console.log("Tags", tags);
@@ -91,10 +103,9 @@ function TaggingSummaryExporter() {
   const [colorOn, setColorOn] = useState<boolean>(true);
   const [doContrast, setDoContrast] = useState<boolean>(true);
   const [showLeaves, setShowLeaves] = useState<boolean>(true);
-  const initialTagEntry = [-1, ""] as [number, string];
   const [contrastEntry, setContrastEntry] =
     useState<[number, string]>(initialTagEntry);
-  const contrastOptions = [[-1, ""]].concat(entrify(tags));
+
   const onAutocompleteChange = (event: Event, newValue: [number, string]) => {
     if (newValue === null) {
       newValue = initialTagEntry;
@@ -105,6 +116,17 @@ function TaggingSummaryExporter() {
   // console.log("Contrast Entry", contrastEntry);
   const whereSql =
     contrastEntry[0] === -1 ? "(1 = 1)" : `(path like '${contrastEntry[1]}%')`;
+  const { loading } = useLoadingContext();
+  useEffect(() => {
+    const [id, path] = contrastEntry;
+    const newContrastEntry =
+      contrastOptions.find(([newId, newPath]) => newId === id) ||
+      contrastOptions.find(([newId, newPath]) => newPath === path) ||
+      initialTagEntry;
+    // console.log("New Contrast Entry", newContrastEntry);
+    setContrastEntry(newContrastEntry as [number, string]);
+  }, [contrastOptions]);
+
   const model = (db: TaguetteDb) => () => {
     // console.log("requery");
     return db.read.taggingsByPath(getAllItemPaths(tags), whereSql) as any;
@@ -113,7 +135,7 @@ function TaggingSummaryExporter() {
 
   const [contrastTrueTaggings, contrastFalseTaggings] = useModel<
     [Taguette.TaggingSummary[], Taguette.TaggingSummary[]]
-  >([[], []], model, [tags, whereSql]);
+  >([[], []], model, [tags, whereSql, loading]);
 
   // useEffect(() => {
   //   console.log(...contrastTrueTaggings.slice(0));
@@ -398,15 +420,18 @@ function ContrastCells({
     (tagging: Taguette.TaggingSummary) => tagging.parentPath === row.parentPath
   ) as Taguette.TaggingSummary;
   return (
-    <>
-      {/* order is with, hl doc, without hl doc, total hl doc */}
-      <TableCell sx={sx}>{trueTagging.hlCount}</TableCell>
-      <TableCell sx={sx}>{trueTagging.docCount}</TableCell>
-      <TableCell sx={sx}>{falseTagging.hlCount}</TableCell>
-      <TableCell sx={sx}>{falseTagging.docCount}</TableCell>
-      <TableCell sx={sx}>{row.hlCount}</TableCell>
-      <TableCell sx={sx}>{row.docCount}</TableCell>
-    </>
+    trueTagging &&
+    falseTagging && (
+      <>
+        {/* order is with, hl doc, without hl doc, total hl doc */}
+        <TableCell sx={sx}>{trueTagging.hlCount}</TableCell>
+        <TableCell sx={sx}>{trueTagging.docCount}</TableCell>
+        <TableCell sx={sx}>{falseTagging.hlCount}</TableCell>
+        <TableCell sx={sx}>{falseTagging.docCount}</TableCell>
+        <TableCell sx={sx}>{row.hlCount}</TableCell>
+        <TableCell sx={sx}>{row.docCount}</TableCell>
+      </>
+    )
   );
 }
 
