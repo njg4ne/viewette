@@ -65,7 +65,9 @@ function Parent() {
   //   virtuosoRef.current?.scrollToIndex(Number(hlOffset));
   // }, [hlOffset]);
 
-  const childContent = (_i: number, hid: number) => <HighlightCard id={hid} />;
+  const childContent = (_i: number, hid: number) => (
+    <HighlightCard id={hid} hlIds={hlIds} />
+  );
   return (
     <>
       <Stack direction="column" sx={{ height: "100%" }} spacing={0}>
@@ -91,7 +93,7 @@ function Parent() {
     </>
   );
 }
-export function HighlightCard({ id }: { id: number }) {
+export function HighlightCard({ id, hlIds }: { id: number; hlIds: number[] }) {
   // const { hlIds } = useHighlightsContext();
   // const id = hlIds[index];
   const [hl, setHl] = useState<Taguette.Highlight | null>(null);
@@ -133,7 +135,7 @@ export function HighlightCard({ id }: { id: number }) {
   return (
     <Box sx={{ m: 1, mt: 0 }}>
       {hl ? (
-        <HighlightListItem highlight={hl} />
+        <HighlightListItem highlight={hl} hlIds={hlIds} />
       ) : (
         <Skeleton variant="rounded" height={"7rem"} />
       )}
@@ -159,12 +161,18 @@ function HighlightListItem2({ highlight }: { highlight: Taguette.Highlight }) {
     </ListItem>
   );
 }
-function HighlightListItem({ highlight }: { highlight: Taguette.Highlight }) {
+function HighlightListItem({
+  highlight,
+  hlIds,
+}: {
+  highlight: Taguette.Highlight;
+  hlIds: number[];
+}) {
   // const navigate = useNavigate();
   // const onClick = () => {
   //   navigate(`/highlights/${highlight.id}`);
   // };
-  const { hlIds } = useHighlightsContext();
+  // const { hlIds } = useHighlightsContext();
   const action = {
     label: "view highlight and taggings",
     icon: LaunchIcon,

@@ -213,18 +213,25 @@ function TitlewithNavigationArrows({
   const { id } = useParams();
   let { state } = useLocation();
   const navigate = useNavigate();
-
   state = state || { hlIds: [id] };
-  const { hlIds } = state;
+  let { hlIds } = state;
+  if (hlIds.length === 0) {
+    hlIds.push(id);
+  }
+  hlIds = hlIds ?? [id];
   const index = hlIds?.indexOf(Number(id));
+
   const prevIndex = (index + hlIds.length - 1) % hlIds.length;
   const nextIndex = (index + 1) % hlIds.length;
   const getPrevId = () => hlIds[prevIndex];
   const getNextId = () => hlIds[nextIndex];
 
+  const canArrow = hlIds.length !== 1;
   const onKeyRight = () =>
+    canArrow &&
     navigate(`/highlights/${getNextId()}`, { state, replace: true });
   const onKeyLeft = () =>
+    canArrow &&
     navigate(`/highlights/${getPrevId()}`, { state, replace: true });
   useHotkeys("right", onKeyRight);
   useHotkeys("left", onKeyLeft);
@@ -238,7 +245,7 @@ function TitlewithNavigationArrows({
       alignItems="flex-start"
     >
       {children}
-      <Stack direction="row">
+      <Stack direction="row" sx={{ display: !canArrow ? "none" : undefined }}>
         {/* <RightKey /> */}
         <Tooltip title="Previous highlight">
           <IconButton
