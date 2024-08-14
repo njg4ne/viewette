@@ -2,7 +2,7 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useEffect, useRef } from "preact/hooks";
-import { useModel } from "../../hooks";
+import { useDb, useModel } from "../../hooks";
 import { TaguetteDb } from "../../db";
 import { ListRange, Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { HighlightCard } from "../HighlightList";
@@ -19,6 +19,25 @@ const SEARCH_KEY = "offset";
 export function HighlightQuerier() {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const whereSql = useQueryBuilderSql("q");
+  // let q = `SELECT ht.tag_id as tid, ht.highlight_id as hid, h.snippet, d.id as did, d.name as docName FROM highlight_tags as ht INNER JOIN highlights as h ON ht.highlight_id = h.id INNER JOIN documents as d ON h.document_id = d.id`;
+  // q = `SELECT hid, snippet, did, tid, path as tagPath, docName from (${q}) JOIN tags as t ON t.id = tid`;
+  // q = `SELECT * FROM (${q})`;
+  // q = `SELECT hid, snippet, did, docName, GROUP_CONCAT(tid) as tids, GROUP_CONCAT('»' || tagPath ) as tagPaths FROM (${q}) GROUP BY hid;`;
+  // const qData = useDb([], [], q);
+
+  // useEffect(() => {
+  //   console.log(qData);
+  // }, [qData]);
+  // useEffect(() => {
+  //   console.log(whereSql);
+  // }, [whereSql]);
+  // const q = `SELECT h.id
+  // FROM highlights h
+  // JOIN highlight_tags ht1 ON h.id = ht1.highlight_id
+  // JOIN tags t1 ON ht1.tag_id = t1.id AND t1.path like '%notable%'
+  // JOIN highlight_tags ht2 ON h.id = ht2.highlight_id
+  // JOIN tags t2 ON ht2.tag_id = t2.id AND t2.path like '%acceleration%'`;
+  // const whereSql = `hid IN (${q})`;
   const model = (db: TaguetteDb) => () => {
     return db.read.highlightsWhere(whereSql) as any;
   };
@@ -52,8 +71,11 @@ export function HighlightQuerier() {
   //   console.log(data);
   // }, [data]);
   const childContent = (_i: number, { hid }: Taguette.DetailedHighlight) => (
-    <HighlightCard id={hid} />
+    <HighlightCard id={hid} hlIds={data.map(({ hid }) => hid)} />
   );
+  const numberOfResultsText = `Showing ${data.length} result${
+    data.length === 1 ? "" : "s"
+  }`;
   return (
     <Paper
       elevation={1}
@@ -72,7 +94,12 @@ export function HighlightQuerier() {
         sx={{ height: "100%", width: "100%" }}
         spacing={0}
       >
-        <HighlightQueryBuilder sx={{ m: 2, mt: 0 }} />
+        <HighlightQueryBuilder sx={{ m: 1, mt: 0 }} />
+        <Typography
+          sx={{ mx: 2, mb: 1, fontSize: "1.125rem", fontWeight: 500 }}
+        >
+          {numberOfResultsText}
+        </Typography>
         <Virtuoso
           ref={virtuosoRef}
           data={data}

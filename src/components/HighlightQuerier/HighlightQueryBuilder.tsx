@@ -50,9 +50,9 @@ export const operators = [
 ] satisfies DefaultOperator[];
 
 const tagPathOperators = [
-  { name: "=", value: "=", label: "is" } as const,
-  { name: "contains", value: "contains", label: "contains" } as const,
-  { name: "beginsWith", value: "beginsWith", label: "starts with" } as const,
+  // { name: "=", value: "=", label: "is" } as const,
+  { name: "contains", value: "contains", label: "contain" } as const,
+  // { name: "beginsWith", value: "beginsWith", label: "starts with" } as const,
 ];
 const docNameOperators = [
   { name: "=", value: "=", label: "is" } as const,
@@ -60,7 +60,7 @@ const docNameOperators = [
 ];
 
 const fields: Field[] = [
-  { name: "tagPath", label: "Tag Path" },
+  { name: "tagPaths", label: "Tag Paths", operators: tagPathOperators },
   { name: "docName", label: "Document Name", operators: docNameOperators },
 ];
 
@@ -127,7 +127,7 @@ import { DocumentNameAutocomplete } from "../DocumentNameAutocomplete";
 const ValueEditor = (props: any) => {
   const { field, handleOnChange } = props;
   // console.log(props);
-  if (field === "tagPath") {
+  if (field === "tagPaths") {
     return <TagValueEditor {...props} />;
   }
   if (field === "docName") {
@@ -168,13 +168,18 @@ function DocNameValueEditor(props: any) {
 }
 
 function TagValueEditor(props: any) {
-  const { field, handleOnChange, value, values } = props;
+  let { field, handleOnChange, value, values } = props;
+  // value with no start character
+  // if value starts with » then remove that
+  if (value.startsWith("»")) {
+    value = value.slice(1);
+  }
   const [autoCompleteValue, setAutoCompleteValue] = useState<
     Taguette.Tag | Taguette.Tag[]
   >({ path: value } as Taguette.Tag);
   function onSetValue(v: Taguette.Tag | Taguette.Tag[]) {
     setAutoCompleteValue(v);
-    handleOnChange((v as Taguette.Tag).path);
+    handleOnChange(`»${(v as Taguette.Tag).path}`);
   }
   return (
     <TagAutocomplete

@@ -49,10 +49,12 @@ export default async function readHighlightsIdsWhere(
   // where clause might query based on docName, tagPath, tid, hid, did
   let q = `SELECT ht.tag_id as tid, ht.highlight_id as hid, h.snippet, d.id as did, d.name as docName FROM highlight_tags as ht INNER JOIN highlights as h ON ht.highlight_id = h.id INNER JOIN documents as d ON h.document_id = d.id`;
   q = `SELECT hid, snippet, did, tid, path as tagPath, docName from (${q}) JOIN tags as t ON t.id = tid`;
-  q = `SELECT * FROM (${q}) WHERE ${whereClause}`;
+  q = `SELECT * FROM (${q}) `; //WHERE ${whereClause}
   //{hid: 111, did: 15, tid: 628, tagPath: 'Work Allocation.outsourcing.expression.syntax', docName: 'Interview i13'}
   // now group concat the dids tids tagPaths and docNames for each hid
-  q = `SELECT hid, snippet, did, docName, GROUP_CONCAT(tid) as tids, GROUP_CONCAT(tagPath) as tagPaths FROM (${q}) GROUP BY hid;`;
+  q = `SELECT hid, snippet, did, docName, GROUP_CONCAT(tid) as tids, GROUP_CONCAT('»' || tagPath) as tagPaths FROM (${q}) GROUP BY hid`;
+  q = `SELECT * FROM (${q}) WHERE ${whereClause};`;
+
   //   {
   //     "hid": 86,
   //     "dids": "14,14,14",
@@ -63,6 +65,8 @@ export default async function readHighlightsIdsWhere(
   // now make those real arrays
   const response = await db.transact(q, "object");
   let highlights = response?.result?.resultRows || [];
+  // console.log(highlights.map((highlight: any) => highlight.tagPaths));
+
   highlights = highlights.map((highlight: any) => {
     highlight.tids = highlight.tids
       .split(",")
