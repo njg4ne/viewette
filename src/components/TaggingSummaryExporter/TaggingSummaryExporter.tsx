@@ -775,6 +775,7 @@ function copyTableContentsToClipboard(el: HTMLElement) {
       sel.addRange(range);
     }
 
+    
     document.execCommand("Copy");
   }
 }

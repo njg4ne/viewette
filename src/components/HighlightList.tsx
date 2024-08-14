@@ -6,6 +6,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import Skeleton from "@mui/material/Skeleton";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import type { ListRange, VirtuosoHandle } from "react-virtuoso";
 import { Virtuoso } from "react-virtuoso";
 import Chip from "@mui/material/Chip";
@@ -168,6 +169,9 @@ function HighlightListItem({
   highlight: Taguette.Highlight;
   hlIds: number[];
 }) {
+  const snippetRef = useRef<HTMLSpanElement>(null);
+  const liRef = useRef<HTMLLIElement>(null);
+  // const sourceRef = useRef<HTMLSpanElement>(null);
   // const navigate = useNavigate();
   // const onClick = () => {
   //   navigate(`/highlights/${highlight.id}`);
@@ -185,8 +189,24 @@ function HighlightListItem({
   });
   const textPrimary = useTheme().palette?.text?.primary || "green";
 
+  function getCopyText() {
+    const range = document.createRange();
+    window.getSelection()?.removeAllRanges();
+    range.selectNode(snippetRef.current as Node);
+    window.getSelection()?.addRange(range);
+    const selectionContents = window.getSelection()?.toString();
+    return `${highlight.source}: "${selectionContents}"`;
+  }
+
   return (
     <ListItem
+      id={`highlight-li-${highlight.id}`}
+      tabIndex={0}
+      // add copy to clipboard behavior via default action
+      onCopy={(e: Event & any) => {
+        e.preventDefault();
+        e.clipboardData.setData("text/plain", getCopyText());
+      }}
       ref={dropRef}
       component={Paper}
       elevation={4}
@@ -199,6 +219,13 @@ function HighlightListItem({
         flexWrap: "nowrap",
         alignItems: "stretch",
         justifyContent: "space-between",
+        transition: "margin 0.25s",
+        "&:focus": {
+          // animate the transition to the margin
+          transition: "margin 0.25s",
+          my: 2,
+          outline: `.125rem solid ${textPrimary}`, // Customize the outline style for focus
+        },
       }}
     >
       <Stack
@@ -211,6 +238,7 @@ function HighlightListItem({
         {ListItemText({
           primary: (
             <Typography
+              ref={snippetRef}
               // fontSize="1rem"
               // fontWeight={400}
               display="inline"
@@ -266,6 +294,23 @@ function HighlightListItem({
               fontSize: "1.5rem",
             },
           })}
+        </IconButton>
+        <IconButton
+          aria-label="copy to clipboard"
+          onClick={() => {
+            // trigger clipboard copy on the dropRef element
+            const el = document.getElementById(`highlight-li-${highlight.id}`);
+            el?.focus();
+            navigator.clipboard.writeText(getCopyText());
+          }}
+          sx={{
+            borderRadius: 1,
+            ml: 0.5,
+            // mr: 2,
+            // p: 0.5,
+          }}
+        >
+          <ContentCopyIcon sx={{ fontSize: "1.25rem" }} />
         </IconButton>
       </Stack>
     </ListItem>
