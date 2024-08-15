@@ -49,10 +49,23 @@ export const operators = [
   } as const,
 ] satisfies DefaultOperator[];
 
-const tagPathOperators = [
+const containOrNot = [
   // { name: "=", value: "=", label: "is" } as const,
   { name: "contains", value: "contains", label: "contain" } as const,
+  {
+    name: "doesNotContain",
+    value: "doesNotContain",
+    label: "don't contain",
+  } as const,
   // { name: "beginsWith", value: "beginsWith", label: "starts with" } as const,
+];
+const containsOrNot = [
+  { name: "contains", value: "contains", label: "contains" } as const,
+  {
+    name: "doesNotContain",
+    value: "doesNotContain",
+    label: "not contains",
+  } as const,
 ];
 const docNameOperators = [
   { name: "=", value: "=", label: "is" } as const,
@@ -60,8 +73,9 @@ const docNameOperators = [
 ];
 
 const fields: Field[] = [
-  { name: "tagPaths", label: "Tag Paths", operators: tagPathOperators },
+  { name: "tagPaths", label: "Tag Paths", operators: containOrNot },
   { name: "docName", label: "Document Name", operators: docNameOperators },
+  { name: "snippet", label: "Snippet", operators: containsOrNot },
 ];
 
 const emptyQuery = {
