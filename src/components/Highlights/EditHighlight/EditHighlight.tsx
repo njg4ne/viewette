@@ -32,6 +32,7 @@ import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import Tooltip from "@mui/material/Tooltip";
 import Stack from "@mui/material/Stack";
 import RightArrowKeyIcon from "@mui/icons-material/Forward";
+import { CopyHighlightIconButton } from "../CopyHighlight";
 
 // export default () => (
 //   // <LoadingProvider>
@@ -76,6 +77,7 @@ export function entrify(tags: Taguette.Tag[]): [number, string][] {
 }
 // const newTags = signal([]);
 function HlCard({ hl }: { hl: Taguette.Highlight }) {
+  const snippetSpanRef = useRef<HTMLSpanElement>(null);
   const id = hl.id;
   const { loading, setLoading } = useLoadingContext();
   const { enqueueSnackbar: sbqr } = useSnackbar();
@@ -152,6 +154,16 @@ function HlCard({ hl }: { hl: Taguette.Highlight }) {
   };
   const saveBtnText = `Save ${numChanges} Change${numChanges === 1 ? "" : "s"}`;
 
+  function CopyButton() {
+    return (
+      <CopyHighlightIconButton
+        snippetSpanRef={snippetSpanRef}
+        highlight={hl}
+        fontSize="1.5rem"
+      />
+    );
+  }
+
   return (
     <Card>
       <CardContent>
@@ -164,10 +176,18 @@ function HlCard({ hl }: { hl: Taguette.Highlight }) {
           </Stack>
         </TitlewithNavigationArrows>
         <Typography color="text.secondary">Text Snippet</Typography>
-        <Typography
-          fontSize={"1.2rem"}
-          dangerouslySetInnerHTML={{ __html: hl.snippet }}
-        ></Typography>
+        <Stack
+          direction="row"
+          alignItems="flex-start"
+          justifyContent="space-between"
+        >
+          <Typography
+            ref={snippetSpanRef}
+            fontSize={"1.2rem"}
+            dangerouslySetInnerHTML={{ __html: hl.snippet }}
+          ></Typography>
+          <CopyButton />
+        </Stack>
         <form onSubmit={onSubmit}>
           <Typography color="text.secondary">Add New Tags</Typography>
           <ManagedTagChooser

@@ -39,6 +39,7 @@ import EditHighlight from "./EditHighlight/EditHighlight";
 import { useTheme } from "@mui/material/styles";
 import { useDroppable } from "@dnd-kit/core";
 import { RefObject } from "preact";
+import { CopyHighlightIconButton, getCopyText } from "./CopyHighlight";
 // import TaggingSummaryExporter from "../TaggingSummaryExportButton";
 
 export default Parent;
@@ -190,15 +191,6 @@ function HighlightListItem({
   });
   const textPrimary = useTheme().palette?.text?.primary || "green";
 
-  function getCopyText(ref: RefObject<HTMLSpanElement>) {
-    const range = document.createRange();
-    window.getSelection()?.removeAllRanges();
-    range.selectNode(ref.current as Node);
-    window.getSelection()?.addRange(range);
-    const selectionContents = window.getSelection()?.toString();
-    return `${highlight.source}: "${selectionContents}"`;
-  }
-
   return (
     <ListItem
       id={`highlight-li-${highlight.id}`}
@@ -206,7 +198,10 @@ function HighlightListItem({
       // add copy to clipboard behavior via default action
       onCopy={(e: Event & any) => {
         e.preventDefault();
-        e.clipboardData.setData("text/plain", getCopyText(snippetRef));
+        e.clipboardData.setData(
+          "text/plain",
+          getCopyText(snippetRef, highlight.source)
+        );
       }}
       ref={dropRef}
       component={Paper}
@@ -296,23 +291,13 @@ function HighlightListItem({
             },
           })}
         </IconButton>
-        <IconButton
-          aria-label="copy to clipboard"
-          onClick={() => {
-            // trigger clipboard copy on the dropRef element
-            const el = document.getElementById(`highlight-li-${highlight.id}`);
-            el?.focus();
-            navigator.clipboard.writeText(getCopyText(snippetRef));
-          }}
-          sx={{
-            borderRadius: 1,
-            ml: 0.5,
-            // mr: 2,
-            // p: 0.5,
-          }}
-        >
-          <ContentCopyIcon sx={{ fontSize: "1.25rem" }} />
-        </IconButton>
+        <CopyHighlightIconButton
+          focus={() =>
+            document.getElementById(`highlight-li-${highlight.id}`)?.focus()
+          }
+          snippetSpanRef={snippetRef}
+          highlight={highlight}
+        />
       </Stack>
     </ListItem>
   );
