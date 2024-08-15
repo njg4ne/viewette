@@ -63,6 +63,7 @@ import TagExporter from "./components/TagExporter";
 import { FilterActiveProvider } from "./components/FilterToggler";
 import TaggingSummaryExporter from "./components/TaggingSummaryExporter";
 import HighlightQuerier from "./components/Highlights/HighlightQuerier";
+import Codebook from "./components/Tags/Codebook";
 
 function Highlights() {
   const [dbHandle, setDbHandle] = useState(null);
@@ -159,10 +160,10 @@ const router = createHashRouter([
   //   path: "/tree",
   //   element: AppContainer({ Contents: TagTree }),
   // },
-  // {
-  //   path: "/tags",
-  //   element: AppContainer({ Contents: () => <Tags tags={tags} /> }),
-  // },
+  {
+    path: "/tags",
+    element: AppContainer({ Contents: Codebook }),
+  },
   // {
   //   path: "/sql",
   //   element: AppContainer({ Contents: SQL }),

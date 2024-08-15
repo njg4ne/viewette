@@ -250,7 +250,7 @@ function TaggingSummaryExporter() {
             display: "flex",
             justifyContent: "space-around",
           }}
-          onClick={() => copyTableContentsToClipboard(tableRef.current!)}
+          onClick={() => copyElementContentsToClipboard(tableRef.current!)}
         >
           <ContentCopyIcon />
           <HtmlIcon fontSize="large" sx={{ mx: 0.5 }} />
@@ -753,13 +753,18 @@ function applyAutoWidth(XLSXWorkSheet: any, widthMultiplier: number) {
   });
 }
 
-// async function copyTableContentsToClipboard(table: HTMLTableElement) {
+// async function copyElementContentsToClipboard(table: HTMLTableElement) {
 // want all of the html with styles for pasting to excel
 // const html = table.outerHTML;
 // await navigator.clipboard.writeText(html);
 // }
 // https://stackoverflow.com/questions/26053004/copy-whole-html-table-to-clipboard-javascript
-function copyTableContentsToClipboard(el: HTMLElement) {
+
+/**
+ * Source: https://stackoverflow.com/questions/26053004/copy-whole-html-table-to-clipboard-javascript
+ * @param el the element whose contents to copy to clipboard
+ */
+export function copyElementContentsToClipboard(el: HTMLElement) {
   var body = document.body,
     range,
     sel;
