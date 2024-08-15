@@ -10,7 +10,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import type { ListRange, VirtuosoHandle } from "react-virtuoso";
 import { Virtuoso } from "react-virtuoso";
 import Chip from "@mui/material/Chip";
-import { TagChip } from "./TagChip";
+import { TagChip } from "../TagChip";
 import {
   useEffect,
   useCallback,
@@ -20,24 +20,25 @@ import {
 } from "preact/hooks";
 import LaunchIcon from "@mui/icons-material/Launch";
 
-import { TaguetteDb } from "../db";
+import { TaguetteDb } from "../../db";
 import { useSnackbar } from "notistack";
-import * as popups from "../popups";
-import { useLoadingContext } from "../contexts/LoadingContext";
-import { dbs, signalReady } from "../signals";
-import VirtualList from "./VirtualList";
+import * as popups from "../../popups";
+import { useLoadingContext } from "../../contexts/LoadingContext";
+import { dbs, signalReady } from "../../signals";
+import VirtualList from "../VirtualList";
 import Typography from "@mui/material/Typography";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { Signal, computed, effect } from "@preact/signals";
-import { useTreeContext } from "../contexts/TagTreeContext";
-import { useHighlightsContext } from "../contexts/HighlightsContext";
+import { useTreeContext } from "../../contexts/TagTreeContext";
+import { useHighlightsContext } from "../../contexts/HighlightsContext";
 // import { useNavigate } from "react-router-dom";
 import { Link, useSearchParams } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
-import useDebouncedSearchParam from "../hooks/useDebouncedSearchParam";
+import useDebouncedSearchParam from "../../hooks/useDebouncedSearchParam";
 import EditHighlight from "./EditHighlight/EditHighlight";
 import { useTheme } from "@mui/material/styles";
 import { useDroppable } from "@dnd-kit/core";
+import { RefObject } from "preact";
 // import TaggingSummaryExporter from "../TaggingSummaryExportButton";
 
 export default Parent;
@@ -189,10 +190,10 @@ function HighlightListItem({
   });
   const textPrimary = useTheme().palette?.text?.primary || "green";
 
-  function getCopyText() {
+  function getCopyText(ref: RefObject<HTMLSpanElement>) {
     const range = document.createRange();
     window.getSelection()?.removeAllRanges();
-    range.selectNode(snippetRef.current as Node);
+    range.selectNode(ref.current as Node);
     window.getSelection()?.addRange(range);
     const selectionContents = window.getSelection()?.toString();
     return `${highlight.source}: "${selectionContents}"`;
@@ -205,7 +206,7 @@ function HighlightListItem({
       // add copy to clipboard behavior via default action
       onCopy={(e: Event & any) => {
         e.preventDefault();
-        e.clipboardData.setData("text/plain", getCopyText());
+        e.clipboardData.setData("text/plain", getCopyText(snippetRef));
       }}
       ref={dropRef}
       component={Paper}
@@ -301,7 +302,7 @@ function HighlightListItem({
             // trigger clipboard copy on the dropRef element
             const el = document.getElementById(`highlight-li-${highlight.id}`);
             el?.focus();
-            navigator.clipboard.writeText(getCopyText());
+            navigator.clipboard.writeText(getCopyText(snippetRef));
           }}
           sx={{
             borderRadius: 1,

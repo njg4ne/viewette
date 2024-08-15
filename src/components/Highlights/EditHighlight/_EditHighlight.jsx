@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 // import { filteredHighlights as highlights, tags } from "../signals";
-import { ManagedTagChooser, TagChooser } from "../TagsFilter";
+import { ManagedTagChooser, TagChooser } from "../../TagsFilter";
 // import { multiWriteQuery } from "../utils/sql";
 // core-js(-pure)/actual|full/set/difference
 // import "core-js/actual/set/difference";
@@ -25,11 +25,11 @@ import { Link, useSearchParams } from "react-router-dom";
 
 import { signal, effect, computed } from "@preact/signals";
 
-import LexicalEditor from "../LexicalEditor";
+import LexicalEditor from "../../LexicalEditor";
 import { Box } from "@mui/material";
 
 // import { convert } from "html-to-text";
-import { dbs, signalReady } from "../../signals";
+import { dbs, signalReady } from "../../../signals";
 // import {db} from "../db/models/TaguetteDb";
 // import
 

@@ -42,7 +42,7 @@ import HtmlIcon from "@mui/icons-material/Html";
 // import { utils as spreadsheetUtils, writeFileXLSX } from "xlsx";
 import { utils as spreadsheetUtils, writeFile } from "xlsx-js-style";
 import { ManagedTagChooser } from "../TagsFilter";
-import { entrify } from "../EditHighlight/EditHighlight";
+import { entrify } from "../Highlights/EditHighlight/EditHighlight";
 import Tooltip from "@mui/material/Tooltip";
 import ContrastQueryBuilder from "./ContrastQueryBuilder";
 import { useModel } from "../../hooks";
@@ -775,7 +775,6 @@ function copyTableContentsToClipboard(el: HTMLElement) {
       sel.addRange(range);
     }
 
-    
     document.execCommand("Copy");
   }
 }

@@ -19,7 +19,7 @@ import MultipleTagTreeItems, {
 import CreateTagForm from "./CreateTagForm";
 // import VirtualList from "../VirtualList";
 // import HighlightList from "../Parent";
-import HighlightList from "../HighlightList";
+import HighlightList from "../Highlights/HighlightList";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import TextField from "@mui/material/TextField";
 import { useSearchParams } from "react-router-dom";

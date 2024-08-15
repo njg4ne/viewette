@@ -51,7 +51,7 @@ import EditTag from "./components/EditTag";
 import Drawer from "./components/Drawer";
 import Home from "./components/Home";
 import DatabaseManager from "./components/DatabaseManager";
-import EditHighlight from "./components/EditHighlight";
+import EditHighlight from "./components/Highlights/EditHighlight";
 
 // import SQL from "./components/SQL";
 // import Tags from "./components/Tags";
@@ -62,7 +62,7 @@ import { LoadingProvider } from "./contexts/LoadingContext";
 import TagExporter from "./components/TagExporter";
 import { FilterActiveProvider } from "./components/FilterToggler";
 import TaggingSummaryExporter from "./components/TaggingSummaryExporter";
-import HighlightQuerier from "./components/HighlightQuerier";
+import HighlightQuerier from "./components/Highlights/HighlightQuerier";
 
 function Highlights() {
   const [dbHandle, setDbHandle] = useState(null);

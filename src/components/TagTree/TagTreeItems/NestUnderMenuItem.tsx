@@ -11,7 +11,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import IconButton from "@mui/material/IconButton";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
-import { entrify } from "../../EditHighlight/EditHighlight";
+import { entrify } from "../../Highlights/EditHighlight/EditHighlight";
 import RightArrowIcon from "@mui/icons-material/ArrowRightAlt";
 // import DownRightArrowIcon from "@mui/icons-material/SubdirectoryArrowRight";
 import NorthEastIcon from "@mui/icons-material/NorthEast";

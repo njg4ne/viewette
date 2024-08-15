@@ -9,21 +9,21 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Container from "@mui/material/Container";
 import { Link, useSearchParams } from "react-router-dom";
-import * as popups from "../../popups";
-import { ManagedTagChooser } from "../TagsFilter";
-import { dbs, signalReady } from "../../signals";
+import * as popups from "../../../popups";
+import { ManagedTagChooser } from "../../TagsFilter";
+import { dbs, signalReady } from "../../../signals";
 import {
   LoadingProvider,
   useLoadingContext,
-} from "../../contexts/LoadingContext";
+} from "../../../contexts/LoadingContext";
 import { useSnackbar } from "notistack";
-import { TaguetteDb } from "../../db";
+import { TaguetteDb } from "../../../db";
 import { useState, useEffect, ChangeEvent, useRef } from "preact/compat";
 import { useHotkeys } from "react-hotkeys-hook";
 import ExistingTagsEditor from "./ExistingTagsEditor";
-import { useTreeContext } from "../../contexts/TagTreeContext";
+import { useTreeContext } from "../../../contexts/TagTreeContext";
 import Button from "@mui/material/Button";
-import { useDb, useModel } from "../../hooks";
+import { useDb, useModel } from "../../../hooks";
 import { signal } from "@preact/signals";
 
 import IconButton from "@mui/material/IconButton";

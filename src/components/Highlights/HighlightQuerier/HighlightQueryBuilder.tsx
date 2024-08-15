@@ -10,17 +10,17 @@ import { formatQuery } from "react-querybuilder";
 import type { Field } from "react-querybuilder";
 import Box, { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { useSearchParamContext } from "../../contexts/SearchParamContext";
+import { useSearchParamContext } from "../../../contexts/SearchParamContext";
 import { parseSQL } from "react-querybuilder/dist/parseSQL.js";
-import { dbs, signalReady } from "../../signals";
-import { useLoadingContext } from "../../contexts/LoadingContext";
+import { dbs, signalReady } from "../../../signals";
+import { useLoadingContext } from "../../../contexts/LoadingContext";
 import IconButton from "@mui/material/IconButton";
 // import FilterListIcon from '@mui/icons-material/FilterList';
 import Stack from "@mui/material/Stack";
-import { useFilterActiveContext } from "../FilterToggler";
+import { useFilterActiveContext } from "../../FilterToggler";
 // import CancelIcon from '@mui/icons-material/CancelPresentation';
 import CloseIcon from "@mui/icons-material/Close";
-import { TagAutocomplete } from "../TagAutocomplete";
+import { TagAutocomplete } from "../../TagAutocomplete";
 
 export const operators = [
   { name: "=", value: "=", label: "is" } as const,
@@ -136,7 +136,7 @@ export default (props: BoxProps) => {
 
 import { ValueEditor as DefaultValueEditor } from "react-querybuilder";
 import { TextField } from "@mui/material";
-import { DocumentNameAutocomplete } from "../DocumentNameAutocomplete";
+import { DocumentNameAutocomplete } from "../../DocumentNameAutocomplete";
 
 const ValueEditor = (props: any) => {
   const { field, handleOnChange } = props;

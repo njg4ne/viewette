@@ -2,14 +2,14 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useEffect, useRef } from "preact/hooks";
-import { useDb, useModel } from "../../hooks";
-import { TaguetteDb } from "../../db";
+import { useDb, useModel } from "../../../hooks";
+import { TaguetteDb } from "../../../db";
 import { ListRange, Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { HighlightCard } from "../HighlightList";
-import { SearchParamProvider } from "../../contexts/SearchParamContext";
-import useDebouncedSearchParam from "../../hooks/useDebouncedSearchParam";
+import { SearchParamProvider } from "../../../contexts/SearchParamContext";
+import useDebouncedSearchParam from "../../../hooks/useDebouncedSearchParam";
 import HighlightQueryBuilder from "./HighlightQueryBuilder";
-import { useQueryBuilderSql } from "../TagQueryBuilder";
+import { useQueryBuilderSql } from "../../TagQueryBuilder";
 export default () => (
   <SearchParamProvider keys={["offset", "q"]}>
     <HighlightQuerier />
